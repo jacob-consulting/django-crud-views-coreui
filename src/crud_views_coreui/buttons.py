@@ -16,8 +16,9 @@ free classes (coreui.io/bootstrap/docs). How the Tabler classes translate:
   ``azure`` is ``info`` (CoreUI's info, #39f, is an azure). ``blue`` and ``pink`` have no theme colour: CoreUI 5 defines
   them as palette variables (``--cui-blue``, ``--cui-pink``) but ships no utility classes for them, a CoreUI palette
   gap, not an upstream one. The theme's ``cv-coreui-badge-blue`` / ``cv-coreui-badge-pink`` (``crud_views_coreui.css``)
-  build subtle badges from those variables, light and dark. Never ``primary``: the manage page's legend names the
-  colours ("Blue: required permission · Magenta: required group"), and a project's primary may be any colour.
+  build subtle badges from those variables; like CoreUI's own subtle badges, they stay light in dark mode. Never
+  ``primary``: the manage page's legend names the colours ("Blue: required permission · Magenta: required group"), and
+  a project's primary may be any colour.
 """
 
 COREUI_BUTTON_CLASSES: dict[str, str] = {

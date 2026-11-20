@@ -60,8 +60,9 @@
 
 /* Subtle badges in CoreUI's named palette colours, which CoreUI defines (--cui-blue, --cui-pink) but gives no utility
    classes (a CoreUI palette gap). Used by manage:badge-permission and manage:badge-group, whose legend names the colours
-   ("Blue", "Magenta"), so they must not follow the project's primary. Mixed like Bootstrap's -subtle/-emphasis: light
-   mode a 20% tint background with 40% shaded text, dark mode a 20% shade background with 60% tinted text. */
+   ("Blue", "Magenta"), so they must not follow the project's primary. Mixed like CoreUI's bg-*-subtle/text-*-emphasis
+   (a 20% tint background with 40% shaded text) and, like those, the same in dark mode: CoreUI 5.9.1 keeps its subtle
+   badges light there, and these sit next to them on the manage page. */
 .cv-coreui-badge-blue {
   --cv-coreui-badge-color: var(--cui-blue);
 }
@@ -74,14 +75,6 @@
 .cv-coreui-badge-pink {
   color: color-mix(in srgb, var(--cv-coreui-badge-color) 40%, #000);
   background-color: color-mix(in srgb, var(--cv-coreui-badge-color) 20%, #fff);
-}
-
-[data-coreui-theme="dark"] .cv-coreui-badge-blue,
-[data-coreui-theme="dark"] .cv-coreui-badge-pink,
-.cv-coreui-badge-blue[data-coreui-theme="dark"],
-.cv-coreui-badge-pink[data-coreui-theme="dark"] {
-  color: color-mix(in srgb, var(--cv-coreui-badge-color) 60%, #fff);
-  background-color: color-mix(in srgb, var(--cv-coreui-badge-color) 20%, #000);
 }
 
 /* The breadcrumb's row in the CoreUI header (django_coreui/layouts/app.html, block breadcrumb): CoreUI's .breadcrumb

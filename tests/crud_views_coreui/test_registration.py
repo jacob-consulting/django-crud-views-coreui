@@ -156,7 +156,9 @@ class ButtonClassTests(SimpleTestCase):
             self.assertRegex(
                 theme, rf"\.cv-coreui-badge-{colour} \{{\s*--cv-coreui-badge-color: var\(--cui-{colour}\);"
             )
-            self.assertRegex(theme, rf'\[data-coreui-theme="dark"\] \.cv-coreui-badge-{colour}\b')
+        # Browser pass: CoreUI 5.9.1 keeps bg-*-subtle light in dark mode, and these badges sit next to those on the
+        # manage page ("view" next to "global fallback"), so they have no dark variant either.
+        self.assertNotRegex(theme, r'\[data-coreui-theme="dark"\][^{]*\.cv-coreui-badge-')
 
     def test_classes_are_registered(self):
         # crud_views_workflow is installed in the test settings, so the workflow:* keys are registered too.

@@ -96,7 +96,7 @@ How Tabler classes translate to CoreUI (the key set is the same):
 | `nav-bordered` | `nav nav-underline-border` |
 | `table-vcenter` | `align-middle` |
 | `azure`, `green`, `red`, `yellow` | `info`, `success`, `danger`, `warning` |
-| `blue`, `pink` (manage page legend) | `cv-coreui-badge-blue`, `cv-coreui-badge-pink`: subtle badges built in the theme CSS from `--cui-blue` and `--cui-pink`, which CoreUI defines but gives no utility classes |
+| `blue`, `pink` (manage page legend) | `cv-coreui-badge-blue`, `cv-coreui-badge-pink`: subtle badges built in the theme CSS from `--cui-blue` and `--cui-pink`, which CoreUI defines but gives no utility classes; light in dark mode too, like CoreUI's `bg-*-subtle` |
 
 The label mode decides the square shape: each action key exists as `location:variant` (labelled) and
 `location:variant:icon` (icon-only, with `cv-coreui-icon-btn`). The manage page's badges never use `primary`, because
