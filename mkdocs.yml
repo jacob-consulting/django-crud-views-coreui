@@ -1,0 +1,17 @@
+site_name: Django CRUD Views CoreUI
+theme: readthedocs
+plugins:
+    - search
+    - awesome-pages
+repo_url: https://github.com/jacob-consulting/django-crud-views-coreui
+edit_uri: blob/main/docs/
+
+nav:
+    - Home: index.md
+
+markdown_extensions:
+    - admonition
+    - pymdownx.superfences
+
+validation:
+    anchors: warn
