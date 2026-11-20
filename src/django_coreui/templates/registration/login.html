@@ -1,10 +1,10 @@
 {% extends "django_coreui/base.html" %}
-{% load coreui %}
+{% load coreui static %}
 {# CoreUI's sign-in page, after the free admin template's authentication/login. #}
 {% block title %}Sign in{% endblock %}
 {% block body %}
 <div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
-  <div class="container" style="max-width: 32rem">
+  <div class="container coreui-login-container">
     <div class="d-flex flex-column gap-4">
       <div class="d-flex justify-content-center fs-4">
         {% include "django_coreui/includes/brand.html" %}
@@ -30,7 +30,7 @@
               <div class="input-group">
                 {{ form.password|form_control }}
                 <span class="input-group-text">
-                  <button type="button" class="bg-transparent border-0 p-0 link-secondary" id="toggle-password" aria-label="Show password" title="Show password" aria-pressed="false">{% icon "cil-low-vision" %}</button>
+                  <button type="button" class="bg-transparent border-0 p-0 link-secondary" data-password-toggle="#{{ form.password.auto_id }}" aria-label="Show password" title="Show password" aria-pressed="false">{% icon "cil-low-vision" %}</button>
                 </span>
               </div>
             </div>
@@ -46,11 +46,5 @@
 </div>
 {% endblock %}
 {% block extra_js %}
-<script>
-  document.getElementById("toggle-password").addEventListener("click", function () {
-    const input = document.getElementById("{{ form.password.auto_id }}");
-    input.type = input.type === "password" ? "text" : "password";
-    this.setAttribute("aria-pressed", input.type === "text");
-  });
-</script>
+<script src="{% static 'django_coreui/password-toggle.js' %}" defer></script>
 {% endblock %}

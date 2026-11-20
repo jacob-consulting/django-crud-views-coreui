@@ -1,7 +1,9 @@
 import json
 
 from django import template
+from django.conf import settings
 from django.contrib.messages import constants
+from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -36,10 +38,18 @@ def icon(name, css_class=""):
 @register.filter
 def initials(user):
     """Two-letter initials from the user's name, falling back to the username."""
-    name = user.get_full_name().split()
+    get_full_name = getattr(user, "get_full_name", None)
+    name = (get_full_name() if get_full_name else "").split()
     if len(name) >= 2:
         return (name[0][0] + name[-1][0]).upper()
-    return user.get_username()[:2].upper()
+    get_username = getattr(user, "get_username", None)
+    return (get_username() if get_username else "")[:2].upper()
+
+
+@register.simple_tag
+def login_url():
+    """The sign-in URL: ``settings.LOGIN_URL`` (a URL or a URL name) resolved."""
+    return resolve_url(settings.LOGIN_URL)
 
 
 @register.filter
@@ -51,7 +61,8 @@ def avatar_color(user):
 @register.filter
 def form_control(field, css_class="form-control"):
     """Render a bound field's widget with a CoreUI class, marked invalid when it has errors."""
-    attrs = {"class": css_class}
+    own = field.field.widget.attrs.get("class", "")
+    attrs = {"class": f"{own} {css_class}".strip()}
     if field.errors:
         attrs["class"] += " is-invalid"
         attrs["aria-invalid"] = "true"

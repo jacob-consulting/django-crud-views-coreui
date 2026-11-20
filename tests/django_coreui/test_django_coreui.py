@@ -6,7 +6,7 @@ from pathlib import Path
 
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages import constants
 from django.contrib.messages.storage.base import Message
 from django.core.checks import run_checks
@@ -428,8 +428,64 @@ class LayoutTests(SimpleTestCase):
             with self.subTest(path=path):
                 self.assertIsNone(re.search(r"\son[a-z]+\s*=", path.read_text()))
 
+    def test_no_inline_scripts_or_styles(self):
+        """Strict CSP: no <script> body and no style= attribute in the shell's templates or its rendered pages."""
+        pages = [("app.html", render_page()), ("login.html", render_login())]
+        pages += [(str(p), p.read_text()) for p in (TEMPLATES / "django_coreui").rglob("*.html")]
+        pages.append(("registration/login.html", (TEMPLATES / "registration" / "login.html").read_text()))
+        for name, html in pages:
+            with self.subTest(name=name):
+                self.assertIsNone(re.search(r"\sstyle\s*=", html), name)
+                for match in re.finditer(r"<script\b([^>]*)>(.*?)</script>", html, re.S):
+                    self.assertIn("src=", match.group(1), name)
+                    self.assertEqual(match.group(2).strip(), "", name)
+
+    @override_settings(LOGIN_URL="login")
+    def test_anonymous_user_renders_the_shell_with_a_sign_in_link(self):
+        source = '{% extends "django_coreui/layouts/app.html" %}'
+        html = Template(source).render(Context({"user": AnonymousUser(), "messages": []}))
+        self.assertIn('href="/login/"', html)
+        self.assertIn("Sign in", html)
+        self.assertNotIn("Open user menu", html)
+        self.assertNotIn("/logout/", html)
+
+    def test_initials_is_safe_without_get_full_name(self):
+        from django_coreui.templatetags.coreui import initials
+
+        class Bare:
+            def get_username(self):
+                return "zoe"
+
+        self.assertEqual(initials(Bare()), "ZO")
+        self.assertEqual(initials(AnonymousUser()), "")
+
+    def test_staff_menu_without_the_admin_urlconf(self):
+        user = User(pk=2, username="st", is_staff=True)
+        html = Template('{% extends "django_coreui/layouts/app.html" %}').render(
+            Context({"user": user, "messages": []})
+        )
+        self.assertIn("Sign out", html)
+        self.assertNotIn("Admin site", html)
+
+    def test_form_control_merges_the_widgets_own_class(self):
+        class F(forms.Form):
+            name = forms.CharField(widget=forms.TextInput(attrs={"class": "mine extra"}))
+
+        html = F()["name"]
+        from django_coreui.templatetags.coreui import form_control
+
+        out = form_control(html)
+        self.assertIn('class="mine extra form-control"', out)
+        self.assertEqual(form_control(html, "form-select").count("form-select"), 1)
+
+    @override_settings(COREUI="free")
+    def test_non_mapping_coreui_setting_is_e001(self):
+        self.assertIn("django_coreui.E001", [message.id for message in run_checks()])
+
     def test_header_toggler_is_wired_by_layout_switch(self):
-        self.assertIn('class="header-toggler" type="button" data-sidebar-toggle="#sidebar"', render_page())
+        self.assertIn(
+            'class="header-toggler coreui-header-toggler" type="button" data-sidebar-toggle="#sidebar"', render_page()
+        )
         js = LAYOUT_SWITCH_JS.read_text()
         self.assertIn('event.target.closest("[data-sidebar-toggle]")', js)
         self.assertIn("coreui.Sidebar.getOrCreateInstance(", js)
@@ -473,5 +529,5 @@ class LayoutTests(SimpleTestCase):
         self.assertIn('action="/login/"', html)
         self.assertIn('name="username"', html)
         self.assertIn('class="form-control"', html)
-        self.assertIn('id="toggle-password"', html)
+        self.assertIn('data-password-toggle="#id_password"', html)
         self.assertNotIn('id="sidebar"', html)

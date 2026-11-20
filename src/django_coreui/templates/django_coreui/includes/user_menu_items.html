@@ -1,7 +1,9 @@
 {% load coreui %}
-{% if user.is_staff %}
-<a href="{% url 'admin:index' %}" class="dropdown-item">{% icon "cil-settings" "me-2" %}Admin site</a>
-<a href="{% url 'admin:password_change' %}" class="dropdown-item">{% icon "cil-user" "me-2" %}Change password</a>
+{# Without django.contrib.admin's URLconf the admin links are left out ({% url ... as %} does not raise). #}
+{% url 'admin:index' as admin_url %}{% url 'admin:password_change' as admin_password_url %}
+{% if user.is_staff and admin_url %}
+<a href="{{ admin_url }}" class="dropdown-item">{% icon "cil-settings" "me-2" %}Admin site</a>
+{% if admin_password_url %}<a href="{{ admin_password_url }}" class="dropdown-item">{% icon "cil-user" "me-2" %}Change password</a>{% endif %}
 <div class="dropdown-divider"></div>
 {% endif %}
 <form method="post" action="{% url 'logout' %}">

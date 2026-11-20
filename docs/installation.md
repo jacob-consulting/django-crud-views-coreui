@@ -71,6 +71,14 @@ CRUD_VIEWS_ICONS = {"customer": "coreui:cil-building"}
 The theme registers a CoreUI icon for every semantic name django-crud-views defines, so `CRUD_VIEWS_ICONS` is only
 needed for your own names or to change one.
 
+## Public pages and the admin
+
+The shell works for anonymous visitors: the header shows a "Sign in" link (to `settings.LOGIN_URL`) instead of the user
+menu, so a page without a login requirement renders. The "Admin site" and "Change password" entries of the user menu
+appear for staff only when `django.contrib.admin`'s URLconf is mounted; without it they are left out. The shell's
+templates carry no inline scripts or `style=` attributes, so a strict Content-Security-Policy only needs to allow the
+CoreUI CDN and your static files.
+
 ## System checks
 
 ```shell
@@ -79,9 +87,9 @@ python manage.py check --fail-level WARNING
 
 | Id | Level | Meaning |
 |---|---|---|
-| `django_coreui.E001` | Error | `COREUI["edition"]` is not an edition this version serves (only `"free"`). |
+| `django_coreui.E001` | Error | `COREUI` is not a dict, or `COREUI["edition"]` is not an edition this version serves (only `"free"`). |
 | `crud_views_coreui.E002` | Error | `crud_views_coreui` is listed after `crud_views` or `crud_views_object_detail` in `INSTALLED_APPS`. |
-| `crud_views_coreui.W001` | Warning | A `coreui:` icon in `CRUD_VIEWS_ICONS` has no SVG in `django_coreui.icons.ICONS`; vendor it with `scripts/vendor_icons.py` or use another library prefix. |
+| `crud_views_coreui.W001` | Warning | A `coreui:` icon in `CRUD_VIEWS_ICONS` has no SVG in `django_coreui.icons.ICONS`; add its SVG to `ICONS` at startup (see [Icons](icons.md#adding-icons)) or use another library prefix. |
 
 ## Your own page layer
 

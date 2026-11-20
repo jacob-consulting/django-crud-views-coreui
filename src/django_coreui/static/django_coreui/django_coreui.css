@@ -66,3 +66,8 @@ body {
 .sidebar-narrow-unfoldable:not(:hover) .sidebar-header .sidebar-brand {
   margin-inline-end: 0 !important;
 }
+
+/* Header and sign-in sizes that would otherwise be inline style= attributes (strict CSP). */
+.coreui-header-toggler { margin-inline-start: -14px; }
+.coreui-layout-menu { min-width: 18rem; }
+.coreui-login-container { max-width: 32rem; }
