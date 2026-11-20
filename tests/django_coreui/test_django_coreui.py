@@ -141,9 +141,13 @@ class PackageTests(SimpleTestCase):
         self.assertIn('<div class="col-auto ms-auto d-print-none">', layout)
 
     def test_empty_breadcrumb_row_is_hidden(self):
-        # .header > .container-fluid has a min-height, which the breadcrumb row would keep while empty
+        # .header > .container-fluid has a min-height, which the breadcrumb row would keep while empty. Not :empty:
+        # whitespace defeats it, and crud_views' breadcrumb tag renders a newline for a view without a breadcrumb
+        # (browser pass: a blank strip on the manage page).
         css = (PACKAGE / "static" / "django_coreui" / "django_coreui.css").read_text()
-        self.assertRegex(css, r"\.header > \.header-breadcrumb:empty \{\s*display: none;\s*\}")
+        self.assertRegex(css, r"\.header > \.header-breadcrumb:not\(:has\(\*\)\) \{\s*display: none;\s*\}")
+        self.assertRegex(css, r"\.header > \.header-breadcrumb:has\(\*\) \{\s*display: flex;")
+        self.assertNotIn(":empty", css)
         layout = (TEMPLATES / "django_coreui" / "layouts" / "app.html").read_text()
         self.assertIn('header-breadcrumb">{% block breadcrumb %}{% endblock %}</div>', layout)
 

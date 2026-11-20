@@ -23,12 +23,13 @@ body {
 }
 
 /* The header's breadcrumb row (layouts/app.html) takes room only when a page fills it: the min-height rule above
-   matches it too, so an empty row is hidden. */
-.header > .header-breadcrumb:empty {
+   matches it too, so a row without an element is hidden. Whitespace does not count: a breadcrumb tag with nothing to
+   show may still render a newline, and the row would stay as a blank 3rem strip. */
+.header > .header-breadcrumb:not(:has(*)) {
   display: none;
 }
 
-.header > .header-breadcrumb:not(:empty) {
+.header > .header-breadcrumb:has(*) {
   display: flex;
   align-items: center;
   min-height: 3rem;
