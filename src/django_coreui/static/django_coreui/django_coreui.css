@@ -22,7 +22,12 @@ body {
   min-height: calc(4rem + 1px);
 }
 
-/* The header's breadcrumb row (layouts/app.html) takes room only when a page fills it. */
+/* The header's breadcrumb row (layouts/app.html) takes room only when a page fills it: the min-height rule above
+   matches it too, so an empty row is hidden. */
+.header > .header-breadcrumb:empty {
+  display: none;
+}
+
 .header > .header-breadcrumb:not(:empty) {
   display: flex;
   align-items: center;

@@ -4,6 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.messages import constants
@@ -139,6 +140,13 @@ class PackageTests(SimpleTestCase):
         )
         self.assertIn('<div class="col-auto ms-auto d-print-none">', layout)
 
+    def test_empty_breadcrumb_row_is_hidden(self):
+        # .header > .container-fluid has a min-height, which the breadcrumb row would keep while empty
+        css = (PACKAGE / "static" / "django_coreui" / "django_coreui.css").read_text()
+        self.assertRegex(css, r"\.header > \.header-breadcrumb:empty \{\s*display: none;\s*\}")
+        layout = (TEMPLATES / "django_coreui" / "layouts" / "app.html").read_text()
+        self.assertIn('header-breadcrumb">{% block breadcrumb %}{% endblock %}</div>', layout)
+
     def test_nav_menu_is_included_once_inside_the_sidebar_nav(self):
         sidebar = (INCLUDES / "sidebar.html").read_text()
         self.assertRegex(
@@ -273,6 +281,56 @@ class FilterTests(SimpleTestCase):
         html = render_template_with("{{ f.username|form_control }}", f=form)
         self.assertIn('class="form-control is-invalid"', html)
         self.assertIn('aria-invalid="true"', html)
+
+
+class _FieldForm(forms.Form):
+    name = forms.CharField(help_text="Your <b>full</b> name.")
+    nickname = forms.CharField(required=False)
+    agree = forms.BooleanField(required=False, label="I agree", help_text="Optional.")
+
+
+def render_field(form, name: str) -> str:
+    return render_to_string("django_coreui/includes/field.html", {"field": form[name]})
+
+
+class FieldIncludeTests(SimpleTestCase):
+    """django_coreui/includes/field.html: one bound field in CoreUI's form markup, for hand-written forms."""
+
+    def test_text_field_has_a_label_and_a_form_control(self):
+        html = render_field(_FieldForm(), "nickname")
+        self.assertRegex(
+            html, r'<label class="form-label" for="id_nickname">Nickname</label>\s*<input [^>]*class="form-control"'
+        )
+
+    def test_required_field_is_marked(self):
+        html = render_field(_FieldForm(), "name")
+        self.assertRegex(
+            html,
+            r'<label class="form-label" for="id_name">Name'
+            r'<span class="text-danger ms-1" aria-hidden="true">\*</span></label>',
+        )
+        self.assertNotIn("aria-hidden", render_field(_FieldForm(), "nickname"))
+
+    def test_help_text_follows_the_input(self):
+        html = render_field(_FieldForm(), "name")
+        self.assertIn('<div class="form-text" id="id_name-help">Your <b>full</b> name.</div>', html)
+
+    def test_errors_mark_the_input_and_replace_the_help_text(self):
+        form = _FieldForm(data={})
+        form.is_valid()
+        html = render_field(form, "name")
+        self.assertIn('class="form-control is-invalid"', html)
+        self.assertIn('<div class="invalid-feedback d-block" id="id_name-errors">This field is required.</div>', html)
+        self.assertNotIn("form-text", html)
+
+    def test_checkbox_is_a_form_check(self):
+        html = render_field(_FieldForm(), "agree")
+        self.assertRegex(
+            html,
+            r'<div class="form-check">\s*<input type="checkbox" [^>]*class="form-check-input"[^>]*>\s*'
+            r'<label class="form-check-label" for="id_agree">I agree</label>',
+        )
+        self.assertIn('<div class="form-text" id="id_agree-help">Optional.</div>', html)
 
 
 def render_template_with(source: str, **context) -> str:
