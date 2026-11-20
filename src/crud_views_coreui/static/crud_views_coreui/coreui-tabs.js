@@ -3,6 +3,12 @@
 // attribute, finds nothing; it stays loaded and does nothing. This is the same init for the data-coreui triggers:
 // owned tablists (data-cv-od-tabs) only, through cv.adapters.tab (coreui-adapters.js points it at window.coreui),
 // before the first keypress, without calling show() or taking focus; disposed before modal content is replaced.
+//
+// Upstream's public initializer, cv.initObjectDetailTabs(root), is the documented hook for content inserted outside
+// the modal flow and for a late UI library. The theme wraps it so a call initialises the data-coreui triggers too.
+// tabs.js loads after this script (asset registration follows INSTALLED_APPS) and assigns the global
+// unconditionally, so the wrapper is an accessor: the assignment is kept as the upstream part, reads return the
+// wrapper. Without crud_views_object_detail's script the wrapper runs the CoreUI part alone.
 (function () {
     if (globalThis.__cvCoreuiObjectDetailTabsInit) {
         return;
@@ -21,24 +27,55 @@
         return lists.flatMap(list => [...list.querySelectorAll(trigger)].filter(el => el.closest(tablist) === list));
     }
 
+    // Upstream's contract: a missing adapter map or tab entry is a no-op; a present entry must supply both methods.
+    function tabAdapter() {
+        const tab = globalThis.cv?.adapters?.tab;
+        if (tab == null) return null;
+        if (typeof tab.init !== "function" || typeof tab.dispose !== "function") {
+            throw new TypeError("cv.adapters.tab must supply init(element) and dispose(element)");
+        }
+        return tab;
+    }
+
     function withTabAdapter(root, call) {
         const triggers = ownedTriggers(root);
         // Pages without owned tabs must not even look up the adapter.
         if (!triggers.length) {
             return;
         }
-        const tab = globalThis.cv?.adapters?.tab;
-        if (tab == null) {
+        const tab = tabAdapter();
+        if (!tab) {
             return;
         }
         triggers.forEach(el => call(tab, el));
     }
 
-    document.addEventListener("DOMContentLoaded", () => withTabAdapter(document, (tab, el) => tab.init(el)));
-    if (document.readyState !== "loading") {
-        withTabAdapter(document, (tab, el) => tab.init(el));
+    function initCoreuiObjectDetailTabs(root = document) {
+        withTabAdapter(root, (tab, el) => tab.init(el));
     }
-    document.addEventListener("cv:modal:loaded", event => withTabAdapter(event.target, (tab, el) => tab.init(el)));
+
+    const cv = (globalThis.cv = globalThis.cv || {});
+    let upstreamInit = typeof cv.initObjectDetailTabs === "function" ? cv.initObjectDetailTabs : null;
+    function initObjectDetailTabs(root = document) {
+        if (upstreamInit) {
+            upstreamInit(root);
+        }
+        initCoreuiObjectDetailTabs(root);
+    }
+    Object.defineProperty(cv, "initObjectDetailTabs", {
+        configurable: true,
+        enumerable: true,
+        get: () => initObjectDetailTabs,
+        set: fn => {
+            upstreamInit = typeof fn === "function" && fn !== initObjectDetailTabs ? fn : null;
+        },
+    });
+
+    document.addEventListener("DOMContentLoaded", () => initCoreuiObjectDetailTabs(document));
+    if (document.readyState !== "loading") {
+        initCoreuiObjectDetailTabs(document);
+    }
+    document.addEventListener("cv:modal:loaded", event => initCoreuiObjectDetailTabs(event.target));
     // Never construct an instance during cleanup: the adapter releases its own handlers.
     document.addEventListener("cv:modal:unload", event => withTabAdapter(event.target, (tab, el) => tab.dispose(el)));
 })();

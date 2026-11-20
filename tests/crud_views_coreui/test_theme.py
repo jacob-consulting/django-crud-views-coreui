@@ -47,6 +47,12 @@ THEME = Path(crud_views_coreui.__file__).resolve().parent
 THEME_CSS = THEME / "static/crud_views_coreui/crud_views_coreui.css"
 UPSTREAM_COMMIT = "fa2f0a7b"
 
+# What the theme's table.thead adds to upstream's <th> (tracker U10), as Tabler's table header does.
+ARIA_SORT = (
+    '{% if column.orderable %} aria-sort="{% if column.is_ordered %}{% if column.order_by_alias.is_descending %}'
+    'descending{% else %}ascending{% endif %}{% else %}none{% endif %}"{% endif %}'
+)
+
 # The four templates the theme copies only to rename data-bs- to data-coreui- (upstream tracker U1). Each is the
 # upstream file with that one change and a first-line comment naming its origin; test_data_bs_overrides_track_upstream
 # fails as soon as upstream edits one, so the copy is refreshed (or dropped, once upstream has a prefix hook).
@@ -252,7 +258,7 @@ class ThemeRenderingTests(TestCase):
         self.assertIn(str(svg("cil-building")), html)  # the ViewSet header icon, coreui:cil-building
 
     def test_table_override_extends_the_stock_table(self):
-        # The theme adds only the card and the responsive wrapper; sorting, rows and pagination stay upstream's.
+        # The theme adds the card, the responsive wrapper and aria-sort; rows, sorting and pagination stay upstream's.
         source = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
         self.assertIn('{% extends "crud_views/table/bootstrap5.html" %}', source)
         self.assertIn("{{ block.super }}", source)
@@ -301,11 +307,38 @@ class ThemeRenderingTests(TestCase):
         self.assertNotIn("<i class=", button.group(0))
 
     def test_sorted_column_is_marked(self):
-        # The stock header marks the sorted column with the table-sort-* icon (no aria-sort upstream; not themed).
+        # The stock header marks the sorted column with the table-sort-* icon; the theme's table.thead adds aria-sort,
+        # which the stock header lacks (tracker U10), so screen readers get the sort state too.
         html = self.list_html(sort="-revenue")
-        revenue = re.search(r'<th class="[^"]*\btext-end" scope="col">.*?</th>', html, re.S).group(0)
-        self.assertIn(str(svg(coreui_name("table-sort-desc"))), revenue)
+        revenue = re.search(r'<th class="[^"]*\btext-end" scope="col" aria-sort="[a-z]+">.*?</th>', html, re.S)
+        self.assertIn('aria-sort="descending"', revenue.group(0))
+        self.assertIn(str(svg(coreui_name("table-sort-desc"))), revenue.group(0))
         self.assertLess(html.index("Customer 14"), html.index("Customer 13"))
+
+    def test_every_orderable_header_has_aria_sort(self):
+        html = self.list_html(sort="name")
+        thead = html[html.index("<thead") : html.index("</thead>")]
+        headers = re.findall(r"<th\b[^>]*>", thead)
+        self.assertGreater(len(headers), 3)
+        for th in headers:
+            self.assertEqual("orderable" in th, "aria-sort=" in th, th)
+        self.assertEqual(thead.count('aria-sort="ascending"'), 1)
+        self.assertNotIn('aria-sort="descending"', thead)
+        self.assertGreater(thead.count('aria-sort="none"'), 1)
+
+    def test_table_head_is_upstream_plus_aria_sort(self):
+        # The theme's table.thead block is a copy (blocks cannot add an attribute to upstream's <th>); it must equal
+        # the installed upstream block with only the aria-sort attribute added. Fails when upstream changes the header.
+        def head(source):
+            return re.search(r"\{% block table\.thead %\}.*?\{% endblock table\.thead %\}", source, re.S).group(0)
+
+        upstream = (
+            Path(crud_views.__file__).resolve().parent / "templates/crud_views/table/bootstrap5.html"
+        ).read_text()
+        theme = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
+        self.assertEqual(head(theme).replace(ARIA_SORT, ""), head(upstream))
+        self.assertEqual(head(theme).count(ARIA_SORT), 1)
+        self.assertNotIn("aria-sort", upstream)  # the copy exists only while upstream has no aria-sort
 
     def test_scripts_use_the_coreui_adapter_without_jquery(self):
         html = self.list_html()
@@ -694,6 +727,39 @@ class DataCoreuiTests(TestCase):
         self.assertIn('"cv:modal:unload"', script)
         self.assertNotIn("data-bs-", script)
         self.assertNotIn("globalThis.coreui", script)  # only through cv.adapters
+
+    def test_coreui_tabs_script_keeps_the_adapter_contract(self):
+        # upstream's tabs.js: a missing tab entry is a no-op, a present one must supply init and dispose
+        script = (THEME / "static/crud_views_coreui/coreui-tabs.js").read_text()
+        self.assertIn('typeof tab.init !== "function" || typeof tab.dispose !== "function"', script)
+        self.assertIn('throw new TypeError("cv.adapters.tab must supply init(element) and dispose(element)")', script)
+        self.assertIn("if (tab == null) return null;", script)
+        upstream = (
+            Path(crud_views_object_detail.__file__).resolve().parent / "static/crud_views_object_detail/js/tabs.js"
+        ).read_text()
+        self.assertIn('throw new TypeError("cv.adapters.tab must supply init(element) and dispose(element)")', upstream)
+
+    def test_coreui_tabs_script_wraps_the_public_initializer(self):
+        # cv.initObjectDetailTabs(root) is upstream's documented hook (custom insertion, a late UI library). tabs.js
+        # loads after the theme script and assigns it unconditionally, so the theme wraps it with an accessor: the
+        # assigned function is kept as the upstream part, reads return the wrapper, which runs the CoreUI part too.
+        script = (THEME / "static/crud_views_coreui/coreui-tabs.js").read_text()
+        self.assertIn('Object.defineProperty(cv, "initObjectDetailTabs", {', script)
+        self.assertIn("get: () => initObjectDetailTabs,", script)
+        self.assertRegex(script, r"set: fn => \{\s*upstreamInit = typeof fn === \"function\"")
+        self.assertRegex(
+            script,
+            r"function initObjectDetailTabs\(root = document\) \{\s*if \(upstreamInit\) \{\s*upstreamInit\(root\);"
+            r"\s*\}\s*initCoreuiObjectDetailTabs\(root\);",
+        )
+        upstream = (
+            Path(crud_views_object_detail.__file__).resolve().parent / "static/crud_views_object_detail/js/tabs.js"
+        ).read_text()
+        self.assertIn("globalThis.cv.initObjectDetailTabs = initObjectDetailTabs;", upstream)  # a plain assignment
+        html = self.client.get(reverse("customer-properties", args=[self.customer.pk])).content.decode()
+        self.assertLess(  # the accessor must exist before tabs.js assigns
+            html.index("crud_views_coreui/coreui-tabs.js"), html.index("crud_views_object_detail/js/tabs.js")
+        )
 
     def test_upstream_tabs_script_still_selects_data_bs(self):
         # The theme's coreui-tabs.js exists because upstream's tabs.js hard-codes data-bs-toggle (tracker U2). When

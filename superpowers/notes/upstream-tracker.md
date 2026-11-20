@@ -63,6 +63,18 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
   and on `cv:modal:loaded`, `dispose` on `cv:modal:unload`. Upstream's `tabs.js` stays loaded and finds nothing.
   `test_upstream_tabs_script_still_selects_data_bs` fails once upstream's selector changes, the signal to drop the
   theme script.
+- Public initializer: upstream documents `cv.initObjectDetailTabs(root)` (`docs/reference/javascript.md`,
+  "Object-detail tabs"; `docs/reference/assets.md`) as the call for content inserted outside the modal flow and for
+  a UI library that loads late. Upstream's function selects `data-bs-toggle`, so under the theme it alone would find
+  nothing. `tabs.js` loads after `coreui-tabs.js` (asset order follows `INSTALLED_APPS`: the theme comes before
+  crud_views and the object-detail app) and assigns the global unconditionally, so `coreui-tabs.js` defines
+  `cv.initObjectDetailTabs` as an accessor: an assignment is kept as the upstream part, a read returns the theme's
+  wrapper, which runs the upstream part and then the `data-coreui` init. Without `crud_views_object_detail`'s script
+  the wrapper runs the CoreUI part alone. The theme keeps upstream's adapter contract (a missing `cv.adapters.tab` is
+  a no-op; an entry without callable `init`/`dispose` throws `TypeError`). Pinned by
+  `test_coreui_tabs_script_wraps_the_public_initializer` and `test_coreui_tabs_script_keeps_the_adapter_contract`
+  (source-level; behaviour is for the browser pass, the project has no JS test suite). Same possible fix: with a
+  prefix in `cv_config` or a `data-cv-tab` marker, upstream's initializer would cover the theme and the wrapper goes.
 
 ## U3. No `dropdown` adapter
 
@@ -168,6 +180,22 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Possible fix: `breadcrumb:nav`, `breadcrumb:list`, `breadcrumb:item` keys (defaults `""`, `breadcrumb`,
   `breadcrumb-item`), as the navbar got with #384.
 
+## U10. The stock table header has no `aria-sort`
+
+- Status: confirmed · Severity: annoyance (accessibility)
+- Where: `crud_views/templates/crud_views/table/bootstrap5.html`, block `table.thead`: an orderable `<th>` shows the
+  `table-sort-asc`/`-desc` icon (from `request.GET.sort`), but carries no `aria-sort`, so assistive technology does not
+  learn which column is sorted or in which direction. The Tabler theme's table override sets it.
+- Theme workaround: the theme's `crud_views/table/bootstrap5.html` (which extends upstream's) overrides
+  `{% block table.thead %}` with upstream's block at `fa2f0a7b` plus one attribute on the `<th>`:
+  `aria-sort="ascending|descending|none"` from `column.is_ordered` / `column.order_by_alias.is_descending`, on
+  orderable columns only. A block cannot add an attribute to upstream's `<th>`, so the block is a copy;
+  `test_theme.py::ThemeRenderingTests::test_table_head_is_upstream_plus_aria_sort` requires it to equal the installed
+  upstream block with only that attribute added (and upstream to have no `aria-sort`), so an upstream change to the
+  header fails the suite. `test_sorted_column_is_marked`, `test_every_orderable_header_has_aria_sort` check the output.
+- Possible fix: add `aria-sort` to the stock header (and take the sort state from `column.is_ordered` instead of
+  `request.GET.sort`, which ignores a table `prefix`); then the theme's `table.thead` block goes.
+
 ## Theme layout overrides (not upstream gaps)
 
 For the record, so they are not mistaken for missing hooks. Started from the Tabler theme's seven layout overrides;
@@ -176,8 +204,9 @@ and its content on cards:
 
 - `crud_views/snippets/form_frame.html`: the form in a card outside a modal. Extends upstream's frame of the same name.
 - `crud_views/table/bootstrap5.html`: the table on a card, in `.table-responsive`, pagination in the card footer.
-  Extends upstream's table of the same name and overrides three blocks with `{{ block.super }}`, so header, rows,
-  sorting and pagination stay upstream's; two CSS rules drop the inner bottom margins.
+  Extends upstream's table of the same name and overrides three blocks with `{{ block.super }}`, so rows, sorting and
+  pagination stay upstream's; two CSS rules drop the inner bottom margins. Its fourth block, `table.thead`, is the
+  upstream copy with `aria-sort` (an upstream gap: U10).
 - Dropped (stock is correct CoreUI markup): `modal/shell.html`, `tags/alert.html`, `tags/card.html`,
   `tags/list_filter.html`, `tags/list_filter.inner.html`, `view_card.content.html`. `card:root` is `card mb-4`
   (upstream's spacing), since the stock card grid has no vertical gutter.

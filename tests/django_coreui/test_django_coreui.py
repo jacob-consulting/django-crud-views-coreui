@@ -15,6 +15,7 @@ from django.test import SimpleTestCase, override_settings
 from django.utils.safestring import mark_safe
 
 import django_coreui
+from django_coreui.icons import svg
 
 PACKAGE = Path(django_coreui.__file__).parent
 TEMPLATES = PACKAGE / "templates"
@@ -56,6 +57,29 @@ class MessagesIncludeTests(SimpleTestCase):
 
     def test_dismiss_uses_coreuis_data_attribute(self):
         self.assertIn('data-coreui-dismiss="alert"', render_messages(Message(constants.INFO, "x")))
+
+    def test_markup_is_bootstraps_stock_alert(self):
+        # The CoreUI theme's alerts use the same markup (its MessagesParityTests compare the two): icon with me-2, the
+        # text right after it, the close button; no flex row or text wrapper.
+        html = render_messages(Message(constants.SUCCESS, "Saved", extra_tags="probe"))
+        normalized = re.sub(r">\s+<", "><", re.sub(r"\s+", " ", html)).strip()
+        expected = (
+            '<div class="alert alert-success alert-dismissible fade show probe" role="alert">'
+            f"{svg('cil-check', 'me-2')}Saved "
+            '<button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button></div>'
+        )
+        self.assertEqual(normalized, expected)
+
+    def test_level_icons(self):
+        for level, name in (
+            (constants.DEBUG, "cil-bug"),
+            (constants.INFO, "cil-info"),
+            (constants.SUCCESS, "cil-check"),
+            (constants.WARNING, "cil-warning"),
+            (constants.ERROR, "cil-x-circle"),
+        ):
+            with self.subTest(level=level):
+                self.assertIn(str(svg(name, "me-2")), render_messages(Message(level, "x")))
 
 
 WITHOUT_CRISPY = """
