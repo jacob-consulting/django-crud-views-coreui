@@ -30,15 +30,19 @@
 
 /* Icon-only buttons (every :icon button class key, the menu toggles, formset and card-order controls) are square.
    CoreUI has no .btn-icon: the button is as wide as it is tall, with the icon centred. Follows .btn-sm and .btn-lg,
-   which only change the --cui-btn-* variables. */
+   which only change the --cui-btn-* variables. The height is set too: as a flex container the button has no text line
+   box, so without it its height follows the icon (a 16px SVG: 26px for .btn-sm instead of 31px) and the menu toggle
+   next to it ends up a few pixels shorter. */
 .cv-coreui-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(
+  --cv-coreui-icon-btn-size: calc(
     var(--cui-btn-font-size) * var(--cui-btn-line-height) + 2 * var(--cui-btn-padding-y) + 2 *
       var(--cui-btn-border-width)
   );
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cv-coreui-icon-btn-size);
+  height: var(--cv-coreui-icon-btn-size);
   padding-inline: 0;
 }
 

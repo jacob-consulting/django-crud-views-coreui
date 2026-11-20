@@ -1025,6 +1025,16 @@ class ThemeCssTests(SimpleTestCase):
             },
         )
 
+    def test_icon_buttons_are_square_in_both_directions(self):
+        # Browser pass: as a flex container the button lost its text line box, so its height followed the 16px icon
+        # (26px instead of 31px for .btn-sm) and the menu toggle next to a link button was shorter. Width and height
+        # come from the same size.
+        css = THEME_CSS.read_text()
+        rule = re.search(r"\.cv-coreui-icon-btn \{(.*?)\n\}", css, re.S).group(1)
+        self.assertIn("--cv-coreui-icon-btn-size: calc(", rule)
+        self.assertIn("width: var(--cv-coreui-icon-btn-size);", rule)
+        self.assertIn("height: var(--cv-coreui-icon-btn-size);", rule)
+
     def test_card_table_drops_the_inner_margins(self):
         css = THEME_CSS.read_text()
         wrapper = r"\.cv-coreui-table > \.table-container > "
