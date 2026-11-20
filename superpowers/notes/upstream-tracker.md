@@ -22,6 +22,29 @@ workaround), **filed** (issue number), **done** (fixed upstream and adopted here
 
 Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Tabler findings file).
 
+## Close-out (2026-11-20, after the browser pass)
+
+Every entry was re-checked against `../django-crud-views` @ `fa2f0a7b` and `../django-crud-views-extensions` @
+`667f27a9` and in the browser (alex, sam, kim; light, dark and auto; 375px). Nothing is filed or done upstream yet.
+
+| Entry | Final status | Handled by (theme side) |
+|---|---|---|
+| U1 | confirmed | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
+| U2 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
+| U3 | confirmed | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
+| U4 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
+| U5 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
+| U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
+| U7 | confirmed (demo) | semantic icon names: `example/config/icons.py` `ACME_ICONS` -> `CRUD_VIEWS_ICONS` and `COREUI_ICON_ALIASES` (`django_coreui/icons.py`) |
+| U8 | anticipated, not hit | nothing to work around; `src/crud_views_coreui/apps.py` is the duplicated `ready()` |
+| U9 | confirmed | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
+| U10 | confirmed | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
+| U11 | confirmed | system check `crud_views_coreui.E002` (`src/crud_views_coreui/checks.py`) |
+| U12 | confirmed | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
+
+U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
+bug; file it only together with U1's prefix setting, as a `register_theme()` helper.
+
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
 - Status: confirmed · Severity: annoyance
@@ -125,13 +148,18 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
   (`--cui-btn-color: var(--bs-btn-color)` on the help button, `--cui-gutter-x: var(--bs-gutter-x)` on the compact
   rows). `tests/crud_views_coreui/test_registration.py::test_css_maps_every_bs_variable_upstream_reads` parses the
   upstream files, so a new `--bs-*` reference fails the suite.
+- 2026-11-20, browser pass: `--bs-secondary-text-emphasis` is now fed from `--cui-body-color`, not from
+  `--cui-secondary-text-emphasis`: CoreUI 5.9.1 keeps that token dark (`#212233`) in dark mode, where Bootstrap's
+  turns light, so the manage page's table headers and `?` help buttons were dark on dark. The same browser pass found
+  the same gap in django-crud-views-extensions (U12).
 - Possible fix: crud_views defines its own tokens (`--cv-secondary-color: var(--bs-secondary-color, #6c757d)`) in
   one place and uses only those; a theme sets the `--cv-*` tokens once. The component variables it sets
   (`--bs-btn-color`, `--bs-gutter-x`) would better be a class key or a `--cv-*` token the theme maps.
 
 ## U6. Third party: crispy-bootstrap5 hard-codes `data-bs-*`
 
-- Status: anticipated · Severity: annoyance · Upstream: crispy-bootstrap5, not django-crud-views
+- Status: confirmed (2026-11-20: the pack's accordion, tab, modal and alert templates carry the rewritten attributes) ·
+  Severity: annoyance · Upstream: crispy-bootstrap5, not django-crud-views
 - Where: crispy-bootstrap5 templates for accordion, tabs and collapse (`accordion-group.html`, `layout/tab-link.html`, …)
 - Effect: the CoreUI crispy pack vendors crispy-bootstrap5 (as the Tabler pack does) and rewrites `data-bs-` to
   `data-coreui-` in the vendoring script. Nothing to file for django-crud-views; noted so the rewrite rule has a
@@ -139,7 +167,8 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 
 ## U7. App code names icons by library (`tabler:<name>`)
 
-- Status: anticipated · Severity: annoyance · Partly a demo issue, not only upstream
+- Status: confirmed (demo; 2026-11-20: semantic names throughout, see the last bullet) · Severity: annoyance · Partly a
+  demo issue, not only upstream
 - Where: the Acme Roasters example (47 `tabler:` strings in `example/**/*.py` in the Tabler project)
 - Effect: moving the same app to another theme means editing every icon string. The app is meant to be
   theme-agnostic ("the app code never imports the theme"), but its icon names are not.
@@ -149,10 +178,13 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Remaining gap (theme-side, not upstream): template-level icons rendered by the shell tag (`{% icon "…" %}` from
   `django_tabler` / `django_coreui`) cannot use that registry, because the shell package must not depend on
   crud_views. Either the shell tag gets its own alias map, or app templates keep library-native names.
+- Resolved here (2026-11-20): the shell tag got its own alias map, `settings.COREUI_ICON_ALIASES`
+  (`django_coreui/icons.py`); the demo sets both it and `CRUD_VIEWS_ICONS` from one dict, `ACME_ICONS`
+  (`example/config/icons.py`), so app code and templates use semantic names only.
 
 ## U8. Theme registration boilerplate
 
-- Status: anticipated · Severity: cosmetic
+- Status: anticipated, not hit (final verdict 2026-11-20, see below) · Severity: cosmetic
 - Where: `../tabler-test/src/crud_views_tabler/apps.py` (`ready()` registers button classes, label-mode defaults,
   icon library, icons, assets)
 - Effect: a second theme repeats the same `ready()` shape. To confirm once `crud_views_coreui/apps.py` exists: if
@@ -167,6 +199,9 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
   duplication is real but costs a dozen lines per theme and hides nothing; status stays **anticipated**, cosmetic.
   Worth filing only together with a theme-facing change (e.g. U1's prefix setting), as a `register_theme()` helper
   that takes classes, icons, label-mode defaults and assets and does the `crud_views_workflow` filtering itself.
+- Final verdict (close-out, 2026-11-20): anticipated, not hit. The browser pass found no defect that a registration
+  helper would have prevented; every registration took effect (button classes, icons, assets in order, label modes).
+  Do not file alone; bundle with U1.
 
 ## U9. The breadcrumb has no class key
 
