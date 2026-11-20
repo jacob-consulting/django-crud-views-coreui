@@ -33,7 +33,7 @@ COREUI_ICON_ALIASES = {"customer": "cil-building"}
 ```
 
 The demo keeps one table, `ACME_ICONS`
-(`example/config/icons.py` in the repository),
+(`example/config/icons.py` in the GitHub repository jacob-consulting/django-crud-views-coreui (not on this site)),
 and feeds it to both settings, so the same names work in templates and in django-crud-views:
 
 ```python

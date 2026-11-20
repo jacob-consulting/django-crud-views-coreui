@@ -9,7 +9,7 @@
 | `example/` | the Acme Roasters demo project and its tests |
 | `docs/` | this documentation |
 | `dev/` | maintainer notes, not published: the hand edits of the crispy pack |
-| `superpowers/` | design specs, implementation plans and the upstream tracker (`superpowers/notes/upstream-tracker.md` in the repository) |
+| `superpowers/` | design specs, implementation plans and the upstream tracker (`superpowers/notes/upstream-tracker.md` in the GitHub repository jacob-consulting/django-crud-views-coreui; maintainer notes, not on this site) |
 | `scripts/` | `vendor_templates.py` (crispy pack), `vendor_icons.py` (icons), `check_dist.py`, `check_release_floor.py` |
 
 ## Local setup

@@ -5,7 +5,7 @@ It is exercised by the Acme Roasters demo (`example/`), which puts nested ViewSe
 workflow, polymorphic models, object detail packs, Guardian, resources, card views and the django-crud-views-extensions
 widgets through it, and by its own test app under `tests/crud_views_coreui/`. Everything the theme needed beyond
 upstream hooks is an entry in the
-upstream tracker (`superpowers/notes/upstream-tracker.md` in the repository)
+upstream tracker (`superpowers/notes/upstream-tracker.md` in the GitHub repository jacob-consulting/django-crud-views-coreui; maintainer notes, not on this site)
 (U1-U11), referenced below.
 
 ## CoreUI in one paragraph

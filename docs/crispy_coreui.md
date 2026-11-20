@@ -45,7 +45,7 @@ use these in a `FormHelper` layout instead. crispy-forms' `UneditableField` sets
 
 Only two templates are edited by hand (`HAND_EDITED` in `vendored.py`); the vendoring script refuses to overwrite them
 without `--force`. The rationale is in
-`dev/crispy_coreui_hand_edits.md` in the repository.
+`dev/crispy_coreui_hand_edits.md` in the GitHub repository jacob-consulting/django-crud-views-coreui (maintainer notes, not on this site).
 
 | Template | Edit |
 |---|---|
