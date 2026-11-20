@@ -753,7 +753,7 @@ class ManageViewsTests(TestCase):
         # Finding 35: user-level Guardian grants used to be invisible; CRUD_VIEWS_MANAGE_SHOW_USERS lists them
         html = self.get("alex", "/customer/manage/").content.decode()
         self.assertIn("sam", html, msg="sam missing from the matrix")
-        self.assertIn("badge border border-secondary-subtle text-secondary-emphasis", html)  # manage:badge-objects
+        self.assertIn("badge border border-secondary-subtle text-body-secondary", html)  # manage:badge-objects
 
     def test_access_check_traces_sam_on_customers(self):
         # Upstream #370, on in the demo (CRUD_VIEWS_MANAGE_ACCESS_TRACE): alex traces sam's access by path

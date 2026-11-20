@@ -140,6 +140,16 @@ class ButtonClassTests(SimpleTestCase):
             COREUI_BUTTON_CLASSES["manage:badge-resource"], COREUI_BUTTON_CLASSES["manage:badge-permission"]
         )
 
+    def test_transparent_badges_use_a_text_colour_that_follows_dark_mode(self):
+        # Browser pass: CoreUI's text-*-emphasis stays dark in dark mode (it is meant for the light bg-*-subtle chips),
+        # so on a badge without a background it was dark on the dark card.
+        for key, value in COREUI_BUTTON_CLASSES.items():
+            classes = value.split()
+            if "badge" in classes and not any(c.startswith("bg-") or c.startswith("cv-coreui-badge-") for c in classes):
+                with self.subTest(key):
+                    self.assertFalse([c for c in classes if c.startswith("text-") and c.endswith("-emphasis")], value)
+        self.assertIn("text-body-secondary", COREUI_BUTTON_CLASSES["manage:badge-objects"].split())
+
     def test_theme_badge_classes_are_styled_from_coreui_palette(self):
         theme = (STATIC / "crud_views_coreui.css").read_text()
         for colour in ("blue", "pink"):

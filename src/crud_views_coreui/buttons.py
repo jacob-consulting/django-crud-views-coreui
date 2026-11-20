@@ -10,7 +10,8 @@ free classes (coreui.io/bootstrap/docs). How the Tabler classes translate:
   card-order controls) get the theme's ``cv-coreui-icon-btn`` (``crud_views_coreui.css``), which makes them square.
 - Tabler's light badges ``bg-<colour>-lt`` are CoreUI's ``bg-<colour>-subtle text-<colour>-emphasis``.
 - ``btn-list`` is ``d-flex flex-wrap gap-2``; ``nav-bordered`` is ``nav nav-underline-border``; ``table-vcenter`` is
-  ``align-middle``; ``badge-outline`` is ``border`` with a subtle border colour.
+  ``align-middle``; ``badge-outline`` is ``border`` with a subtle border colour, and ``text-body-secondary`` for the
+  text: on a transparent badge, CoreUI's ``text-<colour>-emphasis`` stays dark in dark mode.
 - Tabler's named colours: ``green``, ``red`` and ``yellow`` are CoreUI's ``success``, ``danger`` and ``warning``, and
   ``azure`` is ``info`` (CoreUI's info, #39f, is an azure). ``blue`` and ``pink`` have no theme colour: CoreUI 5 defines
   them as palette variables (``--cui-blue``, ``--cui-pink``) but ships no utility classes for them, a CoreUI palette
@@ -98,7 +99,7 @@ COREUI_BUTTON_CLASSES: dict[str, str] = {
     # Green: Guardian policy"); see the module docstring for the colour substitutions and the two theme badge classes.
     "manage:badge-model": "badge bg-secondary-subtle text-secondary-emphasis",
     "manage:badge-resource": "badge bg-info-subtle text-info-emphasis",
-    "manage:badge-objects": "badge border border-secondary-subtle text-secondary-emphasis",
+    "manage:badge-objects": "badge border border-secondary-subtle text-body-secondary",
     "manage:badge-permission": "badge cv-coreui-badge-blue",
     "manage:badge-group": "badge cv-coreui-badge-pink",
     "manage:badge-policy-global": "badge bg-success-subtle text-success-emphasis",
