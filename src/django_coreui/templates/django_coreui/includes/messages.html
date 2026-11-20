@@ -1,9 +1,11 @@
-{% load i18n coreui %}
+{% load i18n coreui %}{% comment %}
+Django messages as CoreUI alerts, in Bootstrap's stock alert markup (icon, text, close button). The CoreUI theme package
+renders its alerts with the same markup, so a plain page and a theme page show the same alert; only the dismiss hook
+differs (CoreUI's data API here). The theme's tests compare the two.
+{% endcomment %}
 {% for message in messages %}{% with alert=message|message_alert %}
-<div class="{{ alert.css }} alert-dismissible fade show d-flex align-items-center{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}" role="alert">
-  {% icon alert.icon "flex-shrink-0 me-2" %}
-  <div>{{ message.message|default:"" }}
-</div>
+<div class="{{ alert.css }} alert-dismissible fade show{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}" role="alert">
+  {% icon alert.icon "me-2" %}{{ message.message|default:"" }}
   <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="{% translate 'Close' %}"></button>
 </div>
 {% endwith %}{% endfor %}

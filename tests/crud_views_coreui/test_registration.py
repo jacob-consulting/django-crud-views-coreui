@@ -207,7 +207,9 @@ class AssetTests(SimpleTestCase):
     def test_assets_registered(self):
         bundles = {bundle.key: bundle for bundle in get_registered()}
         bundle = bundles["crud_views_coreui"]
-        self.assertEqual([a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js"])
+        self.assertEqual(
+            [a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js", "crud_views_coreui/coreui-tabs.js"]
+        )
         self.assertEqual([a.path for a in bundle.css], ["crud_views_coreui/crud_views_coreui.css"])
         self.assertTrue(bundle.emit)
         for asset in (*bundle.js, *bundle.css):

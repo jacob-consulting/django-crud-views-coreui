@@ -15,7 +15,7 @@ register = template.Library()
 MESSAGE_ALERTS = {
     constants.DEBUG: {"css": "alert alert-secondary", "icon": "cil-bug"},
     constants.INFO: {"css": "alert alert-info", "icon": "cil-info"},
-    constants.SUCCESS: {"css": "alert alert-success", "icon": "cil-check-circle"},
+    constants.SUCCESS: {"css": "alert alert-success", "icon": "cil-check"},
     constants.WARNING: {"css": "alert alert-warning", "icon": "cil-warning"},
     constants.ERROR: {"css": "alert alert-danger", "icon": "cil-x-circle"},
 }

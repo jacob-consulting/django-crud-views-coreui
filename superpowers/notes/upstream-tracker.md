@@ -24,7 +24,7 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
-- Status: anticipated · Severity: annoyance
+- Status: confirmed · Severity: annoyance
 - Where:
   - `crud_views/templates/crud_views/tags/actions_menu_toggle.html:4-5`: `data-bs-toggle="dropdown"`,
     `data-bs-popper-config` (the `⋯` menu on every list row and toolbar)
@@ -38,26 +38,44 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Possible fix: one setting or template variable for the data-attribute prefix (e.g. `CRUD_VIEWS_DATA_PREFIX`,
   default `bs`, exposed to templates as `cv_data_prefix`), so the templates write `data-{{ cv_data_prefix }}-toggle`.
   Alternative: let these components initialise through `cv.adapters` (see U3) and drop the data API dependency.
+- Theme workaround (2026-11-20): four overrides under `src/crud_views_coreui/templates/`, each the upstream file at
+  `fa2f0a7b` with only `data-bs-` replaced by `data-coreui-` and a first-line comment naming the upstream path and
+  commit: `crud_views/tags/actions_menu_toggle.html`, `crud_views/snippets/language_selector.html`,
+  `crud_views_object_detail/layouts/tabs-vertical/object_detail.html`,
+  `crud_views_object_detail/layouts/accordion/group.html`. The drift guard is
+  `tests/crud_views_coreui/test_theme.py::DataCoreuiTests::test_data_bs_overrides_track_upstream`: each override must
+  equal header + the installed upstream file with the rename, so any upstream edit (or upstream dropping
+  `data-bs-`) fails the suite. `test_no_data_bs_on_any_testapp_page` renders every test app URL (both object-detail
+  packs included), full page and modal partial, and finds no `data-bs-`.
 
 ## U2. Hard-coded `data-bs-toggle` selector in JavaScript
 
-- Status: anticipated · Severity: annoyance
+- Status: confirmed · Severity: annoyance
 - Where: `crud_views_object_detail/static/crud_views_object_detail/js/tabs.js:12`:
   `'[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]'`
 - Effect: if the theme renames the attributes (U1), tabs.js no longer finds the triggers; if it keeps them, CoreUI's
   data API ignores them. Either way the theme must replace the script or add its own init.
 - Possible fix: read the prefix from `cv_config` (the same value as U1), or mark triggers with a crud_views-owned
   attribute (`data-cv-tab`) the way tooltips use `data-cv-tooltip`.
+- Theme workaround (2026-11-20): `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js`, registered in
+  `CrudViewsCoreuiConfig.ready()` after `coreui-adapters.js`, is upstream's init with the selector
+  `[data-coreui-toggle="tab"|"pill"|"list"]`: owned tablists (`data-cv-od-tabs`) only, `cv.adapters.tab.init` on load
+  and on `cv:modal:loaded`, `dispose` on `cv:modal:unload`. Upstream's `tabs.js` stays loaded and finds nothing.
+  `test_upstream_tabs_script_still_selects_data_bs` fails once upstream's selector changes, the signal to drop the
+  theme script.
 
 ## U3. No `dropdown` adapter
 
-- Status: anticipated · Severity: annoyance
+- Status: confirmed · Severity: annoyance
 - Where: `crud_views/static/crud_views/js/adapters.js:67-127`: `cv.bootstrapAdapters(ns)` builds `modal`,
   `tooltip`, `tab`, `collapse`, `alert`, but no `dropdown`; dropdowns rely on Bootstrap's data API alone.
 - Effect: a theme whose library is not `window.bootstrap` cannot initialise crud_views' dropdowns through the adapter
   layer, which otherwise works well for CoreUI (`cv.bootstrapAdapters(() => window.coreui)`).
 - Possible fix: add `dropdown.init(el)` and initialise `actions_menu_toggle` triggers through it, like
   `data-cv-tooltip`.
+- Theme workaround (2026-11-20): none in JavaScript; the two dropdown templates (`tags/actions_menu_toggle.html`,
+  incl. its `data-bs-popper-config`, and `snippets/language_selector.html`) are among the U1 overrides, so CoreUI's
+  data API picks them up. With a dropdown adapter and a crud_views-owned trigger attribute both overrides could go.
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
@@ -128,3 +146,38 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - 2026-11-20: `src/crud_views_coreui/apps.py` exists and its `ready()` is the Tabler one with names replaced (icon
   library, icons, label-mode defaults, button classes filtered on `crud_views_workflow`, one asset bundle); `checks.py`
   (W001) is likewise a rename of `check_tabler_icons`. Status left anticipated: it is boilerplate, not a workaround.
+- 2026-11-20, after Task 7: compared again with `../tabler-test/src/crud_views_tabler/apps.py` (names normalised):
+  the only differences are docstring wording, import order, comments and one more JS file in the asset bundle
+  (`coreui-tabs.js`, U2). Two themes, the same five registrations and the same workflow filter. Verdict: the
+  duplication is real but costs a dozen lines per theme and hides nothing; status stays **anticipated**, cosmetic.
+  Worth filing only together with a theme-facing change (e.g. U1's prefix setting), as a `register_theme()` helper
+  that takes classes, icons, label-mode defaults and assets and does the `crud_views_workflow` filtering itself.
+
+## U9. The breadcrumb has no class key
+
+- Status: confirmed · Severity: cosmetic
+- Where: `crud_views/templates/crud_views/tags/breadcrumb.html`: `<ol class="breadcrumb">` is fixed; there is no
+  `breadcrumb:*` key in `crud_views/lib/button_classes.py`.
+- Effect under CoreUI: the theme puts the breadcrumb where CoreUI's layout has it, the header's second row
+  (`django_coreui/layouts/app.html`, block `breadcrumb`; on bar pages too, see `crud_views_coreui/page.html`). There
+  the free admin template writes `ol.breadcrumb.my-0`; `.breadcrumb` otherwise keeps a 1rem bottom margin, which
+  pushes the row's content up. A `breadcrumb:list` key would let the theme set `breadcrumb my-0` instead.
+- Theme workaround: `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb { --cui-breadcrumb-margin-bottom: 0; }`
+  (CoreUI's own variable, scoped to the header row). Pinned by
+  `test_theme.py::ThemeRenderingTests::test_header_breadcrumb_has_no_bottom_margin`.
+- Possible fix: `breadcrumb:nav`, `breadcrumb:list`, `breadcrumb:item` keys (defaults `""`, `breadcrumb`,
+  `breadcrumb-item`), as the navbar got with #384.
+
+## Theme layout overrides (not upstream gaps)
+
+For the record, so they are not mistaken for missing hooks. Started from the Tabler theme's seven layout overrides;
+kept only where stock Bootstrap 5 markup is wrong under CoreUI's layout, which sets the page on `--cui-tertiary-bg`
+and its content on cards:
+
+- `crud_views/snippets/form_frame.html`: the form in a card outside a modal. Extends upstream's frame of the same name.
+- `crud_views/table/bootstrap5.html`: the table on a card, in `.table-responsive`, pagination in the card footer.
+  Extends upstream's table of the same name and overrides three blocks with `{{ block.super }}`, so header, rows,
+  sorting and pagination stay upstream's; two CSS rules drop the inner bottom margins.
+- Dropped (stock is correct CoreUI markup): `modal/shell.html`, `tags/alert.html`, `tags/card.html`,
+  `tags/list_filter.html`, `tags/list_filter.inner.html`, `view_card.content.html`. `card:root` is `card mb-4`
+  (upstream's spacing), since the stock card grid has no vertical gutter.

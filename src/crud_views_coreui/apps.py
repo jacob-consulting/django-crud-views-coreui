@@ -32,10 +32,11 @@ class CrudViewsCoreuiConfig(AppConfig):
                 if not key.startswith("workflow:") or self.apps.is_installed("crud_views_workflow")
             }
         )
-        # coreui-adapters.js points cv.adapters at window.coreui (tracker U4); the CSS feeds upstream's --bs-*
-        # custom properties from CoreUI's --cui-* (tracker U5).
+        # coreui-adapters.js points cv.adapters at window.coreui (tracker U4); coreui-tabs.js, after it, initialises
+        # the object-detail tabs, whose upstream init selects data-bs-toggle (tracker U2); the CSS feeds upstream's
+        # --bs-* custom properties from CoreUI's --cui-* (tracker U5).
         register_assets(
             "crud_views_coreui",
-            js=["crud_views_coreui/coreui-adapters.js"],
+            js=["crud_views_coreui/coreui-adapters.js", "crud_views_coreui/coreui-tabs.js"],
             css=["crud_views_coreui/crud_views_coreui.css"],
         )

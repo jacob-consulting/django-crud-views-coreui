@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "crud_views_coreui",
     "crud_views.apps.CrudViewsConfig",
     "crud_views_workflow",
+    "crud_views_object_detail",
     "tests.crud_views_coreui.testapp",
 ]
 

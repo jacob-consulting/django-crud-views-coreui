@@ -20,6 +20,7 @@ from crud_views.lib.views import (
 )
 from crud_views.lib.views.list import ListViewFilterFormHelper
 from crud_views.lib.viewset import ViewSet
+from crud_views_object_detail.lib import ObjectDetailViewPermissionRequired
 
 from .models import Customer
 
@@ -135,3 +136,28 @@ class CustomerDeleteView(BreadcrumbMixin, CrispyViewMixin, MessageMixin, DeleteV
     cv_cancel_keys = ["list", "card", "detail"]
     cv_success_keys = ["list", "card"]  # never "detail": the object is gone
     cv_message_template_code = "Deleted »{{ object }}«"
+
+
+# Two object-detail layout packs whose stock templates hard-code data-bs-* (upstream tracker U1); the theme's copies
+# render them with data-coreui-*. Plain fields only, so the pages need no fixtures.
+CUSTOMER_PROPERTIES = [
+    {"title": "Contact", "properties": ["name", "company", "email", "country"]},
+    {"title": "Sales", "properties": ["status", "revenue", "notes"]},
+]
+
+
+class CustomerPropertiesView(BreadcrumbMixin, ObjectDetailViewPermissionRequired):
+    cv_viewset = cv_customer
+    cv_key = "properties"
+    cv_path = "properties"
+    cv_property_display = CUSTOMER_PROPERTIES
+    cv_object_detail_layout = "tabs-vertical"
+
+
+class CustomerAccordionView(BreadcrumbMixin, ObjectDetailViewPermissionRequired):
+    cv_viewset = cv_customer
+    cv_key = "accordion"
+    cv_path = "accordion"
+    cv_property_display = CUSTOMER_PROPERTIES
+    cv_object_detail_layout = "accordion"
+    cv_object_detail_id = "customer-accordion"

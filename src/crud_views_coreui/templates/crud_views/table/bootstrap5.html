@@ -1,0 +1,9 @@
+{% extends "crud_views/table/bootstrap5.html" %}
+{% comment %}
+CoreUI theme: the table sits on a card, as content does in CoreUI's layout (the page is --cui-tertiary-bg), scrolls
+inside it on narrow screens, and the pagination goes into the card footer. Extends upstream's table of the same name
+(Django skips this file when it resolves the parent): header, rows, sorting and pagination stay upstream's.
+{% endcomment %}
+{% block table-wrapper %}<div class="card cv-coreui-table">{{ block.super }}</div>{% endblock table-wrapper %}
+{% block table %}<div class="table-responsive">{{ block.super }}</div>{% endblock table %}
+{% block pagination %}{% with pagination=block.super %}{% if pagination.strip %}<div class="card-footer">{{ pagination }}</div>{% endif %}{% endwith %}{% endblock pagination %}

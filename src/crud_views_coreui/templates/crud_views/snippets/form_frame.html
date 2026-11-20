@@ -1,0 +1,7 @@
+{% extends "crud_views/snippets/form_frame.html" %}
+{% comment %}
+CoreUI theme: CoreUI's layout sets the page on --cui-tertiary-bg and its content on cards, so create, update, delete and
+custom-form pages put the form in a card; a modal stays bare. Extends upstream's frame of the same name (Django skips
+this file when it resolves the parent), so only the card is the theme's.
+{% endcomment %}
+{% block cv_form_frame %}{% if request.headers.x_cv_modal != "true" %}<div class="card"><div class="card-body">{{ block.super }}</div></div>{% else %}{{ block.super }}{% endif %}{% endblock %}

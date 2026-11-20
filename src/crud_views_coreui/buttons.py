@@ -71,7 +71,9 @@ COREUI_BUTTON_CLASSES: dict[str, str] = {
     "context:menu-toggle": "btn btn-outline-secondary cv-coreui-icon-btn",
     "list:menu-toggle": "btn btn-sm btn-ghost-secondary cv-coreui-icon-btn",
     "card:menu-toggle": "btn btn-sm btn-outline-secondary cv-coreui-icon-btn",
-    "card:root": "card",
+    # The stock card grid (view_card.content.html) is a .row without a vertical gutter: the card keeps upstream's bottom
+    # margin, at CoreUI's mb-4 spacing.
+    "card:root": "card mb-4",
     "context:menu-wrapper": "dropdown",
     "list:menu-wrapper": "dropdown",
     "form:delete": "btn btn-danger",
