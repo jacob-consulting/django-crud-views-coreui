@@ -220,10 +220,14 @@ class AssetTests(SimpleTestCase):
         theme = (STATIC / "crud_views_coreui.css").read_text()
         names = set(re.findall(r"--bs-[a-z-]+", upstream))
         self.assertGreaterEqual(len(names), 8)  # 13 references to 8 properties at crud_views fa2f0a7b
+        # Browser pass: CoreUI's --cui-secondary-text-emphasis stays dark (#212233) in dark mode, unlike Bootstrap's, so
+        # the theme feeds that one from --cui-body-color (dark-on-dark manage headers and help buttons otherwise).
+        sources = {"--bs-secondary-text-emphasis": "--cui-body-color"}
         for name in sorted(names):
             if re.search(rf"var\({name}\b", upstream):
                 # upstream reads it: the theme defines it from CoreUI's --cui-* counterpart
-                self.assertRegex(theme, rf"{name}:\s*var\(--cui-{name[5:]}\)", name)
+                source = sources.get(name, f"--cui-{name[5:]}")
+                self.assertRegex(theme, rf"{name}:\s*var\({source}\)", name)
             else:
                 # upstream only sets it (a Bootstrap component variable): the theme hands it to CoreUI's
                 self.assertRegex(theme, rf"--cui-{name[5:]}:\s*var\({name}\)", name)

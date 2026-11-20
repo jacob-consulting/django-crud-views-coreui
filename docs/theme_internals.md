@@ -194,7 +194,8 @@ django-crud-views' `manage.css` and `formset.css` read Bootstrap's `--bs-*` cust
 define, so the manage page and formsets would use hard fallbacks and ignore dark mode. `crud_views_coreui.css` defines
 the six properties upstream reads (`--bs-secondary-color`, `--bs-secondary-text-emphasis`, `--bs-body-bg`,
 `--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`) from the matching `--cui-*` ones, on the elements those
-rules style (so a `[data-coreui-theme]` subtree is followed). Two properties upstream *sets* for Bootstrap components
+rules style (so a `[data-coreui-theme]` subtree is followed). The exception is `--bs-secondary-text-emphasis`, set from
+`--cui-body-color`: CoreUI's `--cui-secondary-text-emphasis` stays dark in dark mode. Two properties upstream *sets* for Bootstrap components
 (`--bs-btn-color` on the manage help button, `--bs-gutter-x` on compact formset rows) are handed to CoreUI's names
 (`--cui-btn-color`, `--cui-gutter-x`). A test parses upstream's CSS and fails on any new `--bs-*` reference.
 

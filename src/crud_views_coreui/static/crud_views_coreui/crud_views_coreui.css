@@ -2,13 +2,16 @@
 
 /* Upstream tracker U5: crud_views' manage.css and formset.css read Bootstrap's --bs-* custom properties, which CoreUI
    names --cui-*, so under CoreUI their light-mode fallbacks applied and the manage page and formset rows ignored dark
-   mode. Feed them CoreUI's values on the elements those rules style, so a [data-coreui-theme] subtree is followed. */
+   mode. Feed them CoreUI's values on the elements those rules style, so a [data-coreui-theme] subtree is followed.
+   --bs-secondary-text-emphasis is not fed from --cui-secondary-text-emphasis: CoreUI keeps that one dark (#212233) in
+   dark mode, where Bootstrap's turns light, so the manage page's table headers and help buttons were dark on dark.
+   --cui-body-color equals it in light mode and follows dark mode. */
 [data-cv-manage],
 .cv-formset-row-card,
 .cv-formset-row-compact,
 .cv-formset-compact-child {
   --bs-secondary-color: var(--cui-secondary-color);
-  --bs-secondary-text-emphasis: var(--cui-secondary-text-emphasis);
+  --bs-secondary-text-emphasis: var(--cui-body-color);
   --bs-body-bg: var(--cui-body-bg);
   --bs-border-color: var(--cui-border-color);
   --bs-border-radius: var(--cui-border-radius);
