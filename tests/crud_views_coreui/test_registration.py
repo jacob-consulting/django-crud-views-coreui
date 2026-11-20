@@ -235,3 +235,52 @@ class AssetTests(SimpleTestCase):
         self.assertIn("data-coreui-placement", script)
         self.assertNotIn("data-bs-", script)
         self.assertNotIn("cv.adapters.tooltip = ", script)  # wrap init, never replace the tooltip object
+
+
+def _app_order_messages(*names):
+    """The E002 check's messages with these app names as the installed apps, in this order."""
+    from types import SimpleNamespace
+    from unittest import mock
+
+    from crud_views_coreui.checks import check_app_order
+
+    configs = [SimpleNamespace(name=name) for name in names]
+    with mock.patch("crud_views_coreui.checks.apps.get_app_configs", return_value=configs):
+        return [m for m in check_app_order() if m.id == "crud_views_coreui.E002"]
+
+
+class AppOrderCheckTests(TestCase):
+    """E002: the theme's template overrides only win when it comes before crud_views and crud_views_object_detail."""
+
+    def test_theme_first_passes(self):
+        self.assertEqual(
+            _app_order_messages("django_coreui", "crud_views_coreui", "crud_views", "crud_views_object_detail"), []
+        )
+
+    def test_theme_after_crud_views_is_an_error(self):
+        messages = _app_order_messages("crud_views", "crud_views_coreui", "crud_views_object_detail")
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0].level, 40)  # Error
+        self.assertIn("'crud_views'", messages[0].msg)
+        self.assertIn("before crud_views and crud_views_object_detail", messages[0].hint)
+
+    def test_theme_after_object_detail_is_an_error(self):
+        messages = _app_order_messages("crud_views_object_detail", "crud_views_coreui", "crud_views")
+        self.assertEqual(len(messages), 1)
+        self.assertIn("'crud_views_object_detail'", messages[0].msg)
+
+    def test_theme_after_both_names_both(self):
+        messages = _app_order_messages("crud_views", "crud_views_object_detail", "crud_views_coreui")
+        self.assertEqual(len(messages), 1)
+        self.assertIn("'crud_views', 'crud_views_object_detail'", messages[0].msg)
+
+    def test_object_detail_not_installed_passes(self):
+        self.assertEqual(_app_order_messages("crud_views_coreui", "crud_views"), [])
+
+    def test_the_check_is_registered_and_the_test_settings_pass(self):
+        from django.core.checks import registry
+
+        from crud_views_coreui.checks import check_app_order
+
+        self.assertIn(check_app_order, registry.registry.get_checks())
+        self.assertEqual([m for m in run_checks() if m.id == "crud_views_coreui.E002"], [])

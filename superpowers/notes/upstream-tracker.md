@@ -199,6 +199,22 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Possible fix: add `aria-sort` to the stock header (and take the sort state from `column.is_ordered` instead of
   `request.GET.sort`, which ignores a table `prefix`); then the theme's `table.thead` block goes.
 
+## U11. Template overrides make the theme's place in `INSTALLED_APPS` load-bearing
+
+- Status: confirmed · Severity: annoyance
+- Where: consequence of U1/U2. The `data-bs` renames are template overrides of `crud_views` and
+  `crud_views_object_detail` templates, and Django's app-directories loader takes the first app that has a template.
+- Effect: a project that lists `crud_views_object_detail` (or `crud_views`) before `crud_views_coreui` silently gets
+  upstream's templates: `data-bs-toggle="pill"` tabs and `data-bs-toggle="collapse"` accordions that CoreUI ignores.
+  Nothing fails, the tabs just do not switch. The example had exactly this order (copied from the Tabler demo, whose
+  theme did not override object-detail templates); the Task 9 page sweep found it.
+- Theme workaround (2026-11-20): system check `crud_views_coreui.E002` (`crud_views_coreui/checks.py`,
+  `check_app_order`): an Error when `crud_views_coreui` comes after `crud_views` or after `crud_views_object_detail`
+  (when installed), with a hint naming the order. Tests:
+  `tests/crud_views_coreui/test_registration.py::AppOrderCheckTests`.
+- Possible fix: with U1's data-attribute prefix (or adapter-driven init), the theme would not need the overrides, and
+  the order would stop mattering for them.
+
 ## Theme layout overrides (not upstream gaps)
 
 For the record, so they are not mistaken for missing hooks. Started from the Tabler theme's seven layout overrides;
