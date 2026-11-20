@@ -108,7 +108,11 @@ class PackageTests(SimpleTestCase):
 
     def test_page_header_actions_wrap_below_the_title_on_phones(self):
         layout = (TEMPLATES / "django_coreui" / "layouts" / "app.html").read_text()
-        self.assertRegex(layout, r'<div class="col-12 col-md">\s*\{% block page_heading %\}')
+        self.assertRegex(
+            layout,
+            r'<div class="col-12 col-md">\s*<div class="page-pretitle[^"]*">'
+            r"\{% block pretitle %\}\{% endblock %\}</div>\s*\{% block page_heading %\}",
+        )
         self.assertIn('<div class="col-auto ms-auto d-print-none">', layout)
 
     def test_nav_menu_is_included_once_inside_the_sidebar_nav(self):
@@ -260,8 +264,12 @@ def render_login() -> str:
     return render_to_string("registration/login.html", {"form": AuthenticationForm(), "next": "/"})
 
 
+# Every block of django_tabler's layouts/app.html and base.html.
 BLOCKS = [
     "title",
+    "body",
+    "pretitle",
+    "page_title",
     "extra_head",
     "page_header_before",
     "page_header_top",
@@ -300,13 +308,51 @@ class LayoutTests(SimpleTestCase):
                 self.assertNotIn("django_coreui.E001", [message.id for message in run_checks()])
 
     def test_layout_has_the_tabler_block_contract(self):
+        # One block at a time: body, page_heading and page_title enclose others.
+        for name in BLOCKS:
+            with self.subTest(block=name):
+                block = f"{{% block {name} %}}<i>probe-{name}</i>{{% endblock %}}"
+                html = render_page('{% extends "django_coreui/layouts/app.html" %}' + block)
+                self.assertEqual(html.count(f"probe-{name}"), 1)
+
+    def test_every_other_block_fills_at_once(self):
+        nested = {"body", "page_title"}  # body replaces the layout; page_heading replaces page_title
         child = '{% extends "django_coreui/layouts/app.html" %}' + "".join(
-            f"{{% block {name} %}}<i>probe-{name}</i>{{% endblock %}}" for name in BLOCKS
+            f"{{% block {name} %}}<i>probe-{name}</i>{{% endblock %}}" for name in BLOCKS if name not in nested
         )
         html = render_page(child)
         for name in BLOCKS:
-            with self.subTest(block=name):
-                self.assertEqual(html.count(f"probe-{name}"), 1)
+            if name not in nested:
+                with self.subTest(block=name):
+                    self.assertEqual(html.count(f"probe-{name}"), 1)
+
+    def test_pretitle_sits_above_the_heading_and_is_empty_safe(self):
+        html = render_page(
+            '{% extends "django_coreui/layouts/app.html" %}{% block pretitle %}Overview{% endblock %}'
+            "{% block page_title %}Orders{% endblock %}"
+        )
+        self.assertRegex(html, r'<div class="page-pretitle[^"]*">Overview</div>\s*<h1[^>]*>Orders</h1>')
+        self.assertIn('<div class="page-pretitle small text-body-secondary"></div>', render_page())
+
+    def test_no_inline_event_handlers(self):
+        for name, html in (("app.html", render_page()), ("login.html", render_login())):
+            with self.subTest(name=name):
+                self.assertIsNone(re.search(r"\son[a-z]+\s*=", html), name)
+        for path in TEMPLATES.rglob("*.html"):
+            with self.subTest(path=path):
+                self.assertIsNone(re.search(r"\son[a-z]+\s*=", path.read_text()))
+
+    def test_header_toggler_is_wired_by_layout_switch(self):
+        self.assertIn('class="header-toggler" type="button" data-sidebar-toggle="#sidebar"', render_page())
+        js = LAYOUT_SWITCH_JS.read_text()
+        self.assertIn('event.target.closest("[data-sidebar-toggle]")', js)
+        self.assertIn("coreui.Sidebar.getOrCreateInstance(", js)
+
+    def test_footer_version_comes_from_assets(self):
+        from django_coreui.assets import COREUI_VERSION
+
+        self.assertIn(f"CoreUI</a> {COREUI_VERSION}", render_page())
+        self.assertNotIn("5.9.1", (TEMPLATES / "django_coreui" / "layouts" / "app.html").read_text())
 
     def test_page_heading_wraps_page_title(self):
         html = render_page('{% extends "django_coreui/layouts/app.html" %}{% block page_title %}Probe{% endblock %}')
@@ -317,7 +363,6 @@ class LayoutTests(SimpleTestCase):
         self.assertIn('class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar"', html)
         self.assertIn('<ul class="sidebar-nav" data-coreui="navigation">', html)
         self.assertIn('class="wrapper d-flex flex-column min-vh-100"', html)
-        self.assertIn("coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()", html)
         self.assertIn('data-coreui-toggle="unfoldable"', html)
         self.assertIn('class="footer', html)
         self.assertIn(">AJ<", html)  # the user menu's avatar

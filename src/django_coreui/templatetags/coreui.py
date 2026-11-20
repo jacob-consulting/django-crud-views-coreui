@@ -79,6 +79,12 @@ def coreui_assets():
     }
 
 
+@register.simple_tag
+def coreui_version():
+    """The CoreUI version the shell loads (``django_coreui.assets.COREUI_VERSION``), e.g. for the footer."""
+    return assets.COREUI_VERSION
+
+
 # The layout settings a project may preset, with CoreUI's defaults, and the values layout-switch.js accepts.
 COREUI_LAYOUT_DEFAULTS = {"theme": "auto", "sidebar": "default"}
 COREUI_LAYOUT_VALUES = {

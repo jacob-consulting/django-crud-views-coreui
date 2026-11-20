@@ -1,4 +1,5 @@
 {% extends "django_coreui/base.html" %}
+{% load coreui %}
 {# CoreUI's admin layout (free admin template): sidebar, then the wrapper with header, body and footer. #}
 {# The blocks keep django_tabler's names and contract, so a page template maps onto either shell the same way. #}
 {% block body %}
@@ -19,6 +20,7 @@
         <div class="row g-2 align-items-center">
           {# Below md the title takes the whole row and the actions wrap below it, instead of squeezing the title. #}
           <div class="col-12 col-md">
+            <div class="page-pretitle small text-body-secondary">{% block pretitle %}{% endblock %}</div>
             {% block page_heading %}<h1 class="page-title h3 mb-0">{% block page_title %}{% endblock %}</h1>{% endblock %}
             {% block subtitle %}{% endblock %}
           </div>
@@ -35,7 +37,7 @@
   </div>
   <footer class="footer px-4 d-print-none">
     <div>Copyright © {% now "Y" %} {% include "django_coreui/includes/site_name.html" %}</div>
-    <div class="ms-auto">Powered by <a href="https://coreui.io/bootstrap/docs/" target="_blank" rel="noopener">CoreUI</a> 5.9.1</div>
+    <div class="ms-auto">Powered by <a href="https://coreui.io/bootstrap/docs/" target="_blank" rel="noopener">CoreUI</a> {% coreui_version %}</div>
   </footer>
 </div>
 {% endblock %}

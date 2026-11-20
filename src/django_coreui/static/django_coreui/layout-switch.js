@@ -117,6 +117,14 @@
   });
 
   document.addEventListener("click", (event) => {
+    // The header's sidebar toggler (data-sidebar-toggle="#sidebar"): shows or hides the sidebar. A delegated handler
+    // instead of the free template's inline onclick, so the shell needs no 'unsafe-inline' in a CSP.
+    const sidebarToggle = event.target.closest("[data-sidebar-toggle]");
+    if (sidebarToggle) {
+      const target = document.querySelector(sidebarToggle.dataset.sidebarToggle);
+      if (target && window.coreui) coreui.Sidebar.getOrCreateInstance(target).toggle();
+      return;
+    }
     const button = event.target.closest("[data-layout-settings]");
     if (button) {
       for (const [key, value] of Object.entries(settingsOf(button))) choose(key, value);

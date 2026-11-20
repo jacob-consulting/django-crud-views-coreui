@@ -1,7 +1,8 @@
 {% load coreui %}
 {# The header's top row (sidebar toggle, layout switch, user menu); layouts/app.html adds the breadcrumb row. #}
+{# data-sidebar-toggle: layout-switch.js toggles that sidebar (no inline handler, for CSP). #}
 <div class="container-fluid border-bottom px-4">
-  <button class="header-toggler" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()" style="margin-inline-start: -14px" aria-label="Toggle sidebar">
+  <button class="header-toggler" type="button" data-sidebar-toggle="#sidebar" style="margin-inline-start: -14px" aria-label="Toggle sidebar">
     {% icon "cil-menu" "icon-lg" %}
   </button>
   <ul class="header-nav ms-auto">
