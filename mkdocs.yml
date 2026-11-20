@@ -8,6 +8,14 @@ edit_uri: blob/main/docs/
 
 nav:
     - Home: index.md
+    - Installation: installation.md
+    - Branding: branding.md
+    - Layouts: layouts.md
+    - Icons: icons.md
+    - Crispy template pack: crispy_coreui.md
+    - Theme internals: theme_internals.md
+    - Demo: demo.md
+    - Development: development.md
 
 markdown_extensions:
     - admonition
