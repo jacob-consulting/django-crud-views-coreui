@@ -244,6 +244,22 @@ class AssetTests(SimpleTestCase):
                 # upstream only sets it (a Bootstrap component variable): the theme hands it to CoreUI's
                 self.assertRegex(theme, rf"--cui-{name[5:]}:\s*var\({name}\)", name)
 
+    def test_css_maps_every_bs_variable_the_typeahead_reads(self):
+        # Tracker U12: django-crud-views-extensions' typeahead skins read --bs-* too (browser pass: a transparent select
+        # popup). The extensions are optional (the examples extra), so the test needs them installed.
+        try:
+            import crud_views_widget_typeahead
+        except ImportError:
+            self.skipTest("django-crud-views-extensions is not installed")
+        static = Path(crud_views_widget_typeahead.__file__).parent / "static" / "crud_views_widget_typeahead"
+        upstream = "\n".join(path.read_text() for path in sorted(static.glob("*.css")))
+        theme = (STATIC / "crud_views_coreui.css").read_text()
+        block = re.search(r"\.cv-typeahead,\s*\.cv-typeahead-select \{(.*?)\}", theme, re.S).group(1)
+        names = set(re.findall(r"var\((--bs-[a-z-]+)", upstream))
+        self.assertGreaterEqual(len(names), 5)
+        for name in sorted(names):
+            self.assertRegex(block, rf"{name}:\s*var\(--cui-{name[5:]}\)", name)
+
     def test_adapter_script_uses_coreui_namespace_and_wraps_tooltip_init(self):
         script = (STATIC / "coreui-adapters.js").read_text()
         self.assertIn("cv.bootstrapAdapters(() => globalThis.coreui)", script)

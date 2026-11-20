@@ -18,6 +18,18 @@
   --bs-tertiary-bg: var(--cui-tertiary-bg);
 }
 
+/* Upstream tracker U12: the same gap in django-crud-views-extensions. The typeahead's skins (typeahead.css,
+   typeahead-select.css) read --bs-* properties, so under CoreUI the select popup had no background (transparent over the
+   form, in both colour modes) and the match highlight kept a light fallback under light dark-mode text. */
+.cv-typeahead,
+.cv-typeahead-select {
+  --bs-secondary-color: var(--cui-secondary-color);
+  --bs-body-bg: var(--cui-body-bg);
+  --bs-border-color-translucent: var(--cui-border-color-translucent);
+  --bs-border-radius: var(--cui-border-radius);
+  --bs-highlight-bg: var(--cui-highlight-bg);
+}
+
 /* U5, the other direction: two upstream rules set a Bootstrap component variable that CoreUI's component reads under
    its --cui-* name. Hand the value on. The help button's contrast fix (stock outline-secondary is below 4.5:1 on a
    tinted card header; manage:help is btn-outline-secondary): */

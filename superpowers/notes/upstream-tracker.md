@@ -215,6 +215,22 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Possible fix: with U1's data-attribute prefix (or adapter-driven init), the theme would not need the overrides, and
   the order would stop mattering for them.
 
+## U12. django-crud-views-extensions' typeahead skins read `--bs-*` custom properties
+
+- Status: confirmed · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
+- Where (`../django-crud-views-extensions` @ `667f27a9`):
+  `src/crud_views_widget_typeahead/static/crud_views_widget_typeahead/typeahead-select.css` (`--bs-body-bg`,
+  `--bs-border-color-translucent`, `--bs-border-radius` on the select popup, `--bs-secondary-color`,
+  `--bs-highlight-bg`) and `typeahead.css` (`--bs-highlight-bg`, `--bs-secondary-color`).
+- Effect under CoreUI (found in the browser pass, 2026-11-20): the variables are undefined, so the select popup had no
+  background and the options lay transparent over the form below it (both colour modes); in dark mode the match
+  highlight kept its light `#fff3cd` fallback under light text.
+- Theme workaround: `crud_views_coreui.css`, one block on `.cv-typeahead, .cv-typeahead-select` defining the five
+  properties from `--cui-*` (as U5 does for crud_views). Pinned by
+  `tests/crud_views_coreui/test_registration.py::AssetTests::test_css_maps_every_bs_variable_the_typeahead_reads`,
+  which parses the installed skins (skipped without the extensions).
+- Possible fix: the same as U5, own `--cv-*` tokens with Bootstrap fallbacks, set once by a theme.
+
 ## Theme layout overrides (not upstream gaps)
 
 For the record, so they are not mistaken for missing hooks. Started from the Tabler theme's seven layout overrides;

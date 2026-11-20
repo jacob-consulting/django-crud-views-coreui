@@ -197,7 +197,9 @@ the six properties upstream reads (`--bs-secondary-color`, `--bs-secondary-text-
 rules style (so a `[data-coreui-theme]` subtree is followed). The exception is `--bs-secondary-text-emphasis`, set from
 `--cui-body-color`: CoreUI's `--cui-secondary-text-emphasis` stays dark in dark mode. Two properties upstream *sets* for Bootstrap components
 (`--bs-btn-color` on the manage help button, `--bs-gutter-x` on compact formset rows) are handed to CoreUI's names
-(`--cui-btn-color`, `--cui-gutter-x`). A test parses upstream's CSS and fails on any new `--bs-*` reference.
+(`--cui-btn-color`, `--cui-gutter-x`). A test parses upstream's CSS and fails on any new `--bs-*` reference. The same
+block exists for django-crud-views-extensions' typeahead skins (`.cv-typeahead`, `.cv-typeahead-select`; tracker U12),
+whose select popup otherwise has no background.
 
 The other rules: the square `cv-coreui-icon-btn`, `cv-coreui-section-legend` (registered for the conditional and formset
 legends), the two subtle badge colours, `--cui-breadcrumb-margin-bottom: 0` for the header's breadcrumb row (U9, upstream
