@@ -55,8 +55,8 @@ def score_badge(score) -> str:
     """A cupping score as a coloured badge: 85 and up is specialty-plus, 80 to 85 specialty, below that plain."""
     if score is None:
         return "—"
-    color = "green" if score >= 85 else "lime" if score >= 80 else "orange"
-    return format_html('<span class="badge bg-{}-lt">{}</span>', color, score)
+    color = "success" if score >= 85 else "info" if score >= 80 else "warning"
+    return format_html('<span class="badge bg-{0}-subtle text-{0}-emphasis">{1}</span>', color, score)
 
 
 # --------------------------------------------------------------------------- green lots

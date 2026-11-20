@@ -3,94 +3,94 @@
 {% block cv_content %}
 <div class="card">
   <div class="card-body">
-    <div class="datagrid">
-      <div class="datagrid-item">
-        <div class="datagrid-title">SKU</div>
-        <div class="datagrid-content"><code>{{ object.sku }}</code></div>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">SKU</dt>
+        <dd class="mb-0"><code>{{ object.sku }}</code></dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">ShowcaseCategory</div>
-        <div class="datagrid-content">{{ object.category }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">ShowcaseCategory</dt>
+        <dd class="mb-0">{{ object.category }}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Price</div>
-        <div class="datagrid-content">€ {{ object.price|intcomma }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Price</dt>
+        <dd class="mb-0">€ {{ object.price|intcomma }}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Stock</div>
-        <div class="datagrid-content"><span class="badge bg-{{ object.stock_badge }}-lt">{{ object.stock }}</span></div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Stock</dt>
+        <dd class="mb-0"><span class="badge bg-{{ object.stock_badge }}-subtle text-{{ object.stock_badge }}-emphasis">{{ object.stock }}</span></dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Size / shipping</div>
-        <div class="datagrid-content">{{ object.get_size_display }} · {{ object.get_shipping_display }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Size / shipping</dt>
+        <dd class="mb-0">{{ object.get_size_display }} · {{ object.get_shipping_display }}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Rating</div>
-        <div class="datagrid-content">{{ object.rating }} / 5</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Rating</dt>
+        <dd class="mb-0">{{ object.rating }} / 5</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Tags</div>
-        <div class="datagrid-content">
-          {% for tag in object.tags.all %}<span class="badge bg-blue-lt">{{ tag }}</span> {% empty %}—{% endfor %}
-        </div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Tags</dt>
+        <dd class="mb-0">
+          {% for tag in object.tags.all %}<span class="badge bg-info-subtle text-info-emphasis">{{ tag }}</span> {% empty %}—{% endfor %}
+        </dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Channels</div>
-        <div class="datagrid-content">
-          {% for channel in object.channels.all %}<span class="badge bg-purple-lt">{{ channel }}</span> {% empty %}—{% endfor %}
-        </div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Channels</dt>
+        <dd class="mb-0">
+          {% for channel in object.channels.all %}<span class="badge bg-primary-subtle text-primary-emphasis">{{ channel }}</span> {% empty %}—{% endfor %}
+        </dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Accent</div>
-        <div class="datagrid-content">
-          <span class="color-swatch" style="background: {{ object.accent_color }}"></span> {{ object.accent_color }}
-        </div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Accent</dt>
+        <dd class="mb-0">
+          <span class="d-inline-block align-middle rounded border" style="width: 1rem; height: 1rem; background: {{ object.accent_color }}"></span> {{ object.accent_color }}
+        </dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Flags</div>
-        <div class="datagrid-content">
-          <span class="badge bg-{% if object.is_active %}green{% else %}secondary{% endif %}-lt">
-            {% if object.is_active %}Active{% else %}Inactive{% endif %}</span>
-          {% if object.is_featured %}<span class="badge bg-yellow-lt">Featured</span>{% endif %}
-        </div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Flags</dt>
+        <dd class="mb-0">
+          {% with colour=object.is_active|yesno:"success,secondary" %}<span class="badge bg-{{ colour }}-subtle text-{{ colour }}-emphasis">
+            {% if object.is_active %}Active{% else %}Inactive{% endif %}</span>{% endwith %}
+          {% if object.is_featured %}<span class="badge bg-warning-subtle text-warning-emphasis">Featured</span>{% endif %}
+        </dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Released</div>
-        <div class="datagrid-content">{{ object.released_on|default:"—" }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Released</dt>
+        <dd class="mb-0">{{ object.released_on|default:"—" }}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Published</div>
-        <div class="datagrid-content">{% if object.published_at %}<span title="{{ object.published_at }}">{{ object.published_at|naturaltime }}</span>{% else %}—{% endif %}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Published</dt>
+        <dd class="mb-0">{% if object.published_at %}<span title="{{ object.published_at }}">{{ object.published_at|naturaltime }}</span>{% else %}—{% endif %}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Restock at</div>
-        <div class="datagrid-content">{{ object.restock_at|default:"—" }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Restock at</dt>
+        <dd class="mb-0">{{ object.restock_at|default:"—" }}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Warranty</div>
-        <div class="datagrid-content">{{ object.warranty_months }} months</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Warranty</dt>
+        <dd class="mb-0">{{ object.warranty_months }} months</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Contact</div>
-        <div class="datagrid-content">{% if object.contact_email %}<a href="mailto:{{ object.contact_email }}">{{ object.contact_email }}</a>{% else %}—{% endif %}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Contact</dt>
+        <dd class="mb-0">{% if object.contact_email %}<a href="mailto:{{ object.contact_email }}">{{ object.contact_email }}</a>{% else %}—{% endif %}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Website</div>
-        <div class="datagrid-content">{% if object.website %}<a href="{{ object.website }}" rel="noreferrer">{{ object.website }}</a>{% else %}—{% endif %}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Website</dt>
+        <dd class="mb-0">{% if object.website %}<a href="{{ object.website }}" rel="noreferrer">{{ object.website }}</a>{% else %}—{% endif %}</dd>
       </div>
-      <div class="datagrid-item">
-        <div class="datagrid-title">Datasheet</div>
-        <div class="datagrid-content">{% if object.datasheet %}<a href="{{ object.datasheet.url }}">{{ object.datasheet.name }}</a>{% else %}—{% endif %}</div>
+      <div class="col-sm-6 col-xl-3">
+        <dt class="small fw-normal text-body-secondary">Datasheet</dt>
+        <dd class="mb-0">{% if object.datasheet %}<a href="{{ object.datasheet.url }}">{{ object.datasheet.name }}</a>{% else %}—{% endif %}</dd>
       </div>
-      <div class="datagrid-item" style="grid-column: 1 / -1">
-        <div class="datagrid-title">Description</div>
-        <div class="datagrid-content">{{ object.description|linebreaksbr|default:"—" }}</div>
+      <div class="col-12">
+        <dt class="small fw-normal text-body-secondary">Description</dt>
+        <dd class="mb-0">{{ object.description|linebreaksbr|default:"—" }}</dd>
       </div>
-      <div class="datagrid-item" style="grid-column: 1 / -1">
-        <div class="datagrid-title">Internal notes</div>
-        <div class="datagrid-content">{{ object.internal_notes|linebreaksbr|default:"—" }}</div>
+      <div class="col-12">
+        <dt class="small fw-normal text-body-secondary">Internal notes</dt>
+        <dd class="mb-0">{{ object.internal_notes|linebreaksbr|default:"—" }}</dd>
       </div>
-    </div>
+    </dl>
   </div>
 </div>
 {% endblock %}

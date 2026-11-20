@@ -56,7 +56,7 @@ class CustomerFormTests(SalesTestCase):
         self.assertIn('<select name="kind"', html)
         self.assertNotIn('name="is_wholesale"', html)
         self.assertIn('<option value="consumer" selected>Consumer</option>', html)
-        self.assertIn('<legend class="cv-tabler-section-legend">Wholesale terms</legend>', html)
+        self.assertIn('<legend class="cv-coreui-section-legend">Wholesale terms</legend>', html)
 
         # a consumer with the wholesale fields filled saves them empty
         response = self.client.post(reverse("customer-create"), {**CONSUMER_POST, **WHOLESALE_FIELDS})
@@ -208,7 +208,7 @@ class CustomerViewTests(SalesTestCase):
         self.login()
         customer = Customer.objects.first()
         html = self.client.get(reverse("customer-detail", kwargs={"pk": customer.pk})).content.decode()
-        page = html[html.index('class="page-header') : html.index('class="page-body')]
+        page = html[html.index('class="page-header') : html.index("<main>")]
         self.assertNotIn("<h2", page)
         self.assertIn("page-subtitle", page)
         self.assertIn(f"<title>Details · {customer.name}", html.replace("&amp;", "&").replace("&#x27;", "'"))

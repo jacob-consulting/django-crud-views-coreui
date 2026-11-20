@@ -20,7 +20,8 @@ ACME_ICONS: dict[str, str] = {
     "cupping": "cil-coffee",
     "batch": "cil-fire",
     "shipment": "cil-truck",
-    # sidebar sections
+    # menu sections: unused by this demo's sidebar (nav titles carry no icon), kept so the vocabulary stays the same
+    # as the sister demo's
     "sales": "cil-building",
     "catalog": "cil-gift",
     "roastery": "cil-fire",

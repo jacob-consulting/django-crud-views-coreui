@@ -47,13 +47,13 @@ INSTALLED_APPS = [
     "django_fsm",
     "django_tables2",
     "django_filters",
-    "crud_views_object_detail",
     "polymorphic",
     "guardian",
     "django_coreui",
-    # The CoreUI theme overrides crud_views templates, so it must come before crud_views.
+    # The CoreUI theme overrides crud_views and crud_views_object_detail templates, so it must come before both.
     "crud_views_coreui",
     "crud_views.apps.CrudViewsConfig",
+    "crud_views_object_detail",
     "crud_views_workflow.apps.CrudViewsWorkflowConfig",
     "crud_views_polymorphic.apps.CrudViewsPolymorphicConfig",
     "crud_views_guardian.apps.CrudViewsGuardianConfig",

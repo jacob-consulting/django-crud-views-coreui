@@ -1,4 +1,4 @@
-// "Show code" panel (templates/project/code_panel_shell.html): the first time Tabler's collapse opens it, fetch the
+// "Show code" panel (templates/project/code_panel_shell.html): the first time CoreUI's collapse opens it, fetch the
 // highlighted sources from data-code-url and show the page's own module (data-code-active) first.
 (() => {
   const panel = document.getElementById("code-panel");
@@ -18,7 +18,7 @@
     target.querySelectorAll(".tab-pane").forEach((p) => p.classList.toggle("show", p === pane));
   };
 
-  panel.addEventListener("show.bs.collapse", (event) => {
+  panel.addEventListener("show.coreui.collapse", (event) => {
     if (loaded || event.target !== panel) return;
     loaded = true;
     fetch(panel.dataset.codeUrl, { credentials: "same-origin", headers: { Accept: "text/html" } })

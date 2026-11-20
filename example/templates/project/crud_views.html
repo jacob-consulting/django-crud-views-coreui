@@ -5,7 +5,7 @@
 {% block actions %}
 {{ block.super }}
 {% code_panel_url as code_url %}
-{% if code_url %}<a class="btn" data-bs-toggle="collapse" href="#code-panel" role="button" aria-expanded="false" aria-controls="code-panel">{% icon "cil-code" %}Show code</a>{% endif %}
+{% if code_url %}<a class="btn btn-outline-secondary" data-coreui-toggle="collapse" href="#code-panel" role="button" aria-expanded="false" aria-controls="code-panel">{% icon "cil-code" "me-1" %}Show code</a>{% endif %}
 {% endblock %}
 {% block content %}
 {{ block.super }}

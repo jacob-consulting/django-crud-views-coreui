@@ -1,45 +1,43 @@
 {% extends cv_extends %}
 {% load crud_views %}
-{# Shipment page: a datagrid with the parcel's facts and the courier's event timeline (Tabler `timeline`). #}
+{# Shipment page: the parcel's facts as a description list and the courier's events, newest first, as a list group. #}
 
 {% block page_title %}{{ block.super }} {{ status_badge }}{% endblock %}
 
 {% block cv_content %}
-<div class="row row-cards">
+<div class="row g-4">
   <div class="col-lg-4">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Parcel</h3></div>
+      <div class="card-header"><h3 class="h6 mb-0">Parcel</h3></div>
       <div class="card-body">
-        <div class="datagrid">
-          <div class="datagrid-item"><div class="datagrid-title">Tracking number</div><div class="datagrid-content">{{ object.tracking_number }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Carrier</div><div class="datagrid-content">{{ object.carrier }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Status</div><div class="datagrid-content">{{ status_badge }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Shipped</div><div class="datagrid-content">{{ object.shipped_at|date:"d M Y H:i" }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">{% if object.is_delivered %}Estimated delivery was{% else %}Estimated delivery{% endif %}</div><div class="datagrid-content">{{ object.eta|date:"d M Y" }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Order</div><div class="datagrid-content"><a href="{{ order_url }}">#{{ object.order_number }}</a> · {{ object.customer_name }}</div></div>
-        </div>
+        <dl class="row g-3 mb-0">
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Tracking number</dt><dd class="mb-0">{{ object.tracking_number }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Carrier</dt><dd class="mb-0">{{ object.carrier }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Status</dt><dd class="mb-0">{{ status_badge }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Shipped</dt><dd class="mb-0">{{ object.shipped_at|date:"d M Y H:i" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">{% if object.is_delivered %}Estimated delivery was{% else %}Estimated delivery{% endif %}</dt><dd class="mb-0">{{ object.eta|date:"d M Y" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Order</dt><dd class="mb-0"><a href="{{ order_url }}">#{{ object.order_number }}</a> · {{ object.customer_name }}</dd></div>
+        </dl>
       </div>
     </div>
   </div>
   <div class="col-lg-8">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Tracking events</h3></div>
-      <div class="card-body">
-        <ul class="timeline">
-          {% for event in events %}
-          <li class="timeline-event">
-            <div class="timeline-event-icon{% if forloop.first and object.is_delivered %} bg-green-lt text-green{% endif %}">{% cv_icon event.icon %}</div>
-            <div class="card timeline-event-card">
-              <div class="card-body">
-                <div class="text-secondary float-end">{{ event.at|date:"d M Y H:i" }}</div>
-                <h4>{{ event.description }}</h4>
-                <p class="text-secondary mb-0">{{ event.location }}</p>
-              </div>
+      <div class="card-header"><h3 class="h6 mb-0">Tracking events</h3></div>
+      <ul class="list-group list-group-flush">
+        {% for event in events %}
+        <li class="list-group-item d-flex gap-3 py-3" data-shipment-event>
+          <span class="avatar avatar-md flex-shrink-0 {% if forloop.first and object.is_delivered %}bg-success-subtle text-success-emphasis{% else %}bg-body-secondary text-body-secondary{% endif %}">{% cv_icon event.icon %}</span>
+          <div class="flex-fill">
+            <div class="d-flex flex-wrap column-gap-3">
+              <h4 class="h6 mb-1">{{ event.description }}</h4>
+              <span class="small text-body-secondary ms-auto">{{ event.at|date:"d M Y H:i" }}</span>
             </div>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
+            <p class="small text-body-secondary mb-0">{{ event.location }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
 </div>

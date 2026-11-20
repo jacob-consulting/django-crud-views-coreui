@@ -12,7 +12,8 @@ from django.utils import timezone
 from django_fsm import FSMField, TransitionNotAllowed, transition
 
 CENT = Decimal("0.01")
-AVATAR_COLORS = ["orange", "azure", "green", "purple", "pink", "teal", "red", "indigo", "cyan", "lime"]
+# CoreUI's theme colours, as the shell's avatar_color filter uses them (bg-<colour>-subtle text-<colour>-emphasis)
+AVATAR_COLORS = ["primary", "success", "info", "warning", "danger", "secondary"]
 
 
 class Customer(models.Model):
@@ -199,8 +200,9 @@ class Order(WorkflowModelMixin, models.Model):
 
     @property
     def steps(self) -> list[dict]:
-        """The happy path for the steps bar: each step with ``active`` on the current state."""
-        return [{"label": s.label, "active": s == self.state} for s in ORDER_STEPS]
+        """The happy path for the steps bar: each step with ``active`` on the current state and ``done`` before it."""
+        current = ORDER_STEPS.index(self.state) if self.state in ORDER_STEPS else -1
+        return [{"label": s.label, "active": i == current, "done": i < current} for i, s in enumerate(ORDER_STEPS)]
 
     def confirm_problem(self) -> str | None:
         """Why the order cannot be confirmed yet, or None."""

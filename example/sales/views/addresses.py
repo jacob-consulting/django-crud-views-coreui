@@ -50,7 +50,11 @@ class AddressTable(Table):
     is_default = tables.Column(verbose_name="Default")
 
     def render_is_default(self, record):
-        return mark_safe('<span class="badge bg-green-lt">Default</span>') if record.is_default else ""
+        return (
+            mark_safe('<span class="badge bg-success-subtle text-success-emphasis">Default</span>')
+            if record.is_default
+            else ""
+        )
 
 
 class AddressListView(CustomerNavbarMixin, BreadcrumbMixin, ListViewTableMixin, ListViewPermissionRequired):

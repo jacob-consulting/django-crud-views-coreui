@@ -1,7 +1,7 @@
 """The roastery's catalog: one polymorphic ``Product`` with a table per kind (beans, equipment, subscription).
 
 The kinds share the commerce fields on ``Product``; each adds what only it has. ``card_color`` and ``card_icon`` are the
-type's look on the card list (a Tabler colour name, a semantic icon name from ``config.icons``).
+type's look on the card list (a CoreUI theme colour name, a semantic icon name from ``config.icons``).
 """
 
 from decimal import Decimal
@@ -25,7 +25,7 @@ class Origin(models.Model):
 
 class FlavorNote(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    color = models.CharField(max_length=20, default="secondary", help_text="A Tabler colour name, e.g. orange.")
+    color = models.CharField(max_length=20, default="secondary", help_text="A CoreUI theme colour name, e.g. warning.")
 
     class Meta:
         ordering = ["name"]
@@ -82,7 +82,7 @@ class Product(PolymorphicModel):
 
     @property
     def stock_color(self) -> str:
-        return "red" if self.stock == 0 else "orange" if self.stock < 10 else "green"
+        return "danger" if self.stock == 0 else "warning" if self.stock < 10 else "success"
 
     @property
     def card_subtitle(self) -> str:
@@ -124,7 +124,7 @@ class Beans(Product):
         help_text="The lot this coffee is roasted from.",
     )
 
-    card_color = "orange"
+    card_color = "warning"
     order_line_kind = "beans"
     card_icon = "beans"
 
@@ -154,7 +154,7 @@ class Equipment(Product):
     warranty_months = models.PositiveIntegerField(default=24)
     weight_kg = models.DecimalField("weight (kg)", max_digits=6, decimal_places=2, null=True, blank=True)
 
-    card_color = "azure"
+    card_color = "info"
     order_line_kind = "equipment"
     card_icon = "equipment"
 
@@ -188,7 +188,7 @@ class Subscription(Product):
     bags_per_delivery = models.PositiveIntegerField(default=2)
     bag_size = models.CharField(max_length=5, choices=BagSize.choices, default=BagSize.G250)
 
-    card_color = "purple"
+    card_color = "primary"
     order_line_kind = "subscription"
     card_icon = "subscription"
     show_stock = False

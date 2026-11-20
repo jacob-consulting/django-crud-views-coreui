@@ -10,7 +10,7 @@ from .showcode import collect_shell_files, collect_sources_for_app, collect_them
 THEME_PACKAGES = ("django_coreui", "crud_views_coreui")
 
 THEME_GUIDE_URL = "https://django-crud-views.readthedocs.io/en/latest/reference/theme/"
-THEME_DOC_URL = "https://django-crud-views-tabler.readthedocs.io/en/latest/theme_internals/"
+THEME_DOC_URL = "https://django-crud-views-coreui.readthedocs.io/en/latest/"
 
 #: how the theme's files are grouped on the page, in this order
 GROUPS = (
@@ -27,7 +27,7 @@ GROUPS = (
     (
         "static",
         "CSS and JavaScript",
-        "A few CSS fixes and the adapter that hands crud_views Tabler's Bootstrap components.",
+        "A few CSS fixes and the adapters that hand crud_views CoreUI's Bootstrap components.",
     ),
     (
         "settings",

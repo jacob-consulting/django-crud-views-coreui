@@ -23,12 +23,12 @@ cv_shipment = ViewSet(
     resource_permissions={"view": "sales.view_order"},
 )
 
-STATUS_BADGES = {"in_transit": ("azure", "In transit"), "delivered": ("green", "Delivered")}
+STATUS_BADGES = {"in_transit": ("info", "In transit"), "delivered": ("success", "Delivered")}
 
 
 def status_badge(status: str):
     color, label = STATUS_BADGES[status]
-    return format_html('<span class="badge bg-{}-lt">{}</span>', color, label)
+    return format_html('<span class="badge bg-{0}-subtle text-{0}-emphasis">{1}</span>', color, label)
 
 
 class BreadcrumbMixin(CrudViewBreadcrumbMixin):

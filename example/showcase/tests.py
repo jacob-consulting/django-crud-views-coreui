@@ -50,9 +50,9 @@ class ShowcaseItemFormCoverageTests(TestCase):
         self.assertIn('name="tags"', html)  # checkboxselectmultiple_inline.html
         self.assertIn('name="is_featured"', html)  # NullBooleanSelect
         self.assertIn('name="price_min"', html)
-        # InlineCheckboxes legend ("Tags") is plain form-label, not shrunk with fs-6
+        # InlineCheckboxes legend ("Tags"): crispy-bootstrap5's own fs-6 form-label, kept by the CoreUI pack
         legend = self.find(r"<legend[^>]*>\s*Tags", html)
-        self.assertNotIn("fs-6", legend)
+        self.assertIn("fs-6", legend)
         self.assertIn("form-label", legend)
 
     def test_text_select_and_textarea_paths(self):
@@ -86,18 +86,18 @@ class ShowcaseItemFormCoverageTests(TestCase):
         self.assertIn('class="input-group-text">€</span>', html)
         self.assertIn("months</span>", html)
         self.assertIn("form-floating", html)  # floating_field.html
-        # UneditableField: Tabler's plaintext class, and crispy's Bootstrap-2 era class must be gone
+        # UneditableField: Bootstrap's plaintext class, and crispy's Bootstrap-2 era class must be gone
         self.assertIn("form-control-plaintext", html)
         self.assertNotIn("uneditable-input", html)
         self.assertIn('name="sku"', html)
         # fieldset.html — Django's use_fieldset emits <fieldset> for radio/checkbox fields too,
         # so pin the legend of the Fieldset layout object itself
         self.assertIn("<legend>Internal</legend>", html)
-        # Tabler's tinted block, not a bare <fieldset>
+        # crispy-bootstrap5's bare <fieldset>: CoreUI has no tinted fieldset block
         fieldset = self.find(r"<fieldset[^>]*>\s*<legend>Internal</legend>", html)
-        self.assertIn("form-fieldset", fieldset)
+        self.assertNotIn("form-fieldset", fieldset)
 
-    def test_range_and_color_get_tablers_own_classes(self):
+    def test_range_and_color_get_their_own_classes(self):
         html = self.create_page()
         range_input = self.find(r'<input type="range"[^>]*>', html)
         color_input = self.find(r'<input type="color"[^>]*>', html)
@@ -111,15 +111,17 @@ class ShowcaseItemFormCoverageTests(TestCase):
 
     def test_form_actions_and_group_labels(self):
         html = self.create_page()
-        footer = self.find(r"<div[^>]*>\s*<div class=\"\">\s*<button type=\"submit\"", html)  # formactions.html
-        self.assertIn("form-footer", footer)
-        # group legends are plain form-label: Size/Channels (field.html), Shipping (radioselect_inline.html)
+        # formactions.html: crispy-bootstrap5's mb-3 row with the theme's form:actions classes
+        footer = self.find(r"<div[^>]*>\s*<div class=\"\">\s*<button type=\"submit\"", html)
+        self.assertIn("d-flex flex-wrap gap-2", footer)
+        self.assertNotIn("form-footer", footer)
+        # group legends: crispy-bootstrap5's fs-6 form-label for Size/Channels (field.html), Shipping
+        # (radioselect_inline.html)
         for name in ("Size", "Channels", "Shipping"):
             with self.subTest(label=name):
                 legend = self.find(r"<legend[^>]*>\s*" + name, html)
-                self.assertNotIn("fs-6", legend)
+                self.assertIn("fs-6", legend)
                 self.assertIn("form-label", legend)
-        self.assertNotIn("fs-6", html)
 
     def test_form_and_detail_pages_use_no_bootstrap5_template(self):
         # crispy_bootstrap5 is not in INSTALLED_APPS (spec goal 7), so a stray bootstrap5/ reference raises

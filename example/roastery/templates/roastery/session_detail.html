@@ -2,16 +2,16 @@
 {# Cupping session (mockup tab "5 Lot & cupping"): the scores as a table with each taster's total. #}
 
 {% block cv_content %}
-<div class="row row-cards">
+<div class="row g-4">
   <div class="col-lg-9">
     <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Scores</h3>
-        <div class="card-actions"><span class="h2 mb-0">{{ average_badge }}</span></div>
+      <div class="card-header d-flex align-items-center">
+        <h3 class="h6 mb-0">Scores</h3>
+        <span class="fs-5 ms-auto">{{ average_badge }}</span>
       </div>
       {% if scores %}
       <div class="table-responsive">
-        <table class="table card-table table-vcenter">
+        <table class="table align-middle mb-0">
           <thead><tr><th>Taster</th><th>Aroma</th><th>Flavor</th><th>Acidity</th><th>Body</th><th>Aftertaste</th><th>Balance</th><th>Overall</th><th class="text-end">Total</th></tr></thead>
           <tbody>
           {% for score in scores %}
@@ -26,20 +26,20 @@
         </table>
       </div>
       {% else %}
-      <div class="card-body text-secondary">No scores yet.</div>
+      <div class="card-body text-body-secondary">No scores yet.</div>
       {% endif %}
-      <div class="card-footer small text-secondary">Total = the seven attributes plus 30 base points (SCA style, 100 at most).</div>
+      <div class="card-footer small text-body-secondary">Total = the seven attributes plus 30 base points (SCA style, 100 at most).</div>
     </div>
   </div>
   <div class="col-lg-3">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Session</h3></div>
+      <div class="card-header"><h3 class="h6 mb-0">Session</h3></div>
       <div class="card-body">
-        <div class="datagrid">
-          <div class="datagrid-item"><div class="datagrid-title">Lot</div><div class="datagrid-content">{{ object.lot.code }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Held on</div><div class="datagrid-content">{{ object.held_on|date:"d M Y" }}</div></div>
-          <div class="datagrid-item"><div class="datagrid-title">Notes</div><div class="datagrid-content">{{ object.notes|default:"—"|linebreaksbr }}</div></div>
-        </div>
+        <dl class="row g-3 mb-0">
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Lot</dt><dd class="mb-0">{{ object.lot.code }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Held on</dt><dd class="mb-0">{{ object.held_on|date:"d M Y" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Notes</dt><dd class="mb-0">{{ object.notes|default:"—"|linebreaksbr }}</dd></div>
+        </dl>
       </div>
     </div>
   </div>

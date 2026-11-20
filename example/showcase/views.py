@@ -54,7 +54,10 @@ class ShowcaseItemTable(Table):
     category = tables.Column()
     price = tables.Column(attrs={"td": {"class": "text-end"}, "th": {"class": "text-end"}})
     stock = tables.TemplateColumn(
-        template_code='<span class="badge bg-{{ record.stock_badge }}-lt">{{ record.stock }}</span>',
+        template_code=(
+            '<span class="badge bg-{{ record.stock_badge }}-subtle text-{{ record.stock_badge }}-emphasis">'
+            "{{ record.stock }}</span>"
+        ),
         attrs={"td": {"class": "text-end"}, "th": {"class": "text-end"}},
     )
     is_active = tables.BooleanColumn(verbose_name="Active")

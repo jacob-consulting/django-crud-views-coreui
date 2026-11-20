@@ -61,7 +61,7 @@ def tabs_end(html):
 
 
 def header(html):
-    return html[html.index('class="page-header') : html.index('class="page-body')]
+    return html[html.index('class="page-header') : html.index("<main>")]
 
 
 def active(bar):
@@ -139,10 +139,10 @@ class CustomerNavbarTests(OrderTestCase):
         self.login()
         fixtures = self.build(self.mine)
         html = self.client.get(reverse("order-packing_slip", kwargs=fixtures["order"])).content.decode()
-        start = html.index('class="page-header d-print-none')
-        self.assertLess(start, html.index('class="cv-tabler-owner'))
-        self.assertLess(html.index('class="cv-tabler-owner'), html.index('class="page-body'))
-        self.assertIn('class="cv-tabler-navbar d-print-none', html)
+        start = html.index('class="page-header mb-4 d-print-none')
+        self.assertLess(start, html.index('class="cv-coreui-owner'))
+        self.assertLess(html.index('class="cv-coreui-owner'), html.index("<main>"))
+        self.assertIn('class="cv-coreui-navbar d-print-none', html)
 
     def test_detail_buttons_sit_below_the_tabs(self):
         self.login()

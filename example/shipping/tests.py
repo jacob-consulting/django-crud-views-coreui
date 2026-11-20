@@ -59,7 +59,7 @@ class ShipmentViewTests(ShippingTestCase):
         row = next(r for r in fetch_shipments() if r["order_number"] == order.number)
         for event in row["events"]:
             self.assertContains(response, event["description"])
-        self.assertContains(response, "timeline-event")
+        self.assertContains(response, "data-shipment-event", count=len(row["events"]))
 
     def test_unknown_tracking_number_404(self):
         self.login()

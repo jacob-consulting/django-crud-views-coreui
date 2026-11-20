@@ -68,7 +68,9 @@ class SubscriptionTableBase(Table):
 
     def render_is_active(self, value):
         return format_html(
-            '<span class="badge bg-{}-lt">{}</span>', "green" if value else "secondary", "Active" if value else "Paused"
+            '<span class="badge bg-{0}-subtle text-{0}-emphasis">{1}</span>',
+            "success" if value else "secondary",
+            "Active" if value else "Paused",
         )
 
 

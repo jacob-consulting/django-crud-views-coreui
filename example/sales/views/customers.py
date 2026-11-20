@@ -104,16 +104,19 @@ class CustomerTable(Table):
 
     def render_name(self, record):
         return format_html(
-            '<div class="d-flex align-items-center gap-2"><span class="avatar avatar-sm bg-{}-lt">{}</span>'
-            "<span>{}</span></div>",
+            '<div class="d-flex align-items-center gap-2">'
+            '<span class="avatar avatar-sm bg-{0}-subtle text-{0}-emphasis fw-semibold">{1}</span>'
+            "<span>{2}</span></div>",
             record.avatar_color,
             record.initials,
             record.name,
         )
 
     def render_kind(self, record):
-        color = "purple" if record.is_wholesale else "secondary"
-        return format_html('<span class="badge bg-{}-lt">{}</span>', color, record.get_kind_display())
+        color = "primary" if record.is_wholesale else "secondary"
+        return format_html(
+            '<span class="badge bg-{0}-subtle text-{0}-emphasis">{1}</span>', color, record.get_kind_display()
+        )
 
 
 class CustomerListView(
@@ -131,7 +134,7 @@ class CustomerListView(
 # --------------------------------------------------------------------------- detail
 
 _KIND_BADGE = BadgeConfig(
-    color_map={"wholesale": "purple", "consumer": "secondary"},
+    color_map={"wholesale": "primary", "consumer": "secondary"},
     label_map={"wholesale": _("Wholesale"), "consumer": _("Consumer")},
     pill=True,
 )

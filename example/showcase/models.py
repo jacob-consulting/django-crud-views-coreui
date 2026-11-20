@@ -1,7 +1,7 @@
 """A demo model whose fields cover one crispy render path each.
 
 The point of this app is not the data: it is that an ``add product`` form puts every
-django-crispy-forms template branch on one page, so the Tabler theme can be looked at
+django-crispy-forms template branch on one page, so the CoreUI theme can be looked at
 field by field (see ``docs/crispy_coreui.md``).
 """
 
@@ -111,7 +111,7 @@ class ShowcaseItem(models.Model):
 
     @property
     def stock_badge(self):
-        """Tabler colour for the stock badge."""
+        """CoreUI theme colour for the stock badge."""
         if self.stock == 0:
-            return "red"
-        return "yellow" if self.stock < 10 else "green"
+            return "danger"
+        return "warning" if self.stock < 10 else "success"

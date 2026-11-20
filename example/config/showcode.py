@@ -39,7 +39,7 @@ THEME_SETTINGS = (
     "DJANGO_TABLES2_TEMPLATE",
 )
 
-#: CSS classes; the colours come from ``pygments_css()``, one light and one dark style scoped by data-bs-theme
+#: CSS classes; the colours come from ``pygments_css()``, one light and one dark style scoped by data-coreui-theme
 FORMATTER = HtmlFormatter()
 LIGHT_STYLE = "default"
 DARK_STYLE = "github-dark"
@@ -59,9 +59,9 @@ def _lexer(suffix: str):
 
 
 def pygments_css() -> str:
-    """The token colours for ``.code-block``: the light style by default, the dark one under Tabler's dark mode."""
-    light = ":root:not([data-bs-theme=dark]) .code-block"
-    dark = "[data-bs-theme=dark] .code-block"
+    """The token colours for ``.code-block``: the light style by default, the dark one under CoreUI's dark mode."""
+    light = ":root:not([data-coreui-theme=dark]) .code-block"
+    dark = "[data-coreui-theme=dark] .code-block"
     parts = []
     for selector, style in ((light, LIGHT_STYLE), (dark, DARK_STYLE)):
         formatter = HtmlFormatter(style=style)

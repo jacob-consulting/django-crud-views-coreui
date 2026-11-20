@@ -1,7 +1,8 @@
-"""``{% load acme_nav %}``: the Acme navigation, defined once for the sidebar and the top bar (registered in TEMPLATES).
+"""``{% load acme_nav %}``: the Acme navigation, defined once (registered in TEMPLATES).
 
-``django_coreui/includes/nav_menu.html`` renders it as section headings in the sidebar and as one dropdown per
-section in the top bar, where fourteen links side by side do not fit.
+``django_coreui/includes/nav_menu.html`` renders it in CoreUI's sidebar: the dashboard link, then each section as a
+``nav-title`` heading with its links. An entry's ``icon`` is a semantic name from ``config.icons`` or a CoreUI icon name
+(``{% icon %}`` takes either).
 """
 
 from dataclasses import dataclass, field
@@ -26,18 +27,16 @@ class Entry:
 @dataclass(frozen=True)
 class Section:
     title: str
-    icon: str
     entries: tuple[Entry, ...] = field(default_factory=tuple)
 
 
-DASHBOARD = Entry("Dashboard", "dashboard:index", "dashboard", ("index",))
+DASHBOARD = Entry("Dashboard", "dashboard:index", "cil-speedometer", ("index",))
 
 # Account managers hold only `add_customer` globally: their view rights are Guardian object grants, which a
 # permission check without an object cannot see, so Customers opens for add or view.
 MENU = (
     Section(
         "Sales",
-        "sales",
         (
             Entry(
                 "Customers",
@@ -58,7 +57,6 @@ MENU = (
     ),
     Section(
         "Catalog",
-        "catalog",
         (
             Entry("Products", "product-list", "product", ("product-",), ("catalog.view_product",)),
             Entry("Categories", "category-list", "category", ("category-",), ("catalog.view_category",)),
@@ -66,7 +64,6 @@ MENU = (
     ),
     Section(
         "Roastery",
-        "roastery",
         (
             Entry("Green lots", "lot-list", "lot", ("lot-", "cupping-"), ("roastery.view_greenlot",)),
             Entry("Roast batches", "batch-list", "batch", ("batch-",), ("roastery.view_roastbatch",)),
@@ -76,17 +73,14 @@ MENU = (
     ),
     Section(
         "Developer",
-        "code",
         (
             Entry(
-                "Form showcase", "showcaseitem-list", "layout-grid", ("showcaseitem-",), ("showcase.view_showcaseitem",)
+                "Form showcase", "showcaseitem-list", "cil-grid", ("showcaseitem-",), ("showcase.view_showcaseitem",)
             ),
-            Entry("How this is themed", "theming", "palette", ("theming",)),
+            Entry("How this is themed", "theming", "cil-brush", ("theming",)),
         ),
     ),
-    Section(
-        "Users", "users", (Entry("Users", "dashboard:users", "users", ("users", "user_create"), ("auth.view_user",)),)
-    ),
+    Section("Users", (Entry("Users", "dashboard:users", "cil-people", ("users", "user_create"), ("auth.view_user",)),)),
 )
 
 
@@ -109,7 +103,7 @@ def _link(entry: Entry, url_name: str | None, current: str | None) -> dict:
 
 @register.simple_tag(takes_context=True)
 def acme_menu(context) -> dict:
-    """The entries the user may open: ``{"dashboard": link, "sections": [{"title", "icon", "active", "links"}]}``."""
+    """The entries the user may open: ``{"dashboard": link, "sections": [{"title", "links"}]}``."""
     request = context["request"]
     user = request.user
     match = request.resolver_match
@@ -123,12 +117,5 @@ def acme_menu(context) -> dict:
             if not e.perms or any(user.has_perm(p) for p in e.perms)
         ]
         if links:
-            sections.append(
-                {
-                    "title": section.title,
-                    "icon": section.icon,
-                    "links": links,
-                    "active": any(link["active"] for link in links),
-                }
-            )
+            sections.append({"title": section.title, "links": links})
     return {"dashboard": _link(DASHBOARD, url_name, current), "sections": sections}

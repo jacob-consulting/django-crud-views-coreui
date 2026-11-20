@@ -1,30 +1,89 @@
-/* Acme Roasters brand: sienna primary. Tabler's own `data-bs-theme-primary` choice (set from the layout switch or
-   localStorage) sets the same variables through an attribute selector, so the brand only applies while the user
-   has not picked a colour. */
-:root:not([data-bs-theme-primary]) {
-  --tblr-primary: #a0522d;
-  --tblr-primary-rgb: 160, 82, 45;
-  --tblr-primary-darken: #8f4929;
-  --tblr-primary-fg: #fff;
-  --tblr-link-color-rgb: 160, 82, 45;
-  --tblr-link-hover-color-rgb: 128, 66, 36;
+/* Acme Roasters brand: sienna primary (#a0522d). CoreUI reads the primary from --cui-primary* and the links from
+   --cui-link-*, but compiles the colours of the .btn-*-primary rules and .border-top-primary, so those get the brand
+   too. Light mode on :root, dark mode under CoreUI's [data-coreui-theme=dark] (set on <html> by the shell's
+   colour-mode switch). */
+:root {
+  --cui-primary: #a0522d;
+  --cui-primary-rgb: 160, 82, 45;
+  --cui-primary-text-emphasis: #402112;
+  --cui-primary-bg-subtle: #ecdcd5;
+  --cui-primary-border-subtle: #d9baab;
+  --cui-link-color: #a0522d;
+  --cui-link-color-rgb: 160, 82, 45;
+  --cui-link-hover-color: #804224;
+  --cui-link-hover-color-rgb: 128, 66, 36;
+  --cui-focus-ring-color: rgba(160, 82, 45, 0.25);
 }
 
-/* Top bar (nav_menu.html, nav_layout "horizontal"): between Tabler's md breakpoint, where the bar stops
-   collapsing, and 1200px the section icons do not fit next to their titles. */
-@media (min-width: 768px) and (max-width: 1199.98px) {
-  header.navbar #navbar-menu .nav-link-icon { display: none; }
+[data-coreui-theme="dark"] {
+  --cui-primary: #a0522d;
+  --cui-primary-rgb: 160, 82, 45;
+  --cui-primary-text-emphasis: #c69781;
+  --cui-primary-bg-subtle: #201009;
+  --cui-primary-border-subtle: #60311b;
+  /* sienna itself is too dark for text on CoreUI's dark body (2.7:1); this tint reads at 5.9:1 */
+  --cui-link-color: #c69781;
+  --cui-link-color-rgb: 198, 151, 129;
+  --cui-link-hover-color: #d8b6a6;
+  --cui-link-hover-color-rgb: 216, 182, 166;
+  --cui-focus-ring-color: rgba(198, 151, 129, 0.25);
 }
-/* Below 992px the brand keeps only its mark (brand.html's first child), as in the folded sidebar. */
-@media (min-width: 768px) and (max-width: 991.98px) {
-  header.navbar .navbar-brand a > :not(:first-child) { display: none; }
+
+.btn-primary,
+[data-coreui-theme="dark"] .btn-primary {
+  --cui-btn-color: #fff;
+  --cui-btn-bg: #a0522d;
+  --cui-btn-border-color: #a0522d;
+  --cui-btn-hover-color: #fff;
+  --cui-btn-hover-bg: #8f4929;
+  --cui-btn-hover-border-color: #804224;
+  --cui-btn-focus-shadow-rgb: 174, 108, 77;
+  --cui-btn-active-color: #fff;
+  --cui-btn-active-bg: #804224;
+  --cui-btn-active-border-color: #703a20;
+  --cui-btn-disabled-color: #fff;
+  --cui-btn-disabled-bg: #a0522d;
+  --cui-btn-disabled-border-color: #a0522d;
+}
+
+.btn-outline-primary,
+.btn-ghost-primary,
+[data-coreui-theme="dark"] .btn-outline-primary,
+[data-coreui-theme="dark"] .btn-ghost-primary {
+  --cui-btn-color: #a0522d;
+  --cui-btn-hover-color: #fff;
+  --cui-btn-hover-bg: #a0522d;
+  --cui-btn-hover-border-color: #a0522d;
+  --cui-btn-focus-shadow-rgb: 160, 82, 45;
+  --cui-btn-active-color: #fff;
+  --cui-btn-active-bg: #a0522d;
+  --cui-btn-active-border-color: #a0522d;
+  --cui-btn-disabled-color: #a0522d;
+}
+
+.btn-outline-primary,
+[data-coreui-theme="dark"] .btn-outline-primary {
+  --cui-btn-border-color: #a0522d;
+  --cui-btn-disabled-border-color: #a0522d;
+}
+
+/* on the dark body the outline and ghost label takes the light tint, as the links do */
+[data-coreui-theme="dark"] .btn-outline-primary,
+[data-coreui-theme="dark"] .btn-ghost-primary {
+  --cui-btn-color: #c69781;
+  --cui-btn-disabled-color: #c69781;
+}
+
+/* CoreUI compiles .border-top-primary's colour too (the product cards' stripe, catalog/product_card.html). */
+.border-top-primary {
+  border-top-color: #a0522d !important;
 }
 
 /* "Show code" panel and "How this is themed" (config/showcode.py). The token colours and the background come from
-   /_code/pygments.css: Pygments' default style in light mode, github-dark under [data-bs-theme=dark]. */
+   /_code/pygments.css: Pygments' default style in light mode, github-dark under [data-coreui-theme=dark]. */
 .code-block {
-  border: 1px solid var(--tblr-border-color);
-  border-radius: var(--tblr-border-radius);
+  border: 1px solid var(--cui-border-color);
+  border-radius: var(--cui-border-radius);
   max-height: 36rem;
   overflow: auto;
 }
@@ -36,9 +95,9 @@
   font-size: .8125rem;
   line-height: 1.5;
 }
-.code-files .nav-link { padding: .25rem .625rem; font-size: .8125rem; font-family: var(--tblr-font-monospace); }
+.code-files .nav-link { padding: .25rem .625rem; font-size: .8125rem; font-family: var(--cui-font-monospace); }
 .code-block-full { max-height: none; }
 
-/* Product cards (catalog/product_card.html): the card:title class key gives the title Tabler's 1rem bottom margin; the
-   mockup's tight .25rem sits between the title and the summary line. */
+/* Product cards (catalog/product_card.html): CoreUI's card title keeps a .5rem bottom margin; the mockup's tight
+   .25rem sits between the title and the summary line. */
 [data-product-card] ~ .card-body .card-title { margin-bottom: .25rem; }

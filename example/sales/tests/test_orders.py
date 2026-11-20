@@ -23,7 +23,11 @@ from .test_customers import SalesTestCase
 
 
 def page_heading(response):
-    return re.search(r'<h[1-6]\b[^>]*class="page-title"[^>]*>(.*?)</h[1-6]>', response.content.decode(), re.S).group(1)
+    """The view's own heading: the last page-title (with a ViewSet Navigation bar, the owner's h1 comes first)."""
+    headings = re.findall(
+        r'<(h[1-6])\b[^>]*class="[^"]*\bpage-title\b[^"]*"[^>]*>(.*?)</\1>', response.content.decode(), re.S
+    )
+    return headings[-1][1] if headings else None
 
 
 def history(order):
@@ -89,7 +93,7 @@ class OrderFormTests(OrderTestCase):
                 html = self.client.get(url).content.decode()
                 self.assertEqual(html.count('class="row cv-formset-compact-headings"'), 1)
                 self.assertIn("cv-formset-row-compact", html)
-                self.assertIn('<legend class="cv-tabler-section-legend">', html)
+                self.assertIn('<legend class="cv-coreui-section-legend">', html)
                 for field in ("product", "quantity"):
                     self.assertRegex(html, rf'<label[^>]*for="id_lines-[^"]+-{field}"')
                 # finding 20: upstream's QuerysetConditions disables grind and bag size unless the row's product is
@@ -338,13 +342,32 @@ class OrderWorkflowTests(OrderTestCase):
         self.login()
         order = self.make_order()
         html = self.client.get(reverse("order-detail", kwargs=self.order_kwargs(order))).content.decode()
-        self.assertIn("steps steps-counter", html)
-        self.assertRegex(html, r'class="step-item active"[^>]*>Draft<')
+        steps = re.search(r"<ol [^>]*data-order-steps[^>]*>(.*?)</ol>", html, re.S).group(1)
+        self.assertEqual(len(re.findall(r'aria-current="step"', steps)), 1)
+        self.assertRegex(
+            steps,
+            r'aria-current="step"[^>]*>\s*<span class="badge rounded-pill bg-primary">1</span>\s*<span[^>]*>Draft<',
+        )
         self.assertIn('data-transition="wf_confirm"', html)
         self.assertIn(
             f'href="{reverse("order-workflow", kwargs=self.order_kwargs(order))}" data-transition="wf_cancel"', html
         )
-        self.assertIn('class="badge bg-secondary-lt"', html)  # the theme's light workflow badge
+        self.assertIn('class="badge bg-secondary-subtle text-secondary-emphasis"', html)  # the theme's workflow badge
+
+    def test_steps_before_the_current_one_are_done(self):
+        self.login()
+        order = self.make_order(state=OrderState.ROASTED)
+        html = self.client.get(reverse("order-detail", kwargs=self.order_kwargs(order))).content.decode()
+        steps = re.search(r"<ol [^>]*data-order-steps[^>]*>(.*?)</ol>", html, re.S).group(1)
+        done, current, ahead = (
+            "bg-primary-subtle text-primary-emphasis",
+            "bg-primary",
+            "bg-body-secondary text-body-secondary",
+        )
+        self.assertEqual(
+            re.findall(r'<span class="badge rounded-pill ([^"]*)">(\d)</span>', steps),
+            [(done, "1"), (done, "2"), (current, "3"), (ahead, "4"), (ahead, "5")],
+        )
 
     def test_shipped_order_edit_is_disabled_and_forbidden(self):
         self.login()

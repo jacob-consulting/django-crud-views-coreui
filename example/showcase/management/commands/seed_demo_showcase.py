@@ -16,7 +16,7 @@ COLORS = ["#066fd1", "#2fb344", "#d63939", "#f76707", "#ae3ec9", "#4299e1"]
 
 
 class Command(BaseCommand):
-    help = "Create demo products, categories, tags and channels for the crispy/Tabler form coverage page."
+    help = "Create demo products, categories, tags and channels for the crispy/CoreUI form coverage page."
 
     def add_arguments(self, parser):
         parser.add_argument("--count", type=int, default=40)

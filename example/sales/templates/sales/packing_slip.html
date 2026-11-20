@@ -1,6 +1,6 @@
 {% extends cv_extends %}
 {% load crud_views %}
-{# Print-friendly: the page chrome (sidebar, navbar, header, footer) is d-print-none in the Tabler layout. #}
+{# Print-friendly: the page chrome (sidebar, header, page header, footer) is d-print-none in the CoreUI layout. #}
 
 {% block cv_context %}
 <button type="button" class="btn btn-primary" data-print>{% cv_icon "packing-slip" %} Print</button>
@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block cv_content %}
-<div class="card card-lg">
-  <div class="card-body">
+<div class="card">
+  <div class="card-body p-4 p-lg-5">
     <div class="row">
       <div class="col-6">
         <p class="h3">Acme Roasters</p>
@@ -19,16 +19,16 @@
         <p class="h3">Ship to</p>
         <address>
           {{ object.customer }}<br>
-          {% if object.ship_to %}{{ object.ship_to.street }}<br>{{ object.ship_to.zip_code }} {{ object.ship_to.city }}<br>{{ object.ship_to.country }}{% else %}<span class="text-secondary">No address chosen</span>{% endif %}
+          {% if object.ship_to %}{{ object.ship_to.street }}<br>{{ object.ship_to.zip_code }} {{ object.ship_to.city }}<br>{{ object.ship_to.country }}{% else %}<span class="text-body-secondary">No address chosen</span>{% endif %}
         </address>
       </div>
       <div class="col-12 my-4">
         <h1>Packing slip {{ object }}</h1>
-        <div class="text-secondary">Ordered {{ object.created_at|date:"d M Y" }}{% if object.requested_roast_date %} · roast on {{ object.requested_roast_date|date:"d M Y" }}{% endif %}</div>
+        <div class="text-body-secondary">Ordered {{ object.created_at|date:"d M Y" }}{% if object.requested_roast_date %} · roast on {{ object.requested_roast_date|date:"d M Y" }}{% endif %}</div>
       </div>
     </div>
-    <table class="table table-transparent table-responsive" data-packing-lines>
-      <thead><tr><th class="text-center w-1">Packed</th><th class="text-end w-1">Qty</th><th>Product</th><th>Grind</th><th>Bag</th></tr></thead>
+    <table class="table" data-packing-lines>
+      <thead><tr><th class="text-center" style="width: 1%">Packed</th><th class="text-end" style="width: 1%">Qty</th><th>Product</th><th>Grind</th><th>Bag</th></tr></thead>
       <tbody>
       {% for line in object.lines.all %}
         <tr>
@@ -39,11 +39,11 @@
           <td>{{ line.get_bag_size_display|default:"—" }}</td>
         </tr>
       {% empty %}
-        <tr><td colspan="5" class="text-secondary">No line items.</td></tr>
+        <tr><td colspan="5" class="text-body-secondary">No line items.</td></tr>
       {% endfor %}
       </tbody>
     </table>
-    {% if object.notes %}<p class="text-secondary mt-4">Notes: {{ object.notes|linebreaksbr }}</p>{% endif %}
+    {% if object.notes %}<p class="text-body-secondary mt-4">Notes: {{ object.notes|linebreaksbr }}</p>{% endif %}
   </div>
 </div>
 {% endblock %}
