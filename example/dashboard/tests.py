@@ -988,18 +988,32 @@ class CoreuiPagesTests(TestCase):
             reverse("product-create", kwargs={"polymorphic_ctype_id": ContentType.objects.get_for_model(model).pk})
             for model in (Beans, Equipment, Subscription)
         ]
-        pages = _crawl(client, (*cls.START, *creates))
+        from sales.models import Order, OrderState
+
+        # a cancelled order's detail page shows the cancel note instead of the steps; crawling picks any one order
+        cancelled = Order.objects.filter(state=OrderState.CANCELLED).first()
+        cancelled_url = reverse("order-detail", kwargs={"customer_pk": cancelled.customer_id, "pk": cancelled.pk})
+        pages = _crawl(client, (*cls.START, *creates, cancelled_url))
         cls.pages = {url: (r.status_code, r.content.decode()) for url, r in pages.items()}
+        # a crispy create form posted empty: the error markup of the form pack
+        invalid = client.post(reverse("showcaseitem-create"), {})
+        cls.pages["POST " + reverse("showcaseitem-create")] = (invalid.status_code, invalid.content.decode())
 
     def test_every_page_renders(self):
         self.assertGreater(len(self.pages), 60)
         self.assertEqual({url: status for url, (status, _html) in self.pages.items() if status != 200}, {})
 
+    def test_sweep_covers_a_form_with_errors_and_a_cancelled_order(self):
+        _status, html = self.pages["POST " + reverse("showcaseitem-create")]
+        self.assertIn("is-invalid", html)
+        self.assertIn("invalid-feedback", html)
+        self.assertTrue([url for url, (_s, html) in self.pages.items() if "This order was cancelled." in html])
+
     def test_every_viewset_view_is_reached(self):
         from crud_views.lib.viewset import _REGISTRY
         from django.urls import resolve
 
-        reached = {resolve(url.split("?")[0]).view_name for url in self.pages}
+        reached = {resolve(url.split("?")[0]).view_name for url in self.pages if url.startswith("/")}
         missing = [
             viewset.get_router_name(key)
             for viewset in _REGISTRY.values()
@@ -1045,7 +1059,11 @@ class OriginTests(SimpleTestCase):
         own = range(own_start, own_start + len(own_lines))
         offenders = []
         for path in sorted(root.rglob("*")):
-            if path.suffix not in {".py", ".html", ".css", ".js"} or "migrations" in path.parts:
+            # catalog's first migration keeps FlavorNote's old help text as history; 0003 replaces it
+            if (
+                path.suffix not in {".py", ".html", ".css", ".js"}
+                or path == root / "catalog/migrations/0001_initial.py"
+            ):
                 continue
             for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
                 if path == Path(__file__).resolve() and number in own:
@@ -1053,3 +1071,43 @@ class OriginTests(SimpleTestCase):
                 if "tabler" in line.lower() and not self.CREDIT.match(line):
                     offenders.append(f"{path.relative_to(root)}:{number}: {line.strip()}")
         self.assertEqual(offenders, [])
+
+
+class BrandTests(SimpleTestCase):
+    """acme.css: CoreUI compiles its primary into some rules, so the brand restates them (light and dark)."""
+
+    def test_compiled_primary_rules_are_restated(self):
+        css = Path(finders.find("acme/acme.css")).read_text()
+        for selector in (
+            ".btn-primary",
+            '[data-coreui-theme="dark"] .btn-primary',
+            ".btn-outline-primary",
+            ".btn-ghost-primary",
+            ".border-top-primary",
+            ".form-control:focus",
+            ".form-select:focus",
+            ".form-check-input:focus",
+            ".form-switch .form-check-input:focus",
+            ".form-range:focus::-webkit-slider-thumb",
+            ".form-range::-webkit-slider-thumb:active",
+            ".nav-link:focus-visible",
+        ):
+            with self.subTest(selector=selector):
+                self.assertRegex(css, rf"(?m)^{re.escape(selector)}(,| \{{)")
+        for variable in (
+            "--cui-accordion-btn-focus-box-shadow",
+            "--cui-pagination-focus-box-shadow",
+            "--cui-btn-close-focus-shadow",
+            "--cui-sidebar-toggler-focus-shadow",
+        ):
+            with self.subTest(variable=variable):
+                self.assertIn(f"{variable}: 0 0 0 0.25rem var(--cui-focus-ring-color);", css)
+        self.assertNotIn("88, 86, 214", css)
+        self.assertNotIn("5856d6", css)
+
+    def test_focus_ring_follows_the_colour_mode(self):
+        css = Path(finders.find("acme/acme.css")).read_text()
+        light = css[css.index(":root {") :]
+        dark = css[css.index('[data-coreui-theme="dark"] {') :]
+        self.assertIn("--cui-focus-ring-color: rgba(160, 82, 45, 0.25);", light[: light.index("}")])
+        self.assertIn("--cui-focus-ring-color: rgba(198, 151, 129, 0.25);", dark[: dark.index("}")])
