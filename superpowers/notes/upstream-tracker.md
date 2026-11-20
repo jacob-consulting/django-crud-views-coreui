@@ -67,11 +67,14 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
   "Object-detail tabs"; `docs/reference/assets.md`) as the call for content inserted outside the modal flow and for
   a UI library that loads late. Upstream's function selects `data-bs-toggle`, so under the theme it alone would find
   nothing. `tabs.js` loads after `coreui-tabs.js` (asset order follows `INSTALLED_APPS`: the theme comes before
-  crud_views and the object-detail app) and assigns the global unconditionally, so `coreui-tabs.js` defines
-  `cv.initObjectDetailTabs` as an accessor: an assignment is kept as the upstream part, a read returns the theme's
-  wrapper, which runs the upstream part and then the `data-coreui` init. Without `crud_views_object_detail`'s script
-  the wrapper runs the CoreUI part alone. The theme keeps upstream's adapter contract (a missing `cv.adapters.tab` is
-  a no-op; an entry without callable `init`/`dispose` throws `TypeError`). Pinned by
+  crud_views and the object-detail app) and assigns the global unconditionally. So until then `coreui-tabs.js`
+  makes `cv.initObjectDetailTabs` a one-shot accessor: `tabs.js`'s assignment is kept as the upstream part, and the
+  global becomes a plain writable property holding the theme's wrapper (upstream part, then the `data-coreui` init).
+  If `tabs.js` ran first, the plain property is defined directly. From then on it behaves like any global, so a
+  project can wrap it the usual way (`const prev = cv.initObjectDetailTabs; cv.initObjectDetailTabs = r => {...}`)
+  without recursion. Without `crud_views_object_detail`'s script the wrapper runs the CoreUI part alone. The theme
+  keeps upstream's adapter contract (a missing `cv.adapters.tab` is a no-op; an entry without callable
+  `init`/`dispose` throws `TypeError`). Pinned by
   `test_coreui_tabs_script_wraps_the_public_initializer` and `test_coreui_tabs_script_keeps_the_adapter_contract`
   (source-level; behaviour is for the browser pass, the project has no JS test suite). Same possible fix: with a
   prefix in `cv_config` or a `data-cv-tab` marker, upstream's initializer would cover the theme and the wrapper goes.

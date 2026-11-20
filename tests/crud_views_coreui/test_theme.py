@@ -741,12 +741,26 @@ class DataCoreuiTests(TestCase):
 
     def test_coreui_tabs_script_wraps_the_public_initializer(self):
         # cv.initObjectDetailTabs(root) is upstream's documented hook (custom insertion, a late UI library). tabs.js
-        # loads after the theme script and assigns it unconditionally, so the theme wraps it with an accessor: the
-        # assigned function is kept as the upstream part, reads return the wrapper, which runs the CoreUI part too.
+        # loads after the theme script and assigns it unconditionally, so until then the global is a one-shot accessor:
+        # that first assignment becomes the upstream part, and the global turns into a plain writable property holding
+        # the wrapper, so a project's own wrapping composes without recursion. If tabs.js ran first, the plain
+        # property is defined directly. Assigning the wrapper to itself keeps the accessor.
         script = (THEME / "static/crud_views_coreui/coreui-tabs.js").read_text()
-        self.assertIn('Object.defineProperty(cv, "initObjectDetailTabs", {', script)
+        self.assertRegex(
+            script,
+            r"function publish\(fn\) \{\s*upstreamInit = fn;\s*Object\.defineProperty\(cv, \"initObjectDetailTabs\", \{"
+            r"\s*configurable: true,\s*enumerable: true,\s*writable: true,\s*value: initObjectDetailTabs,",
+        )
+        self.assertRegex(
+            script,
+            r'if \(typeof cv\.initObjectDetailTabs === "function"\) \{\s*publish\(cv\.initObjectDetailTabs\);',
+        )
         self.assertIn("get: () => initObjectDetailTabs,", script)
-        self.assertRegex(script, r"set: fn => \{\s*upstreamInit = typeof fn === \"function\"")
+        self.assertRegex(
+            script,
+            r"set: fn => \{\s*if \(fn !== initObjectDetailTabs\) \{\s*"
+            r'publish\(typeof fn === "function" \? fn : null\);',
+        )
         self.assertRegex(
             script,
             r"function initObjectDetailTabs\(root = document\) \{\s*if \(upstreamInit\) \{\s*upstreamInit\(root\);"

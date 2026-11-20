@@ -7,8 +7,9 @@
 // Upstream's public initializer, cv.initObjectDetailTabs(root), is the documented hook for content inserted outside
 // the modal flow and for a late UI library. The theme wraps it so a call initialises the data-coreui triggers too.
 // tabs.js loads after this script (asset registration follows INSTALLED_APPS) and assigns the global
-// unconditionally, so the wrapper is an accessor: the assignment is kept as the upstream part, reads return the
-// wrapper. Without crud_views_object_detail's script the wrapper runs the CoreUI part alone.
+// unconditionally, so until then the global is a one-shot accessor: that first assignment is kept as the upstream
+// part and the global becomes a plain property holding the wrapper. Without crud_views_object_detail's script the
+// wrapper runs the CoreUI part alone.
 (function () {
     if (globalThis.__cvCoreuiObjectDetailTabsInit) {
         return;
@@ -55,21 +56,40 @@
     }
 
     const cv = (globalThis.cv = globalThis.cv || {});
-    let upstreamInit = typeof cv.initObjectDetailTabs === "function" ? cv.initObjectDetailTabs : null;
+    let upstreamInit = null;
     function initObjectDetailTabs(root = document) {
         if (upstreamInit) {
             upstreamInit(root);
         }
         initCoreuiObjectDetailTabs(root);
     }
-    Object.defineProperty(cv, "initObjectDetailTabs", {
-        configurable: true,
-        enumerable: true,
-        get: () => initObjectDetailTabs,
-        set: fn => {
-            upstreamInit = typeof fn === "function" && fn !== initObjectDetailTabs ? fn : null;
-        },
-    });
+    // From here on the global is a plain writable property holding the wrapper, so a project can wrap or replace it
+    // the usual way (const prev = cv.initObjectDetailTabs; cv.initObjectDetailTabs = r => { prev(r); ... }).
+    function publish(fn) {
+        upstreamInit = fn;
+        Object.defineProperty(cv, "initObjectDetailTabs", {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: initObjectDetailTabs,
+        });
+    }
+    if (typeof cv.initObjectDetailTabs === "function") {
+        publish(cv.initObjectDetailTabs); // upstream's tabs.js already ran
+    } else {
+        // tabs.js has not run yet: a one-shot accessor takes its assignment as the upstream part, then turns into
+        // the plain property. Re-assigning the wrapper itself before that changes nothing.
+        Object.defineProperty(cv, "initObjectDetailTabs", {
+            configurable: true,
+            enumerable: true,
+            get: () => initObjectDetailTabs,
+            set: fn => {
+                if (fn !== initObjectDetailTabs) {
+                    publish(typeof fn === "function" ? fn : null);
+                }
+            },
+        });
+    }
 
     document.addEventListener("DOMContentLoaded", () => initCoreuiObjectDetailTabs(document));
     if (document.readyState !== "loading") {
