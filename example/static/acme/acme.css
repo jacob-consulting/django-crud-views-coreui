@@ -1,0 +1,44 @@
+/* Acme Roasters brand: sienna primary. Tabler's own `data-bs-theme-primary` choice (set from the layout switch or
+   localStorage) sets the same variables through an attribute selector, so the brand only applies while the user
+   has not picked a colour. */
+:root:not([data-bs-theme-primary]) {
+  --tblr-primary: #a0522d;
+  --tblr-primary-rgb: 160, 82, 45;
+  --tblr-primary-darken: #8f4929;
+  --tblr-primary-fg: #fff;
+  --tblr-link-color-rgb: 160, 82, 45;
+  --tblr-link-hover-color-rgb: 128, 66, 36;
+}
+
+/* Top bar (nav_menu.html, nav_layout "horizontal"): between Tabler's md breakpoint, where the bar stops
+   collapsing, and 1200px the section icons do not fit next to their titles. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  header.navbar #navbar-menu .nav-link-icon { display: none; }
+}
+/* Below 992px the brand keeps only its mark (brand.html's first child), as in the folded sidebar. */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  header.navbar .navbar-brand a > :not(:first-child) { display: none; }
+}
+
+/* "Show code" panel and "How this is themed" (config/showcode.py). The token colours and the background come from
+   /_code/pygments.css: Pygments' default style in light mode, github-dark under [data-bs-theme=dark]. */
+.code-block {
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-border-radius);
+  max-height: 36rem;
+  overflow: auto;
+}
+.code-block pre {
+  margin: 0;
+  padding: .875rem 1rem;
+  background: transparent;
+  color: inherit;
+  font-size: .8125rem;
+  line-height: 1.5;
+}
+.code-files .nav-link { padding: .25rem .625rem; font-size: .8125rem; font-family: var(--tblr-font-monospace); }
+.code-block-full { max-height: none; }
+
+/* Product cards (catalog/product_card.html): the card:title class key gives the title Tabler's 1rem bottom margin; the
+   mockup's tight .25rem sits between the title and the summary line. */
+[data-product-card] ~ .card-body .card-title { margin-bottom: .25rem; }

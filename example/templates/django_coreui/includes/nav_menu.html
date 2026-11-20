@@ -1,0 +1,41 @@
+{% load coreui acme_nav %}{% acme_menu as menu %}
+        {# The entries and their permissions are defined once, in config/templatetags/acme_nav.py. django_tabler #}
+        {# includes this file twice: nav_layout "vertical" (sidebar: section headings) and "horizontal" (top bar: one #}
+        {# dropdown per section, a section with a single entry as a plain link). #}
+        {% with link=menu.dashboard %}
+        <li class="nav-item{% if link.active %} active{% endif %}">
+          <a class="nav-link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+            <span class="nav-link-icon">{% icon link.icon %}</span>
+            <span class="nav-link-title">{{ link.title }}</span>
+          </a>
+        </li>
+        {% endwith %}
+        {% for section in menu.sections %}
+        {% if nav_layout == "horizontal" and section.links|length > 1 %}
+        <li class="nav-item dropdown{% if section.active %} active{% endif %}">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="true" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="nav-link-icon">{% icon section.icon %}</span>
+            <span class="nav-link-title">{{ section.title }}</span>
+          </a>
+          <div class="dropdown-menu">
+            {% for link in section.links %}
+            <a class="dropdown-item{% if link.active %} active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+              {{ link.title }}
+            </a>
+            {% endfor %}
+          </div>
+        </li>
+        {% else %}
+        {% if nav_layout != "horizontal" %}
+        <li class="nav-item nav-section mt-2"><div class="nav-link text-uppercase small text-secondary">{{ section.title }}</div></li>
+        {% endif %}
+        {% for link in section.links %}
+        <li class="nav-item{% if link.active %} active{% endif %}">
+          <a class="nav-link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+            <span class="nav-link-icon">{% icon link.icon %}</span>
+            <span class="nav-link-title">{{ link.title }}</span>
+          </a>
+        </li>
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
