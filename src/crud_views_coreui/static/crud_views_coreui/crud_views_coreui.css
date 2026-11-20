@@ -1,0 +1,52 @@
+/* crud_views_coreui: theme rules for django-crud-views under CoreUI 5 (free). Loaded after crud_views' own CSS. */
+
+/* Upstream tracker U5: crud_views' manage.css and formset.css read Bootstrap's --bs-* custom properties, which CoreUI
+   names --cui-*, so under CoreUI their light-mode fallbacks applied and the manage page and formset rows ignored dark
+   mode. Feed them CoreUI's values on the elements those rules style, so a [data-coreui-theme] subtree is followed. */
+[data-cv-manage],
+.cv-formset-row-card,
+.cv-formset-row-compact,
+.cv-formset-compact-child {
+  --bs-secondary-color: var(--cui-secondary-color);
+  --bs-secondary-text-emphasis: var(--cui-secondary-text-emphasis);
+  --bs-body-bg: var(--cui-body-bg);
+  --bs-border-color: var(--cui-border-color);
+  --bs-border-radius: var(--cui-border-radius);
+  --bs-tertiary-bg: var(--cui-tertiary-bg);
+}
+
+/* U5, the other direction: two upstream rules set a Bootstrap component variable that CoreUI's component reads under
+   its --cui-* name. Hand the value on. The help button's contrast fix (stock outline-secondary is below 4.5:1 on a
+   tinted card header; manage:help is btn-outline-secondary): */
+[data-cv-manage] [data-cv-manage-help].btn-outline-secondary {
+  --cui-btn-color: var(--bs-btn-color);
+}
+
+/* The compact formset rows' 1rem gutter: CoreUI's .row reads --cui-gutter-x. */
+.cv-formset-compact-fields,
+.cv-formset-compact-headings {
+  --cui-gutter-x: var(--bs-gutter-x);
+}
+
+/* Icon-only buttons (every :icon button class key, the menu toggles, formset and card-order controls) are square.
+   CoreUI has no .btn-icon: the button is as wide as it is tall, with the icon centred. Follows .btn-sm and .btn-lg,
+   which only change the --cui-btn-* variables. */
+.cv-coreui-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(
+    var(--cui-btn-font-size) * var(--cui-btn-line-height) + 2 * var(--cui-btn-padding-y) + 2 *
+      var(--cui-btn-border-width)
+  );
+  padding-inline: 0;
+}
+
+/* Registered for conditional:legend and formset:legend: section labels like CoreUI's .card-title. */
+.cv-coreui-section-legend {
+  float: none;
+  width: auto;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}

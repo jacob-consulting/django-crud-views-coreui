@@ -61,23 +61,40 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
-- Status: anticipated · Severity: cosmetic
+- Status: confirmed · Severity: cosmetic
 - Where: `crud_views/static/crud_views/js/adapters.js:129`
 - Effect: works (a theme script runs `cv.adapters = cv.bootstrapAdapters(() => window.coreui)`), but every
   Bootstrap-fork theme writes the same few lines and has to load after `adapters.js` and before first use.
+- Theme workaround: `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` (registered as a
+  `crud_views_coreui` asset bundle in `CrudViewsCoreuiConfig.ready()`) runs
+  `Object.assign(cv.adapters, cv.bootstrapAdapters(() => globalThis.coreui))`, the same line as
+  `tabler-adapters.js` with another namespace. Its tooltip placement wrapper also has to name the library's data
+  attribute (`data-coreui-placement` here, `data-bs-placement` in Tabler), so a `cv_config` namespace alone would not
+  remove the theme script; a placement option on `tooltip.init` would.
 - Possible fix: a `cv_config` value (`js_namespace: "coreui"`) that `adapters.js` reads before falling back to
   `bootstrap`.
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
-- Status: anticipated · Severity: cosmetic
+- Status: confirmed · Severity: cosmetic
 - Where: `crud_views/static/crud_views/css/manage.css`, `crud_views/static/crud_views/css/formset.css`
-  (13 `--bs-` references in total)
+  (13 `--bs-` references in total: 6 properties read with `var()`, `--bs-secondary-color`,
+  `--bs-secondary-text-emphasis`, `--bs-body-bg`, `--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`; and
+  2 Bootstrap component variables upstream *sets*, `--bs-btn-color` on the manage help button and `--bs-gutter-x` on
+  the compact formset rows, which CoreUI's `.btn`/`.row` never read because they read `--cui-btn-color` and
+  `--cui-gutter-x`)
 - Effect: under CoreUI the variables are undefined (CoreUI defines `--cui-*`), so the manage page and formsets fall
   back to hard defaults and do not follow dark mode. The Tabler theme already re-maps two of them from `--tblr-*`
   (see the Tabler findings, manage page section); a CoreUI theme re-maps them from `--cui-*`.
+- Theme workaround: `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`: one block on
+  `[data-cv-manage]` and the formset row/child elements defines the six read properties from `--cui-*`
+  (element-scoped, so a `[data-coreui-theme]` subtree is followed), plus two rules handing the set values on
+  (`--cui-btn-color: var(--bs-btn-color)` on the help button, `--cui-gutter-x: var(--bs-gutter-x)` on the compact
+  rows). `tests/crud_views_coreui/test_registration.py::test_css_maps_every_bs_variable_upstream_reads` parses the
+  upstream files, so a new `--bs-*` reference fails the suite.
 - Possible fix: crud_views defines its own tokens (`--cv-secondary-color: var(--bs-secondary-color, #6c757d)`) in
-  one place and uses only those; a theme sets the `--cv-*` tokens once.
+  one place and uses only those; a theme sets the `--cv-*` tokens once. The component variables it sets
+  (`--bs-btn-color`, `--bs-gutter-x`) would better be a class key or a `--cv-*` token the theme maps.
 
 ## U6. Third party: crispy-bootstrap5 hard-codes `data-bs-*`
 
@@ -108,3 +125,6 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 - Effect: a second theme repeats the same `ready()` shape. To confirm once `crud_views_coreui/apps.py` exists: if
   the two are near-identical, a small upstream "theme" helper (one call taking classes, icons, assets) would make the
   pattern explicit.
+- 2026-11-20: `src/crud_views_coreui/apps.py` exists and its `ready()` is the Tabler one with names replaced (icon
+  library, icons, label-mode defaults, button classes filtered on `crud_views_workflow`, one asset bundle); `checks.py`
+  (W001) is likewise a rename of `check_tabler_icons`. Status left anticipated: it is boilerplate, not a workaround.
