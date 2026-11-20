@@ -51,8 +51,8 @@ prefix, or use a semantic name from `CRUD_VIEWS_ICONS`:
 
 ```python
 class CustomerDetailView(DetailViewPermissionRequired):
-    cv_icon_action = "customer"          # a semantic name
-    # cv_icon_action = "coreui:cil-star" # or a library icon
+    cv_icon_action = "customer"  # a semantic name
+    # or a library icon: cv_icon_action = "coreui:cil-star"
 ```
 
 The system check `crud_views_coreui.W001` warns about a `coreui:` name that has no SVG in `ICONS`.
