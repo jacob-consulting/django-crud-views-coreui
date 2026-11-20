@@ -700,6 +700,36 @@ class DataCoreuiTests(TestCase):
                 self.assertEqual(override.read_text(), expected)
                 self.assertIn("data-bs-", upstream.read_text())  # the copy exists only while upstream hard-codes it
 
+    def test_no_new_upstream_data_bs_outside_the_overrides(self):
+        """Every installed upstream crud_views* template or JS file that hard-codes data-bs- is already handled.
+
+        The handled set is the four DATA_BS_OVERRIDES templates plus object_detail's tabs.js (the theme's
+        coreui-tabs.js does its work). Comments do not count: JS `//` and `/* */` comments and Django `{# #}`
+        comments are stripped before searching, so tooltip.js, which only names data-bs-toggle="tooltip" in a `//`
+        comment, is not a hit. A new hit means upstream added Bootstrap-only markup the theme must override.
+        """
+        import importlib
+
+        names = ("crud_views", "crud_views_object_detail", "crud_views_workflow", "crud_views_polymorphic")
+        names += ("crud_views_guardian",)
+        found = set()
+        for name in names:
+            root = Path(importlib.import_module(name).__file__).resolve().parent
+            for path in list(root.rglob("*.html")) + list(root.rglob("*.js")):
+                text = path.read_text()
+                if path.suffix == ".js":
+                    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+                    text = re.sub(r"(?m)//.*$", "", text)
+                else:
+                    text = re.sub(r"\{#.*?#\}", "", text, flags=re.S)
+                    text = re.sub(r"\{% comment %\}.*?\{% endcomment %\}", "", text, flags=re.S)
+                if "data-bs-" in text:
+                    found.add(path.relative_to(root.parent).as_posix())
+        expected = {f"{package.__name__}/templates/{name}" for name, package in DATA_BS_OVERRIDES.items()} | {
+            "crud_views_object_detail/static/crud_views_object_detail/js/tabs.js"
+        }
+        self.assertEqual(found, expected)
+
     def test_tabs_vertical_pack_uses_coreui_pills(self):
         html = self.client.get(reverse("customer-properties", args=[self.customer.pk])).content.decode()
         self.assertIn("data-cv-od-tabs", html)

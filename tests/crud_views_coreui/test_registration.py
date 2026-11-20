@@ -199,6 +199,8 @@ class IconCheckTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertIn("'detail'", messages[0].msg)
         self.assertIn("'coreui:cil-nope'", messages[0].msg)
+        self.assertIn("ICONS", messages[0].hint)
+        self.assertNotIn("vendor_icons.py", messages[0].hint)
 
     def test_w001_silent_by_default(self):
         self.assertEqual([m.id for m in run_checks() if m.id.startswith("crud_views_coreui.")], [])

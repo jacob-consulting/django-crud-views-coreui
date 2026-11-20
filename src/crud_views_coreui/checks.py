@@ -21,7 +21,10 @@ def check_coreui_icons(app_configs=None, **kwargs) -> list[CheckMessage]:
             messages.append(
                 Warning(
                     f"Icon {key!r} = {value!r}: crud_views_coreui has no SVG for CoreUI icon {name!r}.",
-                    hint="Vendor it with scripts/vendor_icons.py (CoreUI Icons Free) or use another library prefix.",
+                    hint=(
+                        "Add its SVG to django_coreui.icons.ICONS at startup (see 'Adding icons' in the Icons docs) "
+                        "or use another library prefix."
+                    ),
                     id="crud_views_coreui.W001",
                 )
             )
