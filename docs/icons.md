@@ -33,7 +33,7 @@ COREUI_ICON_ALIASES = {"customer": "cil-building"}
 ```
 
 The demo keeps one table, `ACME_ICONS`
-([`example/config/icons.py`](https://github.com/jacob-consulting/django-crud-views-coreui/blob/main/example/config/icons.py)),
+(`example/config/icons.py` in the repository),
 and feeds it to both settings, so the same names work in templates and in django-crud-views:
 
 ```python
@@ -87,7 +87,9 @@ python scripts/vendor_icons.py cil-rocket cil-bell     # also accepted: rocket, 
 Only the free set (`dist/esm/free/`) is read. The generated block of `django_coreui/icons.py` is not edited by hand.
 
 In a project that only has the installed package, extend the dictionary at startup instead (for example in
-`AppConfig.ready()`) with the inner SVG markup of the icon, a 512x512 viewBox:
+`AppConfig.ready()`) with the inner SVG markup of the icon, a 512x512 viewBox. `ICONS` is read each time an icon renders,
+so `{% icon %}`, the `coreui:` renderer and the system check all see the added name; until it is added, `W001` flags
+any `coreui:` value that names it.
 
 ```python
 from django_coreui.icons import ICONS

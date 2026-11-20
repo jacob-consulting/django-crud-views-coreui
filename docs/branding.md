@@ -16,7 +16,7 @@ Other includes (`header.html`, `sidebar.html`, `messages.html`, `layout_switch_m
 the layout; `field.html` renders one bound field in CoreUI markup for hand-written forms.
 
 The demo's files are in
-[`example/templates/django_coreui/includes/`](https://github.com/jacob-consulting/django-crud-views-coreui/tree/main/example/templates/django_coreui/includes).
+`example/templates/django_coreui/includes/` in the repository.
 
 ## Brand and colour
 
@@ -33,7 +33,7 @@ The `sidebar-brand-full` class hides the name in the narrow sidebar and keeps th
 The primary colour is CoreUI's CSS custom properties; set them in a stylesheet loaded from `head.html`. CoreUI compiles
 the hex value of the primary into some component classes (`.btn-primary`, `.btn-outline-primary`, ...), so a brand
 colour needs those restated as well; the demo's
-[`acme.css`](https://github.com/jacob-consulting/django-crud-views-coreui/blob/main/example/static/acme/acme.css) shows
+`acme.css` (`example/static/acme/acme.css` in the repository) shows
 a complete sienna brand for light and dark mode.
 
 ```css
@@ -54,4 +54,4 @@ section headings:
 ```
 
 The demo builds its menu, with permission checks and the active entry, in one template tag
-([`example/config/templatetags/acme_nav.py`](https://github.com/jacob-consulting/django-crud-views-coreui/blob/main/example/config/templatetags/acme_nav.py)).
+(`example/config/templatetags/acme_nav.py` in the repository).

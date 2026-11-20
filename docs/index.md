@@ -21,7 +21,7 @@ bundled.
     setting; today any value other than `"free"` is a system check error. CoreUI PRO material is never shipped with
     this package, so a PRO edition will need your own CoreUI licence.
 
-Supported: Python 3.12-3.15, Django 4.2, 5.2 and 6.1, django-crud-views 1.0.
+Supported: Python 3.12-3.15, Django 4.2, 5.2 and 6.1, django-crud-views >=0.30. The theme tracks django-crud-views `main` until 1.0.0rc1 is on PyPI.
 
 - [Installation](installation.md): settings, in the order they matter.
 - [Branding](branding.md) and [Layouts](layouts.md): site name, logo, menu, default colour mode and sidebar.

@@ -9,7 +9,7 @@
 | `example/` | the Acme Roasters demo project and its tests |
 | `docs/` | this documentation |
 | `dev/` | maintainer notes, not published: the hand edits of the crispy pack |
-| `superpowers/` | design specs, implementation plans and the [upstream tracker](https://github.com/jacob-consulting/django-crud-views-coreui/blob/main/superpowers/notes/upstream-tracker.md) |
+| `superpowers/` | design specs, implementation plans and the upstream tracker (`superpowers/notes/upstream-tracker.md` in the repository) |
 | `scripts/` | `vendor_templates.py` (crispy pack), `vendor_icons.py` (icons), `check_dist.py`, `check_release_floor.py` |
 
 ## Local setup
@@ -42,7 +42,7 @@ Run `unset VIRTUAL_ENV` before `uv` commands if your shell sets one.
 
 ```shell
 task test          # every suite against the sibling checkouts, plus the system check
-task test:matrix   # the nox matrix, as CI would run it
+task test:matrix   # the nox matrix, as a CI matrix would run it
 ```
 
 `task test` runs the three package suites (each with its own `--ds` settings module), the demo's tests from `example/`
