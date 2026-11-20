@@ -1,0 +1,10 @@
+{% load coreui %}
+{% if user.is_staff %}
+<a href="{% url 'admin:index' %}" class="dropdown-item">{% icon "cil-settings" "me-2" %}Admin site</a>
+<a href="{% url 'admin:password_change' %}" class="dropdown-item">{% icon "cil-user" "me-2" %}Change password</a>
+<div class="dropdown-divider"></div>
+{% endif %}
+<form method="post" action="{% url 'logout' %}">
+  {% csrf_token %}
+  <button type="submit" class="dropdown-item">{% icon "cil-account-logout" "me-2" %}Sign out</button>
+</form>

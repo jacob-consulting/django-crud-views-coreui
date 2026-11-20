@@ -1,0 +1,9 @@
+{% load i18n coreui %}
+{% for message in messages %}{% with alert=message|message_alert %}
+<div class="{{ alert.css }} alert-dismissible fade show d-flex align-items-center{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}" role="alert">
+  {% icon alert.icon "flex-shrink-0 me-2" %}
+  <div>{{ message.message|default:"" }}
+</div>
+  <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="{% translate 'Close' %}"></button>
+</div>
+{% endwith %}{% endfor %}

@@ -1,0 +1,16 @@
+{% load coreui %}
+{# CoreUI's sidebar, as in the free admin template; layout-switch.js adds sidebar-narrow / sidebar-narrow-unfoldable. #}
+<div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+  <div class="sidebar-header border-bottom">
+    <div class="sidebar-brand me-auto">
+      {% include "django_coreui/includes/brand.html" %}
+    </div>
+    <button type="button" class="btn-close d-lg-none" data-coreui-theme="dark" data-coreui-close="sidebar" aria-label="Close"></button>
+  </div>
+  <ul class="sidebar-nav" data-coreui="navigation">
+    {% with url_name=request.resolver_match.url_name %}{% include "django_coreui/includes/nav_menu.html" %}{% endwith %}
+  </ul>
+  <div class="sidebar-footer border-top d-none d-md-flex">
+    <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable" aria-label="Toggle unfoldable sidebar"></button>
+  </div>
+</div>

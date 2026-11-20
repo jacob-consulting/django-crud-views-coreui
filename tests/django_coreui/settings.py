@@ -20,3 +20,7 @@ TEMPLATES = [
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
+
+# The shell's templates reverse the auth URLs and load their static files.
+ROOT_URLCONF = "tests.django_coreui.urls"
+STATIC_URL = "/static/"

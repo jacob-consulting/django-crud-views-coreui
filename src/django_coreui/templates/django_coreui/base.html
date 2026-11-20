@@ -1,0 +1,19 @@
+{% load static coreui %}<!doctype html>
+<html lang="en"{% layout_defaults_attrs %}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{% block title %}{% endblock %} · {% include "django_coreui/includes/site_name.html" %}</title>
+    {% include "django_coreui/includes/assets.html" with part="css" %}
+    <link rel="stylesheet" href="{% static 'django_coreui/django_coreui.css' %}" />
+    {# Not deferred: it sets the colour mode and the sidebar state before the page is painted. #}
+    <script src="{% static 'django_coreui/layout-switch.js' %}"></script>
+    {% include "django_coreui/includes/head.html" %}
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    {% block body %}{% endblock %}
+    {% include "django_coreui/includes/assets.html" with part="js" %}
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

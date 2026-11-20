@@ -1,0 +1,4 @@
+{% load coreui %}{% coreui_assets as assets %}{% comment %}
+  Every CoreUI CSS/JS tag of the shell, and the only template that looks at settings.COREUI["edition"] (the edition
+  seam). base.html includes it twice: part="css" in <head>, part="js" at the end of <body>.
+{% endcomment %}{% if assets.edition == "free" %}{% if part == "css" %}<link rel="stylesheet" href="{{ assets.css }}" integrity="{{ assets.css_sri }}" crossorigin="anonymous" />{% elif part == "js" %}<script src="{{ assets.js }}" integrity="{{ assets.js_sri }}" crossorigin="anonymous"></script>{% endif %}{% endif %}

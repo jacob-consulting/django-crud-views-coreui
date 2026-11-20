@@ -6,3 +6,6 @@ class DjangoCoreuiConfig(AppConfig):
 
     name = "django_coreui"
     verbose_name = "Django CoreUI"
+
+    def ready(self):
+        from django_coreui import checks  # noqa: F401  (registers the system checks)
