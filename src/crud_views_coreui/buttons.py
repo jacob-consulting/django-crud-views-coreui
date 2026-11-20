@@ -11,10 +11,12 @@ free classes (coreui.io/bootstrap/docs). How the Tabler classes translate:
 - Tabler's light badges ``bg-<colour>-lt`` are CoreUI's ``bg-<colour>-subtle text-<colour>-emphasis``.
 - ``btn-list`` is ``d-flex flex-wrap gap-2``; ``nav-bordered`` is ``nav nav-underline-border``; ``table-vcenter`` is
   ``align-middle``; ``badge-outline`` is ``border`` with a subtle border colour.
-- Tabler's named colours have no CoreUI utility classes, so the closest theme colour is used: ``blue`` and ``azure``
-  are ``info`` (CoreUI's info is blue, its primary violet), ``pink`` is ``primary`` (violet, the nearest to the manage
-  page's "Magenta" that stays apart from the red ``danger`` of a denied trace), ``green`` is ``success``, ``red`` is
-  ``danger`` and ``yellow`` is ``warning``.
+- Tabler's named colours: ``green``, ``red`` and ``yellow`` are CoreUI's ``success``, ``danger`` and ``warning``, and
+  ``azure`` is ``info`` (CoreUI's info, #39f, is an azure). ``blue`` and ``pink`` have no theme colour: CoreUI 5 defines
+  them as palette variables (``--cui-blue``, ``--cui-pink``) but ships no utility classes for them, a CoreUI palette
+  gap, not an upstream one. The theme's ``cv-coreui-badge-blue`` / ``cv-coreui-badge-pink`` (``crud_views_coreui.css``)
+  build subtle badges from those variables, light and dark. Never ``primary``: the manage page's legend names the
+  colours ("Blue: required permission · Magenta: required group"), and a project's primary may be any colour.
 """
 
 COREUI_BUTTON_CLASSES: dict[str, str] = {
@@ -91,12 +93,12 @@ COREUI_BUTTON_CLASSES: dict[str, str] = {
     "formset:legend": "cv-coreui-section-legend",
     # The structured manage page (#366, #370, #372): subtle badges, as for the workflow state. Named colours, not the
     # project's primary, because the page's legend names them ("Blue: required permission · Magenta: required group ·
-    # Green: Guardian policy"); see the module docstring for the colour substitutions.
+    # Green: Guardian policy"); see the module docstring for the colour substitutions and the two theme badge classes.
     "manage:badge-model": "badge bg-secondary-subtle text-secondary-emphasis",
     "manage:badge-resource": "badge bg-info-subtle text-info-emphasis",
     "manage:badge-objects": "badge border border-secondary-subtle text-secondary-emphasis",
-    "manage:badge-permission": "badge bg-info-subtle text-info-emphasis",
-    "manage:badge-group": "badge bg-primary-subtle text-primary-emphasis",
+    "manage:badge-permission": "badge cv-coreui-badge-blue",
+    "manage:badge-group": "badge cv-coreui-badge-pink",
     "manage:badge-policy-global": "badge bg-success-subtle text-success-emphasis",
     "manage:badge-policy-strict": "badge bg-success-subtle text-success-emphasis",
     "manage:badge-policy-na": "badge bg-secondary-subtle text-secondary-emphasis",

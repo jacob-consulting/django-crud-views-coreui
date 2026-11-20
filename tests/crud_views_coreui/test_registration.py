@@ -128,6 +128,26 @@ class ButtonClassTests(SimpleTestCase):
             if key.endswith(":icon"):
                 self.assertIn("cv-coreui-icon-btn", value.split(), key)
 
+    def test_manage_badges_do_not_follow_the_brand_primary(self):
+        # The manage page's legend names the colours ("Blue", "Magenta"); a project's primary may be any colour.
+        primary = {k: v for k, v in COREUI_BUTTON_CLASSES.items() if k.startswith("manage:") and "primary" in v}
+        self.assertEqual(primary, {})
+
+    def test_legend_colours(self):
+        self.assertIn("cv-coreui-badge-blue", COREUI_BUTTON_CLASSES["manage:badge-permission"].split())
+        self.assertIn("cv-coreui-badge-pink", COREUI_BUTTON_CLASSES["manage:badge-group"].split())
+        self.assertNotEqual(
+            COREUI_BUTTON_CLASSES["manage:badge-resource"], COREUI_BUTTON_CLASSES["manage:badge-permission"]
+        )
+
+    def test_theme_badge_classes_are_styled_from_coreui_palette(self):
+        theme = (STATIC / "crud_views_coreui.css").read_text()
+        for colour in ("blue", "pink"):
+            self.assertRegex(
+                theme, rf"\.cv-coreui-badge-{colour} \{{\s*--cv-coreui-badge-color: var\(--cui-{colour}\);"
+            )
+            self.assertRegex(theme, rf'\[data-coreui-theme="dark"\] \.cv-coreui-badge-{colour}\b')
+
     def test_classes_are_registered(self):
         # crud_views_workflow is installed in the test settings, so the workflow:* keys are registered too.
         classes = get_button_classes()
