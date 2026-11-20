@@ -1,6 +1,6 @@
 # CoreUI theme for django-crud-views (free edition): design
 
-Date: 2026-11-20 · Status: draft, awaiting approval
+Date: 2026-11-20 · Status: approved
 
 ## Intent
 
