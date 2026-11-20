@@ -1,0 +1,5 @@
+{% load coreui %}<a href="{% url 'dashboard:index' %}" class="d-inline-flex align-items-center gap-2 text-reset text-decoration-none">
+  <span class="avatar avatar-md bg-primary text-white">{% icon "cil-coffee" %}</span>
+  {# sidebar-brand-full: CoreUI hides the name in the narrow sidebar, the mark stays. #}
+  <span class="sidebar-brand-full fw-semibold">{% include "django_coreui/includes/site_name.html" %}</span>
+</a>

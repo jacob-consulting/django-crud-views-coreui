@@ -1,0 +1,2 @@
+{% with colour=object.is_wholesale|yesno:"primary,secondary" %}<span class="badge bg-{{ colour }}-subtle text-{{ colour }}-emphasis me-1">{{ object.get_kind_display }}</span>{% endwith %}
+{% if object.is_wholesale %}Tier {{ object.price_tier }} · {{ object.get_payment_terms_display }} · {% endif %}{{ object.city }}{% if object.country %}, {{ object.country }}{% endif %}

@@ -1,0 +1,35 @@
+{% extends "django_coreui/layouts/app.html" %}
+{% load crud_views crud_views_coreui %}
+{# Base template for every django-crud-views page (CRUD_VIEWS_EXTENDS): maps the crud_views blocks onto the CoreUI page. #}
+{% block title %}{% cv_header %}{% if cv_navbar %} · {{ cv_navbar.label }}{% endif %}{% endblock %}
+{% block extra_head %}{% cv_css %}{% endblock %}
+{# The breadcrumb has its own row in CoreUI's layout, the header's second row, on every page. With a ViewSet #}
+{# Navigation bar it stays there too: the owner header below needs it only once, and "once" is what upstream's #}
+{# owner-as-page-heading recipe asks for (#384). #}
+{% block breadcrumb %}{% cv_breadcrumb %}{% endblock %}
+{# ViewSet Navigation (upstream PR #383): with a bar, the owner's header (avatar, name as h1, the section tabs) sits #}
+{# at the top of the page header and the view's own title row follows the tabs as a section heading, as in #}
+{# upstream's owner-as-page-heading recipe (#384). The title row's blocks stay in place, so overrides of page_title, #}
+{# cv_context and actions keep working. The cv_navbar block holds only the tabs: the stock items template, styled #}
+{# through the navbar:* class keys. #}
+{% block page_header_top %}{% if cv_navbar %}
+<div class="cv-coreui-owner">
+  <div class="d-flex align-items-center gap-3 mb-3">
+    {% if cv_navbar.icon %}<span class="avatar avatar-md bg-primary-subtle text-primary-emphasis">{% cv_icon cv_navbar.icon %}</span>{% endif %}
+    <h1 class="page-title h3 mb-0 text-break">{{ cv_navbar.label }}</h1>
+  </div>
+  {% block cv_navbar %}<div class="cv-coreui-navbar d-print-none mb-3">{% cv_navbar_items %}</div>{% endblock %}
+</div>
+{% endif %}{% endblock %}
+{# The page title follows CRUD_VIEWS_HEADER_LEVEL (h2 while it is unset) at CoreUI's h3 size, like the shell's own #}
+{# title. With a bar, a heading that says the same as the active tab is left out; its subline and buttons stay. #}
+{% block page_heading %}{% cv_coreui_heading_repeats_tab as repeats_tab %}{% if not repeats_tab %}{% cv_heading "header" level=2 size=3 class="page-title mb-0" %}{% block page_title %}<span class="d-inline-flex align-items-center gap-2">{% cv_header_icon %}{% cv_header %}</span>{% endblock %}{% endcv_heading %}{% endif %}{% endblock %}
+{% block subtitle %}{% block cv_paragraph %}<div class="page-subtitle text-body-secondary mt-1">{% cv_paragraph %}</div>{% endblock cv_paragraph %}{% endblock %}
+{% block actions %}{% block cv_context %}{% cv_context_actions object %}{% endblock cv_context %}{% endblock %}
+{% block messages %}{% cv_messages %}{% endblock %}
+{% block content %}
+{% block cv_filter %}{% endblock cv_filter %}
+{% block cv_content %}{% endblock cv_content %}
+{% cv_config %}
+{% endblock %}
+{% block extra_js %}{% cv_js %}{% endblock %}

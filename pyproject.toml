@@ -1,17 +1,185 @@
 [project]
-name = "django-crud-views-core-ui"
+name = "django-crud-views-coreui"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "CoreUI 5 theme for django-crud-views, with a CoreUI page shell and crispy-forms template pack"
 authors = [
     { name = "Alexander Jacob", email = "alexander.jacob@jacob-consulting.de" }
 ]
-requires-python = ">=3.14"
-dependencies = []
+license = { text = "MIT" }
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 4",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6",
+    "Framework :: Django :: 6.1",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django (>=4.2)",
+    # Raised to >=1.0.0rc1 in the release commit (scripts/check_release_floor.py guards the publish workflow).
+    "django-crud-views (>=0.30)",
+    "django-crispy-forms (>=2.3)",
+    # The crispy_coreui templates match these releases byte for byte (django_coreui/crispy/vendored.py); 2026.3 is the
+    # newest on Django 4.2.
+    "crispy-bootstrap5 (>=2026.3)",
+]
 
-[project.scripts]
-django-crud-views-core-ui = "django_crud_views_core_ui:main"
+[project.optional-dependencies]
+# The Acme Roasters example project (example/).
+examples = [
+    "django-crud-views[workflow,polymorphic,guardian,ordered]",
+    "django-crud-views-extensions (>=0.3.3)",
+    "pygments",
+]
+
+test = [
+    "nox",
+    "pytest",
+    "pytest-cov",
+    "pytest-random-order",
+    "pytest-mock",
+    "pytest-django",
+    "pytest-xdist",
+    "lxml",
+    "cssselect",
+    # The exact crispy-bootstrap5 per Django version is pinned by noxfile.py (crispy_bootstrap5()).
+]
+
+dev = [
+    "ruff>=0.17,<0.18",
+    "pre-commit",
+    "bump-my-version",
+    "mkdocs (>=1.6.1)",
+    "mkdocs-awesome-pages-plugin (>=2.10.1)",
+    "mkdocs-get-deps (>=0.2.0)",
+    "pymdown-extensions (>=10.0)",
+]
+
+[project.urls]
+Homepage = "https://github.com/jacob-consulting/django-crud-views-coreui"
+Documentation = "https://django-crud-views-coreui.readthedocs.io/en/latest/"
+Repository = "https://github.com/jacob-consulting/django-crud-views-coreui.git"
+Issues = "https://github.com/jacob-consulting/django-crud-views-coreui/issues"
+Changelog = "https://github.com/jacob-consulting/django-crud-views-coreui/blob/main/CHANGELOG.md"
+
+# Local development tracks the sibling checkouts (unreleased upstream features). nox, CI installs
+# django-crud-views from its GitHub main instead (noxfile.py CRUD_VIEWS) until 1.0.0rc1 is on PyPI.
+[tool.uv.sources]
+django-crud-views = { path = "../django-crud-views", editable = true }
+django-crud-views-extensions = { path = "../django-crud-views-extensions", editable = true }
 
 [build-system]
-requires = ["uv_build>=0.13.5,<0.14.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/crud_views_coreui",
+    "src/django_coreui",
+]
+
+# The sdist ships only what is listed here; scripts/check_dist.py enforces this list on every built distribution.
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "src",
+    "tests",
+    "docs",
+    "example",
+    "noxfile.py",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+exclude = [
+    "example/db.sqlite3",
+    "example/media",
+    "example/staticfiles",
+    "__pycache__",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.crispy_coreui.settings"
+pythonpath = ["."]
+testpaths = ["tests/crispy_coreui"]
+addopts = "--strict-markers"
+
+[tool.coverage.run]
+relative_files = true
+source = [
+    "crud_views_coreui",
+    "django_coreui",
+]
+
+[tool.coverage.paths]
+# nox installs the package rather than linking it; map site-packages back onto src/ for Codecov.
+source = [
+    "src/",
+    "*/site-packages/",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.bumpversion]
+current_version = "0.1.0"
+commit = true
+tag = true
+tag_name = "v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "src/crud_views_coreui/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "src/django_coreui/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "docs/index.md"
+search = "Current version: {current_version}"
+replace = "Current version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "README.md"
+search = "Current version: {current_version}"
+replace = "Current version: {new_version}"
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["superpowers/**"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
+# Typographic characters in demo copy and test data, on purpose.
+allowed-confusables = ["×", "’", "–"]
+
+[tool.ruff.lint.per-file-ignores]
+# ClassVar annotations on test fixtures and demo code add noise, not safety; Django generates migrations.
+"tests/**" = ["RUF012"]
+"example/**" = ["RUF012"]
+"**/migrations/*" = ["RUF012"]
+# CoreUI icon SVG path data: one icon per line, not splittable prose.
+"src/django_coreui/icons.py" = ["E501"]

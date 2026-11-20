@@ -1,0 +1,16 @@
+{# The happy path as a row of numbered steps (CoreUI free has no stepper): the steps already taken in the primary's #}
+{# light tint, the current one in the primary, the rest grey. A cancelled order shows a note instead. #}
+{% if order.state == "cancelled" %}
+<div class="alert alert-danger mb-4" role="status">This order was cancelled.</div>
+{% else %}
+<div class="card mb-4"><div class="card-body py-3">
+  <ol class="list-unstyled d-flex flex-wrap column-gap-4 row-gap-2 mb-0" aria-label="Order progress" data-order-steps>
+    {% for step in order.steps %}
+    <li class="d-flex align-items-center gap-2{% if not step.done and not step.active %} text-body-secondary{% endif %}"{% if step.active %} aria-current="step"{% endif %}>
+      <span class="badge rounded-pill {% if step.active %}bg-primary{% elif step.done %}bg-primary-subtle text-primary-emphasis{% else %}bg-body-secondary text-body-secondary{% endif %}">{{ forloop.counter }}</span>
+      <span{% if step.active %} class="fw-semibold"{% endif %}>{{ step.label }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+</div></div>
+{% endif %}

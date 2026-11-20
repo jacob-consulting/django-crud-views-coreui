@@ -1,0 +1,21 @@
+{% extends "crud_views/tags/card.html" %}
+{% load humanize %}
+{% block card_title %}
+<span class="d-flex align-items-center justify-content-between gap-2">
+  {{ object.name }}
+  <span class="badge bg-{{ object.status_badge }}-subtle text-{{ object.status_badge }}-emphasis">{{ object.get_status_display }}</span>
+</span>
+{% endblock %}
+{% block card_content %}
+<div class="text-body-secondary mb-3">{{ object.company|default:"No company" }}{% if object.country %} · {{ object.country }}{% endif %}</div>
+<div class="d-flex justify-content-between">
+  <div>
+    <div class="small text-body-secondary text-uppercase fw-semibold">Revenue</div>
+    <div class="fs-4 fw-semibold mb-0">{{ object.revenue|floatformat:"0g" }}</div>
+  </div>
+  <div class="text-end">
+    <div class="small text-body-secondary text-uppercase fw-semibold">Created</div>
+    <div title="{{ object.created_at }}">{{ object.created_at|naturaltime }}</div>
+  </div>
+</div>
+{% endblock %}

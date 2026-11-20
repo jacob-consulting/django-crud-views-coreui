@@ -1,0 +1,47 @@
+{% extends cv_extends %}
+{# Cupping session (mockup tab "5 Lot & cupping"): the scores as a table with each taster's total. #}
+
+{% block cv_content %}
+<div class="row g-4">
+  <div class="col-lg-9">
+    <div class="card">
+      <div class="card-header d-flex align-items-center">
+        <h3 class="h6 mb-0">Scores</h3>
+        <span class="fs-5 ms-auto">{{ average_badge }}</span>
+      </div>
+      {% if scores %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Taster</th><th>Aroma</th><th>Flavor</th><th>Acidity</th><th>Body</th><th>Aftertaste</th><th>Balance</th><th>Overall</th><th class="text-end">Total</th></tr></thead>
+          <tbody>
+          {% for score in scores %}
+            <tr>
+              <td>{{ score.taster.get_full_name|default:score.taster.username }}</td>
+              <td>{{ score.aroma }}</td><td>{{ score.flavor }}</td><td>{{ score.acidity }}</td><td>{{ score.body }}</td>
+              <td>{{ score.aftertaste }}</td><td>{{ score.balance }}</td><td>{{ score.overall }}</td>
+              <td class="text-end fw-bold">{{ score.total }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="card-body text-body-secondary">No scores yet.</div>
+      {% endif %}
+      <div class="card-footer small text-body-secondary">Total = the seven attributes plus 30 base points (SCA style, 100 at most).</div>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <div class="card">
+      <div class="card-header"><h3 class="h6 mb-0">Session</h3></div>
+      <div class="card-body">
+        <dl class="row g-3 mb-0">
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Lot</dt><dd class="mb-0">{{ object.lot.code }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Held on</dt><dd class="mb-0">{{ object.held_on|date:"d M Y" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Notes</dt><dd class="mb-0">{{ object.notes|default:"—"|linebreaksbr }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

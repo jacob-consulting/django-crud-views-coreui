@@ -1,0 +1,102 @@
+version: "3"
+
+vars:
+  MANAGE: uv run python example/manage.py
+  # Local development login created by `task superuser`; override with e.g. `task up ADMIN_PASSWORD=secret`.
+  ADMIN_USER: admin
+  ADMIN_EMAIL: admin@example.com
+  ADMIN_PASSWORD: admin
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  up:
+    desc: Install, migrate, create the superuser, seed the demo data and run the dev server
+    cmds:
+      - task: setup
+      - task: run
+
+  setup:
+    desc: Install, migrate, create the superuser and seed the demo data (safe to re-run)
+    cmds:
+      - task: install
+      - task: migrate
+      - task: superuser
+      - task: seed
+
+  install:
+    desc: Install the dependencies (needs the sibling checkout ../django-crud-views)
+    cmds:
+      - uv sync --extra examples --extra test --extra dev
+
+  migrate:
+    desc: Apply database migrations and ensure the crud_views manage group exists
+    cmds:
+      - "{{.MANAGE}} migrate"
+      - "{{.MANAGE}} cv_manage_group"
+
+  superuser:
+    desc: Create the superuser {{.ADMIN_USER}} unless it exists
+    env:
+      DJANGO_SUPERUSER_USERNAME: "{{.ADMIN_USER}}"
+      DJANGO_SUPERUSER_EMAIL: "{{.ADMIN_EMAIL}}"
+      DJANGO_SUPERUSER_PASSWORD: "{{.ADMIN_PASSWORD}}"
+    cmds:
+      - "{{.MANAGE}} createsuperuser --noinput"
+    status:
+      - >-
+        {{.MANAGE}} shell -c "import sys; from django.contrib.auth import get_user_model;
+        sys.exit(0 if get_user_model().objects.filter(username='{{.ADMIN_USER}}').exists() else 1)"
+
+  seed:
+    desc: Seed the roastery demo data, then the showcase items (seed_demo refuses when it is already there)
+    cmds:
+      - "{{.MANAGE}} seed_demo"
+      - task: seed:showcase
+
+  seed:reset:
+    desc: Delete the roastery demo data (not admin) and rebuild it
+    cmds:
+      - "{{.MANAGE}} seed_demo --reset"
+
+  # seed_demo refuses by itself when the demo accounts exist. seed_demo_showcase is not safely re-runnable (it skips
+  # a clashing row before drawing its remaining random values, so a second run adds ~39 more rows), hence the guard.
+
+  seed:showcase:
+    desc: Seed 40 demo showcase items, unless there are items already
+    cmds:
+      - "{{.MANAGE}} seed_demo_showcase"
+    status:
+      - >-
+        {{.MANAGE}} shell -c "import sys; from showcase.models import ShowcaseItem;
+        sys.exit(0 if ShowcaseItem.objects.exists() else 1)"
+
+  test:
+    desc: Run every test suite (crispy pack, theme, example apps) and the system check
+    cmds:
+      - uv run pytest -n auto
+      - uv run pytest -n auto tests/crud_views_coreui --ds tests.crud_views_coreui.settings
+      - uv run pytest -n auto tests/django_coreui --ds tests.django_coreui.settings
+      - cd example && uv run pytest -n auto
+      - "{{.MANAGE}} check --fail-level WARNING"
+
+  test:matrix:
+    desc: Run the full nox matrix against the installed package (django-crud-views from GitHub main), as CI does
+    cmds:
+      - uvx nox {{.CLI_ARGS}}
+
+  run:
+    desc: Run the development server on http://127.0.0.1:8000/
+    cmds:
+      - "{{.MANAGE}} runserver"
+
+  reset:
+    desc: Delete the SQLite database and uploaded media, then set everything up again
+    prompt: This deletes example/db.sqlite3 and example/media/. Continue?
+    cmds:
+      - rm -f example/db.sqlite3
+      - rm -rf example/media
+      - task: setup

@@ -1,0 +1,73 @@
+/* Layout rules that the free CoreUI admin template keeps in its own SCSS (src/scss/style.scss, MIT) rather than in
+   coreui.min.css: without them the wrapper slides under the fixed sidebar. */
+body {
+  background-color: var(--cui-tertiary-bg);
+}
+
+.wrapper {
+  width: 100%;
+  padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
+  will-change: auto;
+  transition: padding 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapper {
+    transition: none;
+  }
+}
+
+.header > .container-fluid,
+.sidebar-header {
+  min-height: calc(4rem + 1px);
+}
+
+/* The header's breadcrumb row (layouts/app.html) takes room only when a page fills it: the min-height rule above
+   matches it too, so a row without an element is hidden. Whitespace does not count: a breadcrumb tag with nothing to
+   show may still render a newline, and the row would stay as a blank 3rem strip. */
+.header > .header-breadcrumb:not(:has(*)) {
+  display: none;
+}
+
+.header > .header-breadcrumb:has(*) {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+}
+
+.sidebar-toggler {
+  margin-inline-start: auto;
+}
+
+.sidebar-narrow .sidebar-toggler,
+.sidebar-narrow-unfoldable:not(:hover) .sidebar-toggler {
+  margin-inline-end: auto;
+}
+
+.footer {
+  min-height: calc(3rem + 1px);
+}
+
+[data-coreui-theme="dark"] body {
+  background-color: var(--cui-dark-bg-subtle);
+}
+
+[data-coreui-theme="dark"] .footer {
+  --cui-footer-bg: var(--cui-body-bg);
+}
+
+/* A narrow sidebar has room for the brand's mark only (brand.html hides the name with sidebar-brand-full): centre it. */
+.sidebar-narrow .sidebar-header,
+.sidebar-narrow-unfoldable:not(:hover) .sidebar-header {
+  justify-content: center;
+}
+
+.sidebar-narrow .sidebar-header .sidebar-brand,
+.sidebar-narrow-unfoldable:not(:hover) .sidebar-header .sidebar-brand {
+  margin-inline-end: 0 !important;
+}
+
+/* Header and sign-in sizes that would otherwise be inline style= attributes (strict CSP). */
+.coreui-header-toggler { margin-inline-start: -14px; }
+.coreui-layout-menu { min-width: 18rem; }
+.coreui-login-container { max-width: 32rem; }

@@ -1,0 +1,18 @@
+{% load coreui %}
+{# Buttons of layout-switch.js: each sets the layout settings in its data-layout-settings JSON. #}
+<div class="mb-3">
+  <div class="form-label mb-1">Colour mode</div>
+  <div class="btn-group w-100" role="group" aria-label="Colour mode">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"theme":"light"}'>{% icon "cil-sun" "me-1" %}Light</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"theme":"dark"}'>{% icon "cil-moon" "me-1" %}Dark</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"theme":"auto"}'>{% icon "cil-contrast" "me-1" %}Auto</button>
+  </div>
+</div>
+<div>
+  <div class="form-label mb-1">Sidebar</div>
+  <div class="btn-group w-100" role="group" aria-label="Sidebar">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"sidebar":"default"}'>Default</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"sidebar":"narrow"}'>Narrow</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-layout-settings='{"sidebar":"unfoldable"}'>Unfoldable</button>
+  </div>
+</div>

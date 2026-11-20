@@ -1,0 +1,16 @@
+{% load coreui %}{% comment %}
+One bound field in CoreUI's form markup, for a hand-written form (crispy forms render their own):
+{% include "django_coreui/includes/field.html" with field=form.email %}. A checkbox is a .form-check; any other widget
+gets a .form-label and form_control's class. Errors (marked .is-invalid by form_control) take the place of the help
+text. A required field's label carries a red asterisk.
+{% endcomment %}{% if field.widget_type == "checkbox" %}
+<div class="form-check">
+  {{ field|form_control:"form-check-input" }}
+  <label class="form-check-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+</div>
+{% else %}
+<label class="form-label" for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required %}<span class="text-danger ms-1" aria-hidden="true">*</span>{% endif %}</label>
+{{ field|form_control }}
+{% endif %}
+{% if field.errors %}<div class="invalid-feedback d-block" id="{{ field.auto_id }}-errors">{{ field.errors|join:" " }}</div>
+{% elif field.help_text %}<div class="form-text" id="{{ field.auto_id }}-help">{{ field.help_text|safe }}</div>{% endif %}

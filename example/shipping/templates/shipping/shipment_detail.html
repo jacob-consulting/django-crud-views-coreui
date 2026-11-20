@@ -1,0 +1,44 @@
+{% extends cv_extends %}
+{% load crud_views %}
+{# Shipment page: the parcel's facts as a description list and the courier's events, newest first, as a list group. #}
+
+{% block page_title %}{{ block.super }} {{ status_badge }}{% endblock %}
+
+{% block cv_content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="h6 mb-0">Parcel</h3></div>
+      <div class="card-body">
+        <dl class="row g-3 mb-0">
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Tracking number</dt><dd class="mb-0">{{ object.tracking_number }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Carrier</dt><dd class="mb-0">{{ object.carrier }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Status</dt><dd class="mb-0">{{ status_badge }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Shipped</dt><dd class="mb-0">{{ object.shipped_at|date:"d M Y H:i" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">{% if object.is_delivered %}Estimated delivery was{% else %}Estimated delivery{% endif %}</dt><dd class="mb-0">{{ object.eta|date:"d M Y" }}</dd></div>
+          <div class="col-12"><dt class="small fw-normal text-body-secondary">Order</dt><dd class="mb-0"><a href="{{ order_url }}">#{{ object.order_number }}</a> · {{ object.customer_name }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><h3 class="h6 mb-0">Tracking events</h3></div>
+      <ul class="list-group list-group-flush">
+        {% for event in events %}
+        <li class="list-group-item d-flex gap-3 py-3" data-shipment-event>
+          <span class="avatar avatar-md flex-shrink-0 {% if forloop.first and object.is_delivered %}bg-success-subtle text-success-emphasis{% else %}bg-body-secondary text-body-secondary{% endif %}">{% cv_icon event.icon %}</span>
+          <div class="flex-fill">
+            <div class="d-flex flex-wrap column-gap-3">
+              <h4 class="h6 mb-1">{{ event.description }}</h4>
+              <span class="small text-body-secondary ms-auto">{{ event.at|date:"d M Y H:i" }}</span>
+            </div>
+            <p class="small text-body-secondary mb-0">{{ event.location }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

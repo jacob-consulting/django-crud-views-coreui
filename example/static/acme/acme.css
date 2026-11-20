@@ -1,0 +1,169 @@
+/* Acme Roasters brand: sienna primary (#a0522d). CoreUI reads the primary from --cui-primary* and the links from
+   --cui-link-*, but compiles the colours of the .btn-*-primary rules and .border-top-primary, so those get the brand
+   too. Light mode on :root, dark mode under CoreUI's [data-coreui-theme=dark] (set on <html> by the shell's
+   colour-mode switch). */
+:root {
+  --cui-primary: #a0522d;
+  --cui-primary-rgb: 160, 82, 45;
+  --cui-primary-text-emphasis: #402112;
+  --cui-primary-bg-subtle: #ecdcd5;
+  --cui-primary-border-subtle: #d9baab;
+  --cui-link-color: #a0522d;
+  --cui-link-color-rgb: 160, 82, 45;
+  --cui-link-hover-color: #804224;
+  --cui-link-hover-color-rgb: 128, 66, 36;
+  --cui-focus-ring-color: rgba(160, 82, 45, 0.25);
+}
+
+[data-coreui-theme="dark"] {
+  --cui-primary: #a0522d;
+  --cui-primary-rgb: 160, 82, 45;
+  --cui-primary-text-emphasis: #c69781;
+  --cui-primary-bg-subtle: #201009;
+  --cui-primary-border-subtle: #60311b;
+  /* sienna itself is too dark for text on CoreUI's dark body (2.7:1); this tint reads at 5.9:1 */
+  --cui-link-color: #c69781;
+  --cui-link-color-rgb: 198, 151, 129;
+  --cui-link-hover-color: #d8b6a6;
+  --cui-link-hover-color-rgb: 216, 182, 166;
+  --cui-focus-ring-color: rgba(198, 151, 129, 0.25);
+}
+
+.btn-primary,
+[data-coreui-theme="dark"] .btn-primary {
+  --cui-btn-color: #fff;
+  --cui-btn-bg: #a0522d;
+  --cui-btn-border-color: #a0522d;
+  --cui-btn-hover-color: #fff;
+  --cui-btn-hover-bg: #8f4929;
+  --cui-btn-hover-border-color: #804224;
+  --cui-btn-focus-shadow-rgb: 174, 108, 77;
+  --cui-btn-active-color: #fff;
+  --cui-btn-active-bg: #804224;
+  --cui-btn-active-border-color: #703a20;
+  --cui-btn-disabled-color: #fff;
+  --cui-btn-disabled-bg: #a0522d;
+  --cui-btn-disabled-border-color: #a0522d;
+}
+
+.btn-outline-primary,
+.btn-ghost-primary,
+[data-coreui-theme="dark"] .btn-outline-primary,
+[data-coreui-theme="dark"] .btn-ghost-primary {
+  --cui-btn-color: #a0522d;
+  --cui-btn-hover-color: #fff;
+  --cui-btn-hover-bg: #a0522d;
+  --cui-btn-hover-border-color: #a0522d;
+  --cui-btn-focus-shadow-rgb: 160, 82, 45;
+  --cui-btn-active-color: #fff;
+  --cui-btn-active-bg: #a0522d;
+  --cui-btn-active-border-color: #a0522d;
+  --cui-btn-disabled-color: #a0522d;
+}
+
+.btn-outline-primary,
+[data-coreui-theme="dark"] .btn-outline-primary {
+  --cui-btn-border-color: #a0522d;
+  --cui-btn-disabled-border-color: #a0522d;
+}
+
+/* on the dark body the outline and ghost label takes the light tint, as the links do */
+[data-coreui-theme="dark"] .btn-outline-primary,
+[data-coreui-theme="dark"] .btn-ghost-primary {
+  --cui-btn-color: #c69781;
+  --cui-btn-disabled-color: #c69781;
+}
+
+/* CoreUI compiles .border-top-primary's colour too (the product cards' stripe, catalog/product_card.html). */
+.border-top-primary {
+  border-top-color: #a0522d !important;
+}
+
+/* Focus states: CoreUI compiles its own primary into the form controls' focus border and ring, the range
+   thumb, the switch knob, the nav-link focus ring and the focus shadows of accordion, pagination, close button,
+   search button and sidebar toggler. They get the brand here: the border is sienna tinted 50% (#d0a996), the ring is
+   --cui-focus-ring-color (above, light and dark). The .is-valid/.is-invalid focus rules are more specific and keep
+   their colours. */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: #d0a996;
+  box-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.chip-input:focus-within {
+  border-color: #d0a996;
+}
+
+.nav-link:focus-visible {
+  box-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.form-switch .form-check-input:focus {
+  --cui-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23d0a996'/%3e%3c/svg%3e");
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--cui-body-bg), 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.form-range:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--cui-body-bg), 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.form-range::-webkit-slider-thumb:active {
+  background-color: #e3cbc0;
+}
+
+.form-range::-moz-range-thumb:active {
+  background-color: #e3cbc0;
+}
+
+.accordion {
+  --cui-accordion-btn-focus-box-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+  --cui-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23402112' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+[data-coreui-theme="dark"] .accordion-button::after {
+  --cui-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c69781'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+}
+
+.pagination {
+  --cui-pagination-focus-box-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.btn-close {
+  --cui-btn-close-focus-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.search-button {
+  --cui-search-button-focus-border-color: #d0a996;
+  --cui-search-button-focus-box-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+.sidebar-toggler {
+  --cui-sidebar-toggler-focus-shadow: 0 0 0 0.25rem var(--cui-focus-ring-color);
+}
+
+/* "Show code" panel and "How this is themed" (config/showcode.py). The token colours and the background come from
+   /_code/pygments.css: Pygments' default style in light mode, github-dark under [data-coreui-theme=dark]. */
+.code-block {
+  border: 1px solid var(--cui-border-color);
+  border-radius: var(--cui-border-radius);
+  max-height: 36rem;
+  overflow: auto;
+}
+.code-block pre {
+  margin: 0;
+  padding: .875rem 1rem;
+  background: transparent;
+  color: inherit;
+  font-size: .8125rem;
+  line-height: 1.5;
+}
+.code-files .nav-link { padding: .25rem .625rem; font-size: .8125rem; font-family: var(--cui-font-monospace); }
+.code-block-full { max-height: none; }
+
+/* Product cards (catalog/product_card.html): CoreUI's card title keeps a .5rem bottom margin; the mockup's tight
+   .25rem sits between the title and the summary line. */
+[data-product-card] ~ .card-body .card-title { margin-bottom: .25rem; }

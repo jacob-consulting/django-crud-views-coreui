@@ -1,0 +1,50 @@
+{% extends "django_coreui/base.html" %}
+{% load coreui static %}
+{# CoreUI's sign-in page, after the free admin template's authentication/login. #}
+{% block title %}Sign in{% endblock %}
+{% block body %}
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+  <div class="container coreui-login-container">
+    <div class="d-flex flex-column gap-4">
+      <div class="d-flex justify-content-center fs-4">
+        {% include "django_coreui/includes/brand.html" %}
+      </div>
+      <div class="card p-4">
+        <div class="card-body d-flex flex-column gap-4">
+          <h2 class="h5 text-center mb-0">Login to your account</h2>
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger d-flex align-items-center mb-0" role="alert">
+            {% icon "cil-x-circle" "flex-shrink-0 me-2" %}
+            <div>{{ form.non_field_errors|join:" " }}</div>
+          </div>
+          {% endif %}
+          <form class="d-flex flex-column gap-3" method="post" action="{% url 'login' %}" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            <div>
+              <label class="form-label" for="{{ form.username.auto_id }}">Username</label>
+              {{ form.username|form_control }}
+            </div>
+            <div>
+              <label class="form-label" for="{{ form.password.auto_id }}">Password</label>
+              <div class="input-group">
+                {{ form.password|form_control }}
+                <span class="input-group-text">
+                  <button type="button" class="bg-transparent border-0 p-0 link-secondary" data-password-toggle="#{{ form.password.auto_id }}" aria-label="Show password" title="Show password" aria-pressed="false">{% icon "cil-low-vision" %}</button>
+                </span>
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary w-100">Sign in</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% block login_after %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'django_coreui/password-toggle.js' %}" defer></script>
+{% endblock %}

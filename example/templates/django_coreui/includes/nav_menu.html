@@ -1,0 +1,20 @@
+{% load coreui acme_nav %}{% acme_menu as menu %}
+{# The entries and their permissions are defined once, in config/templatetags/acme_nav.py: the dashboard link, then #}
+{# one CoreUI nav-title per section with its links. The active link is marked here (its child pages too). #}
+{% with link=menu.dashboard %}
+<li class="nav-item">
+  <a class="nav-link{% if link.active %} active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+    {% icon link.icon "nav-icon" %} {{ link.title }}
+  </a>
+</li>
+{% endwith %}
+{% for section in menu.sections %}
+<li class="nav-title">{{ section.title }}</li>
+{% for link in section.links %}
+<li class="nav-item">
+  <a class="nav-link{% if link.active %} active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+    {% icon link.icon "nav-icon" %} {{ link.title }}
+  </a>
+</li>
+{% endfor %}
+{% endfor %}

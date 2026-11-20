@@ -1,0 +1,40 @@
+{% load coreui %}
+{# The header's top row (sidebar toggle, layout switch, user menu); layouts/app.html adds the breadcrumb row. #}
+{# data-sidebar-toggle: layout-switch.js toggles that sidebar (no inline handler, for CSP). #}
+<div class="container-fluid border-bottom px-4">
+  <button class="header-toggler coreui-header-toggler" type="button" data-sidebar-toggle="#sidebar" aria-label="Toggle sidebar">
+    {% icon "cil-menu" "icon-lg" %}
+  </button>
+  <ul class="header-nav ms-auto">
+    <li class="nav-item dropdown">
+      <button type="button" class="btn btn-link nav-link py-2 px-2 d-flex align-items-center" data-coreui-toggle="dropdown" data-coreui-auto-close="outside" aria-expanded="false" aria-label="Layout settings" title="Layout settings">
+        {% icon "cil-settings" "icon-lg" %}
+      </button>
+      <div class="dropdown-menu dropdown-menu-end p-3 coreui-layout-menu">
+        {% include "django_coreui/includes/layout_switch_menu.html" %}
+      </div>
+    </li>
+    <li class="nav-item py-1">
+      <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+    </li>
+    {% if user.is_authenticated %}
+    <li class="nav-item dropdown">
+      <a class="nav-link py-0 pe-0 d-flex align-items-center" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu">
+        {% with colour=user|avatar_color %}<span class="avatar avatar-md bg-{{ colour }}-subtle text-{{ colour }}-emphasis fw-semibold">{{ user|initials }}</span>{% endwith %}
+        <span class="d-none d-xl-block ps-2 lh-sm">
+          <span class="d-block">{{ user.get_full_name|default:user.get_username }}</span>
+          <span class="d-block small text-body-secondary">{% if user.is_superuser %}Superuser{% elif user.is_staff %}Staff{% else %}Member{% endif %}</span>
+        </span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-end pt-0">
+        <div class="dropdown-header bg-body-tertiary text-body-secondary fw-semibold rounded-top mb-2">Account</div>
+        {% include "django_coreui/includes/user_menu_items.html" %}
+      </div>
+    </li>
+    {% else %}
+    <li class="nav-item">
+      <a class="nav-link py-2 px-2 d-flex align-items-center" href="{% login_url %}">{% icon "cil-account-logout" "me-2" %}Sign in</a>
+    </li>
+    {% endif %}
+  </ul>
+</div>
