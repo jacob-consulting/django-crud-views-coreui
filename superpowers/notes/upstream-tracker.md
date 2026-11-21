@@ -15,7 +15,8 @@ entry here in the same change that adds it.
 
 References are against the sibling checkouts: `../django-crud-views` `main` @ `fa2f0a7b` (2026-11-19, includes
 ViewSet Navigation #383 and its navbar class keys #386; re-checked, U1-U6 unchanged from `8cc4c05a`). Paths without a
-repo prefix are in django-crud-views.
+repo prefix are in django-crud-views. Since 2026-11-21 the theme builds on `49d5173a` (#391, #393, #394 adopted) and
+django-crud-views-extensions `fd06c91` (0.4.0); the line references in the entries below are historical.
 
 Status: **anticipated** (found by reading the code, not yet hit while building), **confirmed** (the theme needed a
 workaround), **filed** (issue number), **fixed** (merged upstream, PR number; the theme workaround is still in place),
@@ -47,37 +48,68 @@ declared upstream; gutter via `gx-3`; help-button rule stays). U12 follows with 
 | django-crud-views #394 | U5 | PR #397 | `49d5173a` | six `--cv-*` tokens read with Bootstrap and literal fallbacks (twelve uses); compact formset rows use `gx-3`; the help-button `--bs-btn-color` bridge stays. |
 | extensions #6 | U12 | PR #7 | `c23739cb` | both typeahead skins read five `--cv-*` tokens as `var(--cv-x, var(--bs-x, <hard>))`; released in 0.4.0 (`fd06c91`). |
 
-Not yet adopted: `../django-crud-views` is still at `75a42851` (bulk selection #392), before all three PRs, and nox
-installs `main`. The extensions checkout (`fd06c91`) already has its fix. Adopting means: register the `coreui` prefix
-and drop the four U1 overrides, `coreui-tabs.js` and (probably) check E002 (U11); use the breadcrumb key instead of the
-CSS rule (U9); drop the `table.thead` copy (U10, C8); set the `--cv-*` tokens instead of re-mapping `--bs-*` (U5, U12).
-Expect the drift tests (`test_data_bs_overrides_track_upstream`, `test_upstream_tabs_script_still_selects_data_bs`,
-`test_table_head_is_upstream_plus_aria_sort`) and the strict xfail `test_bulk_prefixed_sort_shows_the_icon` to fail
-once the checkout is updated. That failure is the signal to adopt. U3 and U4 were waiting on #391; the decision is
-due when the adoption shows how much of `coreui-adapters.js` is left. #391 shipped without a `register_theme()`
-helper, so U8 stays as it is.
+Adopted (2026-11-21, branch `feature/adopt-upstream-fixes`, design
+`superpowers/specs/2026-11-21-adopt-upstream-fixes-design.md`): `../django-crud-views` pulled to `49d5173a`.
+
+- U1, U2: `register_data_prefix("coreui")` in `CrudViewsCoreuiConfig.ready()`; the four `data-coreui-` template copies
+  and `coreui-tabs.js` are deleted. Guards: every test app page (full and modal partial) renders without `data-bs-`,
+  `#cv-config` carries `data-data-prefix="coreui"`, and a scan of upstream's templates and scripts finds no hard-coded
+  `data-bs-`.
+- U11: E002 checks only `crud_views` (the form frame and table overrides remain); `crud_views_object_detail` may come
+  anywhere.
+- U9: `breadcrumb:list` = `breadcrumb my-0`; the CSS rule is gone.
+- U10, C8: the theme's `table.thead` copy is gone; upstream's header sets `aria-sort` and the icon from the table's
+  ordering, prefixed tables included (`test_bulk_prefixed_sort_shows_the_icon` is an ordinary test now).
+- U5, U12: the theme sets the `--cv-*` tokens from `--cui-*` (element-scoped); the `--bs-*` re-mapping and the gutter
+  rule are gone (upstream uses `gx-3`); the help-button `--cui-btn-color: var(--bs-btn-color)` bridge stays. The
+  example requires django-crud-views-extensions >= 0.4.0.
+- U3: the overrides it relied on are gone; dropdowns now work through the prefix and CoreUI's data API. Still deferred.
+- U4: unchanged; upstream's `adapters.js` did not change, `coreui-adapters.js` stays. Its tooltip placement wrapper could
+  derive `data-coreui-placement` from the prefix now in `#cv-config`; worth filing together with a namespace value.
+
+Browser pass after adoption (Acme Roasters, alex, Chrome via Claude in Chrome, 1548px window, 2026-11-21):
+
+| Check | Page | Mode | Result |
+| --- | --- | --- | --- |
+| `#cv-config` prefix `coreui`, no `data-bs-` in the page; second pill switches tab and pane | `/product/<id>/detail/` (tabs-vertical) | light | pass |
+| accordion: second group opens, first closes; no `data-bs-` | `/lot/<id>/detail/` (accordion) | light | pass |
+| `⋯` actions menu opens (`aria-expanded="true"`, `.show`) | `/lot/<id>/detail/` | light | pass |
+| header breadcrumb `breadcrumb my-0`, computed bottom margin 0 | `/lot/<id>/detail/` | light | pass |
+| sorted column: `aria-sort="ascending"` + icon; unsorted columns `none` | `/orders/?sort=number` | light | pass |
+| tokens resolve to CoreUI dark values; table headers and `?` buttons `rgba(255,255,255,.87)` | `/orders/manage/` | dark | pass (see note) |
+| same, light values (`rgba(37,43,54,.95)`, `--cv-body-bg` `#fff`) | `/orders/manage/` | light | pass |
+| typeahead select popup opaque, options readable | `/orders/create/` | dark | pass |
+| compact formset: `row gx-3` headings and fields, gutter 1rem, columns aligned to 1px, row card dark | `/customer/<id>/order/create/` | dark | pass |
+
+Note: the first manage-page check showed `#495057` headers on the dark page, because the browser still had the
+pre-pull `manage.css` (reading `--bs-*`) cached next to the new theme CSS (setting only `--cv-*`). After a cache reload
+it passed. The theme's and upstream's stylesheets must be upgraded together; hashed static file names
+(`ManifestStaticFilesStorage`) do that in production. Not checked in the browser: tabs inside a modal (no demo view
+opens an object detail in a modal; covered by `test_cv_config_publishes_the_coreui_prefix`), the language selector (the
+demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixed bulk list (covered by
+`test_bulk_prefixed_sort_*`), 375px.
 
 | Entry | Final status | Handled by (theme side) |
 |---|---|---|
-| U1 | fixed (#391, PR #395) | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
-| U2 | fixed (#391, PR #395) | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
-| U3 | deferred (superseded by #391, now merged) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
-| U4 | deferred (after #391, now merged; decide at adoption) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
-| U5 | fixed (#394, PR #397) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
+| U1 | done (#391, PR #395; adopted 2026-11-21) | `register_data_prefix("coreui")` in `ready()`; no template copies |
+| U2 | done (#391, PR #395; adopted 2026-11-21) | nothing; upstream's `tabs.js` reads the prefix (`coreui-tabs.js` deleted) |
+| U3 | deferred (superseded by #391, adopted) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
+| U4 | deferred (#391 adopted; adapters.js unchanged, script stays) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
+| U5 | done (#394, PR #397; adopted 2026-11-21) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--cv-*` block (`--cv-secondary-text-emphasis` from `--cui-body-color`) |
 | U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
 | U7 | confirmed (demo) | semantic icon names: `example/config/icons.py` `ACME_ICONS` -> `CRUD_VIEWS_ICONS` and `COREUI_ICON_ALIASES` (`django_coreui/icons.py`) |
 | U8 | anticipated, not hit | nothing to work around; `src/crud_views_coreui/apps.py` is the duplicated `ready()` |
-| U9 | fixed (#393, PR #396) | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
-| U10 | fixed (#393, PR #396) | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
-| U11 | confirmed (goes with the U1 overrides once #395 is adopted) | system check `crud_views_coreui.E002` (`src/crud_views_coreui/checks.py`) |
-| U12 | fixed (extensions #6, PR #7, 0.4.0) | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
+| U9 | done (#393, PR #396; adopted 2026-11-21) | class key `breadcrumb:list` = `breadcrumb my-0` |
+| U10 | done (#393, PR #396; adopted 2026-11-21) | nothing; upstream's header |
+| U11 | reduced (2026-11-21) | system check `crud_views_coreui.E002`, now `crud_views` only (two layout overrides remain) |
+| U12 | done (extensions #6, PR #7, 0.4.0; adopted 2026-11-21) | `crud_views_coreui.css`, `--cv-*` tokens on `.cv-typeahead, .cv-typeahead-select` |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug; file it only together with U1's prefix setting, as a `register_theme()` helper.
 
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
-- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U2; not yet adopted) · Severity: annoyance
+- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U2; adopted 2026-11-21, overrides deleted) · Severity: annoyance
 - Where:
   - `crud_views/templates/crud_views/tags/actions_menu_toggle.html:4-5`: `data-bs-toggle="dropdown"`,
     `data-bs-popper-config` (the `⋯` menu on every list row and toolbar)
@@ -103,7 +135,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U2. Hard-coded `data-bs-toggle` selector in JavaScript
 
-- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U1; not yet adopted) · Severity: annoyance
+- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U1; adopted 2026-11-21, `coreui-tabs.js` deleted) · Severity: annoyance
 - Where: `crud_views_object_detail/static/crud_views_object_detail/js/tabs.js:12`:
   `'[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]'`
 - Effect: if the theme renames the attributes (U1), tabs.js no longer finds the triggers; if it keeps them, CoreUI's
@@ -171,7 +203,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
-- Status: fixed (#394 filed and fixed 2026-11-21 by PR #397 @ `49d5173a`; not yet adopted) · Severity: cosmetic
+- Status: fixed (#394 filed and fixed 2026-11-21 by PR #397 @ `49d5173a`; adopted 2026-11-21, theme sets `--cv-*`) · Severity: cosmetic
 - Where: `crud_views/static/crud_views/css/manage.css`, `crud_views/static/crud_views/css/formset.css`
   (13 `--bs-` references in total: 6 properties read with `var()`, `--bs-secondary-color`,
   `--bs-secondary-text-emphasis`, `--bs-body-bg`, `--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`; and
@@ -244,7 +276,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U9. The breadcrumb has no class key
 
-- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U10; not yet adopted) · Severity: cosmetic
+- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U10; adopted 2026-11-21, `breadcrumb:list` key) · Severity: cosmetic
 - Where: `crud_views/templates/crud_views/tags/breadcrumb.html`: `<ol class="breadcrumb">` is fixed; there is no
   `breadcrumb:*` key in `crud_views/lib/button_classes.py`.
 - Effect under CoreUI: the theme puts the breadcrumb where CoreUI's layout has it, the header's second row
@@ -259,7 +291,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U10. The stock table header has no `aria-sort`
 
-- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U9; not yet adopted) · Severity: annoyance (accessibility)
+- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U9; adopted 2026-11-21, `table.thead` copy deleted) · Severity: annoyance (accessibility)
 - Where: `crud_views/templates/crud_views/table/bootstrap5.html`, block `table.thead`: an orderable `<th>` shows the
   `table-sort-asc`/`-desc` icon (from `request.GET.sort`), but carries no `aria-sort`, so assistive technology does not
   learn which column is sorted or in which direction. The Tabler theme's table override sets it.
@@ -275,7 +307,8 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U11. Template overrides make the theme's place in `INSTALLED_APPS` load-bearing
 
-- Status: confirmed · Severity: annoyance
+- Status: reduced (2026-11-21: with #391 adopted the theme overrides no `crud_views_object_detail` template; E002 checks
+  `crud_views` only, for the two layout overrides) · Severity: annoyance
 - Where: consequence of U1/U2. The `data-bs` renames are template overrides of `crud_views` and
   `crud_views_object_detail` templates, and Django's app-directories loader takes the first app that has a template.
 - Effect: a project that lists `crud_views_object_detail` (or `crud_views`) before `crud_views_coreui` silently gets
@@ -291,7 +324,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U12. django-crud-views-extensions' typeahead skins read `--bs-*` custom properties
 
-- Status: fixed (django-crud-views-extensions #6 filed and fixed 2026-11-21 by PR #7 @ `c23739cb`, released in 0.4.0; not yet adopted) · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
+- Status: fixed (django-crud-views-extensions #6 filed and fixed 2026-11-21 by PR #7 @ `c23739cb`, released in 0.4.0; adopted 2026-11-21, theme sets `--cv-*`) · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
 - Where (`../django-crud-views-extensions` @ `667f27a9`):
   `src/crud_views_widget_typeahead/static/crud_views_widget_typeahead/typeahead-select.css` (`--bs-body-bg`,
   `--bs-border-color-translucent`, `--bs-border-radius` on the select popup, `--bs-secondary-color`,
@@ -322,8 +355,8 @@ The gaps found in the AdminLTE tracker apply here as they are:
   the `aria-sort` half is U10 here (the table.thead copy reads the ordering from the table, so the prefix works;
   `test_bulk_prefixed_sort_sets_aria_sort`). The icon half is not solved: the copy still tests `request.GET.sort`,
   which a prefixed table never sets, so the prefixed header shows no sort icon until upstream #393 lands
-  (`test_bulk_prefixed_sort_shows_the_icon`, a strict xfail). #393 landed the same day (PR #396): adopting it drops
-  the copy and the xfail.
+  (`test_bulk_prefixed_sort_shows_the_icon`, a strict xfail). Done 2026-11-21: #393 (PR #396) adopted, the copy is
+  gone and the test passes without the xfail.
 - **Demo test deviation:** `example/sales/tests/test_bulk.py` is AdminLTE's file with one change, the message selector
   `.adminlte-messages .alert` is `.alert`, since this shell has no host message wrapper.
 - Demo and browser pass (Acme Roasters, `/orders/` and `/orders/card/`, Chromium via chrome-devtools, 2026-11-21).
@@ -358,8 +391,8 @@ and its content on cards:
 - `crud_views/snippets/form_frame.html`: the form in a card outside a modal. Extends upstream's frame of the same name.
 - `crud_views/table/bootstrap5.html`: the table on a card, in `.table-responsive`, pagination in the card footer.
   Extends upstream's table of the same name and overrides three blocks with `{{ block.super }}`, so rows, sorting and
-  pagination stay upstream's; two CSS rules drop the inner bottom margins. Its fourth block, `table.thead`, is the
-  upstream copy with `aria-sort` (an upstream gap: U10).
+  pagination stay upstream's; two CSS rules drop the inner bottom margins. (Until 2026-11-21 a fourth block,
+  `table.thead`, copied upstream's header to add `aria-sort`: U10, now upstream.)
 - Dropped (stock is correct CoreUI markup): `modal/shell.html`, `tags/alert.html`, `tags/card.html`,
   `tags/list_filter.html`, `tags/list_filter.inner.html`, `view_card.content.html`. `card:root` is `card mb-4`
   (upstream's spacing), since the stock card grid has no vertical gutter.

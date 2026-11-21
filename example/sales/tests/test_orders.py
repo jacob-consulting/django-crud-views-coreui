@@ -91,7 +91,7 @@ class OrderFormTests(OrderTestCase):
         for url in urls:
             with self.subTest(url=url):
                 html = self.client.get(url).content.decode()
-                self.assertEqual(html.count('class="row cv-formset-compact-headings"'), 1)
+                self.assertEqual(html.count('class="row gx-3 cv-formset-compact-headings"'), 1)
                 self.assertIn("cv-formset-row-compact", html)
                 self.assertIn('<legend class="cv-coreui-section-legend">', html)
                 for field in ("product", "quantity"):

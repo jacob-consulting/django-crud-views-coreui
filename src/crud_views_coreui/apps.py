@@ -13,6 +13,7 @@ class CrudViewsCoreuiConfig(AppConfig):
     verbose_name = "django-crud-views CoreUI theme"
 
     def ready(self):
+        from crud_views.lib import register_data_prefix
         from crud_views.lib.assets import register_assets
         from crud_views.lib.button_classes import register_button_classes
         from crud_views.lib.icons import register_icon_library, register_icons
@@ -32,11 +33,13 @@ class CrudViewsCoreuiConfig(AppConfig):
                 if not key.startswith("workflow:") or self.apps.is_installed("crud_views_workflow")
             }
         )
-        # coreui-adapters.js points cv.adapters at window.coreui (tracker U4); coreui-tabs.js, after it, initialises
-        # the object-detail tabs, whose upstream init selects data-bs-toggle (tracker U2); the CSS feeds upstream's
-        # --bs-* custom properties from CoreUI's --cui-* (tracker U5).
+        # CoreUI's data API reads only data-coreui-*: upstream's templates and object-detail tabs.js write the
+        # registered prefix (upstream #391, tracker U1/U2).
+        register_data_prefix("coreui")
+        # coreui-adapters.js points cv.adapters at window.coreui (tracker U4); the CSS sets upstream's --cv-* tokens
+        # from CoreUI's --cui-* (tracker U5, U12).
         register_assets(
             "crud_views_coreui",
-            js=["crud_views_coreui/coreui-adapters.js", "crud_views_coreui/coreui-tabs.js"],
+            js=["crud_views_coreui/coreui-adapters.js"],
             css=["crud_views_coreui/crud_views_coreui.css"],
         )

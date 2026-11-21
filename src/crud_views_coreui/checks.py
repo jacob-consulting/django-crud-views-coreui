@@ -31,9 +31,11 @@ def check_coreui_icons(app_configs=None, **kwargs) -> list[CheckMessage]:
     return messages
 
 
-#: Apps whose templates the theme overrides (upstream tracker U1, U11): Django's app template loader takes the first
-#: app that has the template, so the theme must be listed before each of them.
-OVERRIDDEN_APPS = ("crud_views", "crud_views_object_detail")
+#: Apps whose templates the theme overrides (upstream tracker U11): Django's app template loader takes the first app
+#: that has the template, so the theme must be listed before each of them. The two overrides left are layout,
+#: crud_views/snippets/form_frame.html and crud_views/table/bootstrap5.html; since upstream #391 (the data prefix) the
+#: theme overrides no crud_views_object_detail template.
+OVERRIDDEN_APPS = ("crud_views",)
 
 
 @register(Tags.templates)
@@ -48,9 +50,9 @@ def check_app_order(app_configs=None, **kwargs) -> list[CheckMessage]:
         return []
     return [
         Error(
-            f"crud_views_coreui is listed in INSTALLED_APPS after {', '.join(map(repr, before))}: those apps' "
-            "templates win over the theme's overrides (stock Bootstrap markup with data-bs-* attributes).",
-            hint="List crud_views_coreui before crud_views and crud_views_object_detail in INSTALLED_APPS.",
+            f"crud_views_coreui is listed in INSTALLED_APPS after {', '.join(map(repr, before))}: its templates win "
+            "over the theme's (the form frame and the card table lose their CoreUI layout).",
+            hint="List crud_views_coreui before crud_views in INSTALLED_APPS.",
             id="crud_views_coreui.E002",
         )
     ]

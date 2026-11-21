@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "django_tables2",
     "django_filters",
     "django_coreui",
-    "crud_views_coreui",  # before crud_views and crud_views_object_detail: its templates shadow theirs (check E002)
+    "crud_views_coreui",  # before crud_views: its templates shadow two of crud_views' (check E002)
     "crud_views.apps.CrudViewsConfig",
     # crud_views_object_detail, your apps
 ]

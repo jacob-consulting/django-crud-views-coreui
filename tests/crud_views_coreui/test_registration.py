@@ -117,7 +117,8 @@ TABLER_ONLY = re.compile(
 
 class ButtonClassTests(SimpleTestCase):
     def test_button_keys_match_tabler(self):
-        self.assertEqual(set(COREUI_BUTTON_CLASSES), TABLER_BUTTON_KEYS)
+        # plus breadcrumb:list, which CoreUI's header row needs (upstream #393, tracker U9) and Tabler does not set
+        self.assertEqual(set(COREUI_BUTTON_CLASSES), TABLER_BUTTON_KEYS | {"breadcrumb:list"})
 
     def test_no_tabler_only_classes(self):
         leaks = {key: value for key, value in COREUI_BUTTON_CLASSES.items() if TABLER_ONLY.search(value)}
@@ -221,34 +222,39 @@ class AssetTests(SimpleTestCase):
     def test_assets_registered(self):
         bundles = {bundle.key: bundle for bundle in get_registered()}
         bundle = bundles["crud_views_coreui"]
-        self.assertEqual(
-            [a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js", "crud_views_coreui/coreui-tabs.js"]
-        )
+        self.assertEqual([a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js"])
         self.assertEqual([a.path for a in bundle.css], ["crud_views_coreui/crud_views_coreui.css"])
         self.assertTrue(bundle.emit)
         for asset in (*bundle.js, *bundle.css):
             self.assertTrue((STATIC.parent / asset.path).is_file(), asset.path)
 
-    def test_css_maps_every_bs_variable_upstream_reads(self):
+    def test_data_prefix_is_coreui(self):
+        # upstream's templates and tabs.js write data-coreui-* (#391, tracker U1/U2)
+        from crud_views.lib.data_prefix import get_data_prefix
+
+        self.assertEqual(get_data_prefix(), "coreui")
+
+    # The CoreUI source of each --cv-* token where it is not --cui-<same name>: CoreUI's --cui-secondary-text-emphasis
+    # stays dark (#212233) in dark mode, unlike Bootstrap's (browser pass: dark-on-dark manage headers, help buttons).
+    TOKEN_SOURCES = {"--cv-secondary-text-emphasis": "--cui-body-color"}
+
+    def assert_sets_tokens(self, upstream, block, minimum):
+        names = set(re.findall(r"var\((--cv-[a-z-]+)", upstream))
+        self.assertGreaterEqual(len(names), minimum)
+        for name in sorted(names):
+            source = self.TOKEN_SOURCES.get(name, f"--cui-{name[5:]}")
+            self.assertRegex(block, rf"{name}:\s*var\({source}\);", name)
+
+    def test_css_sets_every_cv_token_upstream_reads(self):
+        # Tracker U5: crud_views reads --cv-* tokens with Bootstrap fallbacks (#394); the theme sets them from --cui-*.
         upstream = "\n".join((UPSTREAM_CSS / name).read_text() for name in ("manage.css", "formset.css"))
         theme = (STATIC / "crud_views_coreui.css").read_text()
-        names = set(re.findall(r"--bs-[a-z-]+", upstream))
-        self.assertGreaterEqual(len(names), 8)  # 13 references to 8 properties at crud_views fa2f0a7b
-        # Browser pass: CoreUI's --cui-secondary-text-emphasis stays dark (#212233) in dark mode, unlike Bootstrap's, so
-        # the theme feeds that one from --cui-body-color (dark-on-dark manage headers and help buttons otherwise).
-        sources = {"--bs-secondary-text-emphasis": "--cui-body-color"}
-        for name in sorted(names):
-            if re.search(rf"var\({name}\b", upstream):
-                # upstream reads it: the theme defines it from CoreUI's --cui-* counterpart
-                source = sources.get(name, f"--cui-{name[5:]}")
-                self.assertRegex(theme, rf"{name}:\s*var\({source}\)", name)
-            else:
-                # upstream only sets it (a Bootstrap component variable): the theme hands it to CoreUI's
-                self.assertRegex(theme, rf"--cui-{name[5:]}:\s*var\({name}\)", name)
+        block = re.search(r"\[data-cv-manage\],[^{]*\{(.*?)\}", theme, re.S).group(1)
+        self.assert_sets_tokens(upstream, block, 6)
 
-    def test_css_maps_every_bs_variable_the_typeahead_reads(self):
-        # Tracker U12: django-crud-views-extensions' typeahead skins read --bs-* too (browser pass: a transparent select
-        # popup). The extensions are optional (the examples extra), so the test needs them installed.
+    def test_css_sets_every_cv_token_the_typeahead_reads(self):
+        # Tracker U12: django-crud-views-extensions' typeahead skins read --cv-* tokens too (extensions #6, 0.4.0). The
+        # extensions are optional (the examples extra), so the test needs them installed.
         try:
             import crud_views_widget_typeahead
         except ImportError:
@@ -257,10 +263,22 @@ class AssetTests(SimpleTestCase):
         upstream = "\n".join(path.read_text() for path in sorted(static.glob("*.css")))
         theme = (STATIC / "crud_views_coreui.css").read_text()
         block = re.search(r"\.cv-typeahead,\s*\.cv-typeahead-select \{(.*?)\}", theme, re.S).group(1)
-        names = set(re.findall(r"var\((--bs-[a-z-]+)", upstream))
-        self.assertGreaterEqual(len(names), 5)
-        for name in sorted(names):
-            self.assertRegex(block, rf"{name}:\s*var\(--cui-{name[5:]}\)", name)
+        self.assert_sets_tokens(upstream, block, 5)
+
+    def test_css_re_maps_no_bs_variable(self):
+        theme = (STATIC / "crud_views_coreui.css").read_text()
+        self.assertNotRegex(theme, r"--bs-[a-z-]+\s*:")
+        # the one --bs-* read: upstream's manage help button sets Bootstrap's --bs-btn-color, CoreUI's .btn reads
+        # --cui-btn-color, so the theme hands the value on
+        self.assertEqual(re.findall(r"[a-z-]+:\s*var\(--bs-[a-z-]+\)", theme), ["--cui-btn-color: var(--bs-btn-color)"])
+        self.assertIn("--bs-btn-color:", (UPSTREAM_CSS / "manage.css").read_text())
+
+    def test_cv_tokens_are_element_scoped(self):
+        # On :root a token would resolve --cui-* once, at the root, and ignore [data-coreui-theme] subtrees.
+        theme = re.sub(r"/\*.*?\*/", "", (STATIC / "crud_views_coreui.css").read_text(), flags=re.S)
+        for selector, body in re.findall(r"([^{}]+)\{([^{}]*)\}", theme):
+            if re.search(r"--cv-(?!coreui-)[a-z-]+\s*:", body):
+                self.assertNotRegex(selector, r"(:root|\bhtml\b)", selector.strip())
 
     def test_adapter_script_uses_coreui_namespace_and_wraps_tooltip_init(self):
         script = (STATIC / "coreui-adapters.js").read_text()
@@ -284,7 +302,10 @@ def _app_order_messages(*names):
 
 
 class AppOrderCheckTests(TestCase):
-    """E002: the theme's template overrides only win when it comes before crud_views and crud_views_object_detail."""
+    """E002: the theme's overrides of crud_views templates only win when it comes before crud_views.
+
+    It overrides no crud_views_object_detail template since upstream #391 (the data prefix): that app may come anywhere.
+    """
 
     def test_theme_first_passes(self):
         self.assertEqual(
@@ -296,17 +317,16 @@ class AppOrderCheckTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].level, 40)  # Error
         self.assertIn("'crud_views'", messages[0].msg)
-        self.assertIn("before crud_views and crud_views_object_detail", messages[0].hint)
+        self.assertIn("before crud_views in INSTALLED_APPS", messages[0].hint)
 
-    def test_theme_after_object_detail_is_an_error(self):
-        messages = _app_order_messages("crud_views_object_detail", "crud_views_coreui", "crud_views")
-        self.assertEqual(len(messages), 1)
-        self.assertIn("'crud_views_object_detail'", messages[0].msg)
+    def test_theme_after_object_detail_passes(self):
+        self.assertEqual(_app_order_messages("crud_views_object_detail", "crud_views_coreui", "crud_views"), [])
 
-    def test_theme_after_both_names_both(self):
+    def test_theme_after_both_names_crud_views(self):
         messages = _app_order_messages("crud_views", "crud_views_object_detail", "crud_views_coreui")
         self.assertEqual(len(messages), 1)
-        self.assertIn("'crud_views', 'crud_views_object_detail'", messages[0].msg)
+        self.assertIn("'crud_views'", messages[0].msg)
+        self.assertNotIn("crud_views_object_detail", messages[0].msg)
 
     def test_object_detail_not_installed_passes(self):
         self.assertEqual(_app_order_messages("crud_views_coreui", "crud_views"), [])

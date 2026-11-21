@@ -40,7 +40,6 @@ WHEEL_REQUIRED = [
     "crud_views_coreui/templates/crud_views_coreui/page.html",
     "crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css",
     "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
-    "crud_views_coreui/static/crud_views_coreui/coreui-tabs.js",
     "crud_views_coreui/templatetags/crud_views_coreui.py",
 ]
 

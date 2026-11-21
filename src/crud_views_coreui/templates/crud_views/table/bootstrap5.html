@@ -4,28 +4,7 @@
 CoreUI theme: the table sits on a card, as content does in CoreUI's layout (the page is --cui-tertiary-bg), scrolls
 inside it on narrow screens, and the pagination goes into the card footer. Extends upstream's table of the same name
 (Django skips this file when it resolves the parent): rows, sorting and pagination stay upstream's.
-The table.thead block is upstream's (fa2f0a7b) plus aria-sort on orderable headers, which the stock header lacks
-(upstream tracker U10); test_table_head_is_upstream_plus_aria_sort compares it with the installed upstream block.
 {% endcomment %}
 {% block table-wrapper %}<div class="card cv-coreui-table">{{ block.super }}</div>{% endblock table-wrapper %}
 {% block table %}<div class="table-responsive">{{ block.super }}</div>{% endblock table %}
 {% block pagination %}{% with pagination=block.super %}{% if pagination.strip %}<div class="card-footer">{{ pagination }}</div>{% endif %}{% endwith %}{% endblock pagination %}
-{% block table.thead %}
-            {% if table.show_header %}
-                <thead {{ table.attrs.thead.as_html }}>
-                <tr>
-                {% for column in table.columns %}
-                    <th {{ column.attrs.th.as_html }} scope="col"{% if column.orderable %} aria-sort="{% if column.is_ordered %}{% if column.order_by_alias.is_descending %}descending{% else %}ascending{% endif %}{% else %}none{% endif %}"{% endif %}>
-                        {% if column.orderable %}
-                            {% if request.GET.sort == column.name%}{% cv_icon "table-sort-asc" %}{% endif %}
-                            {% if request.GET.sort == "-"|add:column.name%}{% cv_icon "table-sort-desc" %}{% endif %}
-                             <a href="{% cv_querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header }}</a>
-                        {% else %}
-                            {{ column.header }}
-                        {% endif %}
-                    </th>
-                {% endfor %}
-                </tr>
-                </thead>
-            {% endif %}
-            {% endblock table.thead %}

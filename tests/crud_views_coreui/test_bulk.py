@@ -133,12 +133,11 @@ def name_header(client):
 
 
 def test_bulk_prefixed_sort_sets_aria_sort(admin_client, customers):
-    # tracker U10 (C8): the table.thead copy reads the ordering from the table, so the prefix is honoured
+    # tracker U10 (C8): upstream's header reads the ordering from the table (#393), so the prefix is honoured
     assert name_header(admin_client).get("aria-sort") == "ascending"
 
 
-# tracker C8: the copy's sort icon still tests request.GET.sort, which a prefixed table never sets; waiting on #393
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="waiting on django-crud-views #393")
+# tracker C8: the icon follows the table's ordering too, also for a prefixed table (#393)
 def test_bulk_prefixed_sort_shows_the_icon(admin_client, customers):
     assert name_header(admin_client).cssselect("svg")
 
