@@ -288,7 +288,10 @@ def _app_order_messages(*names):
 
 
 class AppOrderCheckTests(TestCase):
-    """E002: the theme's template overrides only win when it comes before crud_views and crud_views_object_detail."""
+    """E002: the theme's overrides of crud_views templates only win when it comes before crud_views.
+
+    It overrides no crud_views_object_detail template since upstream #391 (the data prefix): that app may come anywhere.
+    """
 
     def test_theme_first_passes(self):
         self.assertEqual(
@@ -300,17 +303,16 @@ class AppOrderCheckTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].level, 40)  # Error
         self.assertIn("'crud_views'", messages[0].msg)
-        self.assertIn("before crud_views and crud_views_object_detail", messages[0].hint)
+        self.assertIn("before crud_views in INSTALLED_APPS", messages[0].hint)
 
-    def test_theme_after_object_detail_is_an_error(self):
-        messages = _app_order_messages("crud_views_object_detail", "crud_views_coreui", "crud_views")
-        self.assertEqual(len(messages), 1)
-        self.assertIn("'crud_views_object_detail'", messages[0].msg)
+    def test_theme_after_object_detail_passes(self):
+        self.assertEqual(_app_order_messages("crud_views_object_detail", "crud_views_coreui", "crud_views"), [])
 
-    def test_theme_after_both_names_both(self):
+    def test_theme_after_both_names_crud_views(self):
         messages = _app_order_messages("crud_views", "crud_views_object_detail", "crud_views_coreui")
         self.assertEqual(len(messages), 1)
-        self.assertIn("'crud_views', 'crud_views_object_detail'", messages[0].msg)
+        self.assertIn("'crud_views'", messages[0].msg)
+        self.assertNotIn("crud_views_object_detail", messages[0].msg)
 
     def test_object_detail_not_installed_passes(self):
         self.assertEqual(_app_order_messages("crud_views_coreui", "crud_views"), [])

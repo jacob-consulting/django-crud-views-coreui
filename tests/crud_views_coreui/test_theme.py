@@ -15,8 +15,6 @@ from types import SimpleNamespace
 from unittest import mock
 
 import crud_views
-import crud_views_object_detail
-from crud_views.lib.assets import get_registered
 from crud_views.lib.button_classes import _get_default_button_classes, get_button_classes
 from crud_views.lib.crispy import CrispyDeleteForm
 from crud_views.lib.icons import render_icon as cv_render_icon
@@ -686,9 +684,9 @@ class DataCoreuiTests(TestCase):
         """No installed upstream crud_views* template or JS file hard-codes data-bs-.
 
         Upstream writes the prefix the theme registers (register_data_prefix, #391), so the theme copies nothing. A hit
-        means upstream added markup that bypasses cv_data_prefix and the theme would need an override. Comments do not count: JS `//` and `/* */` comments and Django `{# #}`
-        comments are stripped before searching, so tooltip.js, which only names data-bs-toggle="tooltip" in a `//`
-        comment, is not a hit. A new hit means upstream added Bootstrap-only markup the theme must override.
+        means upstream added markup that bypasses cv_data_prefix and the theme would need an override. Comments do not
+        count: JS `//` and `/* */` comments and Django `{# #}` comments are stripped before searching, so tooltip.js,
+        which only names data-bs-toggle="tooltip" in a `//` comment, is not a hit.
         """
         import importlib
 

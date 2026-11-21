@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "polymorphic",
     "guardian",
     "django_coreui",
-    # The CoreUI theme overrides crud_views and crud_views_object_detail templates, so it must come before both.
+    # The CoreUI theme overrides two crud_views templates (form frame, table), so it must come before crud_views.
     "crud_views_coreui",
     "crud_views.apps.CrudViewsConfig",
     "crud_views_object_detail",

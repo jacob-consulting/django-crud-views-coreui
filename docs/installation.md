@@ -10,8 +10,8 @@ features (workflow, polymorphic, ordered, guardian) install its extras as usual,
 
 ## `INSTALLED_APPS`
 
-The theme overrides templates of `crud_views` and `crud_views_object_detail`, so **`crud_views_coreui` must come before
-both**. Django's app template loader takes the first app that has a template; anything the theme does not override
+The theme overrides two `crud_views` templates (the form frame and the table), so **`crud_views_coreui` must come before
+`crud_views`**. Django's app template loader takes the first app that has a template; anything the theme does not override
 falls through to the stock templates.
 
 ```python
@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     "django_tables2",
     "django_filters",
     "django_coreui",
-    "crud_views_coreui",  # before crud_views and crud_views_object_detail
+    "crud_views_coreui",  # before crud_views
     "crud_views.apps.CrudViewsConfig",
     "crud_views_object_detail",  # if you use it
     # crud_views_workflow, crud_views_polymorphic, ... as you use them
@@ -34,9 +34,9 @@ INSTALLED_APPS = [
 ]
 ```
 
-If the order is wrong the pages render with stock Bootstrap `data-bs-*` attributes that CoreUI ignores: dropdown menus,
-object-detail tabs and accordions silently stop working. The system check `crud_views_coreui.E002` turns that into an
-error (see below).
+If the order is wrong, crud_views' stock form frame and table win over the theme's: forms and lists sit bare on CoreUI's
+gray page instead of on cards. The system check `crud_views_coreui.E002` turns that into an error (see below).
+`crud_views_object_detail` and the other crud_views apps may come anywhere.
 
 `crispy_bootstrap5` does not need to be in `INSTALLED_APPS`: the pack's templates live in `django_coreui`, and only two
 layout objects subclass crispy-bootstrap5's Python classes.
@@ -88,7 +88,7 @@ python manage.py check --fail-level WARNING
 | Id | Level | Meaning |
 |---|---|---|
 | `django_coreui.E001` | Error | `COREUI` is not a dict, or `COREUI["edition"]` is not an edition this version serves (only `"free"`). |
-| `crud_views_coreui.E002` | Error | `crud_views_coreui` is listed after `crud_views` or `crud_views_object_detail` in `INSTALLED_APPS`. |
+| `crud_views_coreui.E002` | Error | `crud_views_coreui` is listed after `crud_views` in `INSTALLED_APPS`. |
 | `crud_views_coreui.W001` | Warning | A `coreui:` icon in `CRUD_VIEWS_ICONS` has no SVG in `django_coreui.icons.ICONS`; add its SVG to `ICONS` at startup (see [Icons](icons.md#adding-icons)) or use another library prefix. |
 
 ## Your own page layer

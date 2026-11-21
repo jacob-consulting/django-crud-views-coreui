@@ -21,8 +21,8 @@ three spots, and they are all this theme has to bridge.
 django-crud-views has no theme setting. The route its own hints describe is the one the theme follows:
 
 - a theme **app** ships templates under the `crud_views/` namespace,
-- it is listed **before** `crud_views` (and `crud_views_object_detail`) in `INSTALLED_APPS`, so Django's app template
-  loader finds its files first (check `crud_views_coreui.E002` enforces the order, tracker U11),
+- it is listed **before** `crud_views` in `INSTALLED_APPS`, so Django's app template loader finds its files first (check
+  `crud_views_coreui.E002` enforces the order, tracker U11),
 - anything it does not override falls through to the stock Bootstrap 5 templates, whose markup is CoreUI markup.
 
 So the theme is a few template overrides, a little Python (the icon library, the button class table, system checks) and
@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "django_tables2",
     "django_filters",
     "django_coreui",  # also provides the crispy_coreui template pack
-    "crud_views_coreui",  # before crud_views and crud_views_object_detail
+    "crud_views_coreui",  # before crud_views
     "crud_views.apps.CrudViewsConfig",
     "crud_views_object_detail",
 ]
