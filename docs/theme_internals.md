@@ -165,16 +165,17 @@ the registered prefix the dropdown toggles say `data-coreui-toggle`, so CoreUI's
 
 ## CSS tokens (U5)
 
-django-crud-views' `manage.css` and `formset.css` read Bootstrap's `--bs-*` custom properties, which CoreUI does not
-define, so the manage page and formsets would use hard fallbacks and ignore dark mode. `crud_views_coreui.css` defines
-the six properties upstream reads (`--bs-secondary-color`, `--bs-secondary-text-emphasis`, `--bs-body-bg`,
-`--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`) from the matching `--cui-*` ones, on the elements those
-rules style (so a `[data-coreui-theme]` subtree is followed). The exception is `--bs-secondary-text-emphasis`, set from
-`--cui-body-color`: CoreUI's `--cui-secondary-text-emphasis` stays dark in dark mode. Two properties upstream *sets* for Bootstrap components
-(`--bs-btn-color` on the manage help button, `--bs-gutter-x` on compact formset rows) are handed to CoreUI's names
-(`--cui-btn-color`, `--cui-gutter-x`). A test parses upstream's CSS and fails on any new `--bs-*` reference. The same
-block exists for django-crud-views-extensions' typeahead skins (`.cv-typeahead`, `.cv-typeahead-select`; tracker U12),
-whose select popup otherwise has no background.
+django-crud-views' `manage.css` and `formset.css` read six `--cv-*` tokens, each falling back to Bootstrap's `--bs-*`
+property and then a literal (upstream #394). CoreUI does not define `--bs-*`, so without the theme the manage page and
+formsets would use the literals and ignore dark mode. `crud_views_coreui.css` sets the tokens (`--cv-secondary-color`,
+`--cv-secondary-text-emphasis`, `--cv-body-bg`, `--cv-border-color`, `--cv-border-radius`, `--cv-tertiary-bg`) from
+the matching `--cui-*` properties, on the elements those rules style rather than on `:root`, so a `[data-coreui-theme]`
+subtree is followed. The exception is `--cv-secondary-text-emphasis`, set from `--cui-body-color`: CoreUI's
+`--cui-secondary-text-emphasis` stays dark in dark mode. One rule hands a value on the other way: upstream's manage help
+button sets Bootstrap's `--bs-btn-color`, and CoreUI's `.btn` reads `--cui-btn-color`. A test parses upstream's CSS and
+fails on a token the theme does not set. The same block exists for django-crud-views-extensions' typeahead skins
+(`.cv-typeahead`, `.cv-typeahead-select`, plus `--cv-border-color-translucent` and `--cv-highlight-bg`; extensions 0.4.0,
+tracker U12), whose select popup otherwise has no background.
 
 The other rules: the square `cv-coreui-icon-btn`, `cv-coreui-section-legend` (registered for the conditional and formset
 legends), the two subtle badge colours, a smaller view title below the owner tabs, and two rules that drop the inner bottom

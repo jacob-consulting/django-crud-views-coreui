@@ -6,7 +6,9 @@ pip install django-crud-views-coreui
 
 This installs django-crud-views, django-crispy-forms and crispy-bootstrap5 with it. For django-crud-views' optional
 features (workflow, polymorphic, ordered, guardian) install its extras as usual, e.g.
-`pip install "django-crud-views[workflow]"`.
+`pip install "django-crud-views[workflow]"`. The theme styles the type-ahead widgets of
+[django-crud-views-extensions](https://github.com/jacob-consulting/django-crud-views-extensions) from version 0.4.0 on,
+whose skins read the same `--cv-*` tokens as django-crud-views.
 
 ## `INSTALLED_APPS`
 

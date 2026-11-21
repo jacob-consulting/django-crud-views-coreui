@@ -234,26 +234,27 @@ class AssetTests(SimpleTestCase):
 
         self.assertEqual(get_data_prefix(), "coreui")
 
-    def test_css_maps_every_bs_variable_upstream_reads(self):
+    # The CoreUI source of each --cv-* token where it is not --cui-<same name>: CoreUI's --cui-secondary-text-emphasis
+    # stays dark (#212233) in dark mode, unlike Bootstrap's (browser pass: dark-on-dark manage headers, help buttons).
+    TOKEN_SOURCES = {"--cv-secondary-text-emphasis": "--cui-body-color"}
+
+    def assert_sets_tokens(self, upstream, block, minimum):
+        names = set(re.findall(r"var\((--cv-[a-z-]+)", upstream))
+        self.assertGreaterEqual(len(names), minimum)
+        for name in sorted(names):
+            source = self.TOKEN_SOURCES.get(name, f"--cui-{name[5:]}")
+            self.assertRegex(block, rf"{name}:\s*var\({source}\);", name)
+
+    def test_css_sets_every_cv_token_upstream_reads(self):
+        # Tracker U5: crud_views reads --cv-* tokens with Bootstrap fallbacks (#394); the theme sets them from --cui-*.
         upstream = "\n".join((UPSTREAM_CSS / name).read_text() for name in ("manage.css", "formset.css"))
         theme = (STATIC / "crud_views_coreui.css").read_text()
-        names = set(re.findall(r"--bs-[a-z-]+", upstream))
-        self.assertGreaterEqual(len(names), 8)  # 13 references to 8 properties at crud_views fa2f0a7b
-        # Browser pass: CoreUI's --cui-secondary-text-emphasis stays dark (#212233) in dark mode, unlike Bootstrap's, so
-        # the theme feeds that one from --cui-body-color (dark-on-dark manage headers and help buttons otherwise).
-        sources = {"--bs-secondary-text-emphasis": "--cui-body-color"}
-        for name in sorted(names):
-            if re.search(rf"var\({name}\b", upstream):
-                # upstream reads it: the theme defines it from CoreUI's --cui-* counterpart
-                source = sources.get(name, f"--cui-{name[5:]}")
-                self.assertRegex(theme, rf"{name}:\s*var\({source}\)", name)
-            else:
-                # upstream only sets it (a Bootstrap component variable): the theme hands it to CoreUI's
-                self.assertRegex(theme, rf"--cui-{name[5:]}:\s*var\({name}\)", name)
+        block = re.search(r"\[data-cv-manage\],[^{]*\{(.*?)\}", theme, re.S).group(1)
+        self.assert_sets_tokens(upstream, block, 6)
 
-    def test_css_maps_every_bs_variable_the_typeahead_reads(self):
-        # Tracker U12: django-crud-views-extensions' typeahead skins read --bs-* too (browser pass: a transparent select
-        # popup). The extensions are optional (the examples extra), so the test needs them installed.
+    def test_css_sets_every_cv_token_the_typeahead_reads(self):
+        # Tracker U12: django-crud-views-extensions' typeahead skins read --cv-* tokens too (extensions #6, 0.4.0). The
+        # extensions are optional (the examples extra), so the test needs them installed.
         try:
             import crud_views_widget_typeahead
         except ImportError:
@@ -262,10 +263,22 @@ class AssetTests(SimpleTestCase):
         upstream = "\n".join(path.read_text() for path in sorted(static.glob("*.css")))
         theme = (STATIC / "crud_views_coreui.css").read_text()
         block = re.search(r"\.cv-typeahead,\s*\.cv-typeahead-select \{(.*?)\}", theme, re.S).group(1)
-        names = set(re.findall(r"var\((--bs-[a-z-]+)", upstream))
-        self.assertGreaterEqual(len(names), 5)
-        for name in sorted(names):
-            self.assertRegex(block, rf"{name}:\s*var\(--cui-{name[5:]}\)", name)
+        self.assert_sets_tokens(upstream, block, 5)
+
+    def test_css_re_maps_no_bs_variable(self):
+        theme = (STATIC / "crud_views_coreui.css").read_text()
+        self.assertNotRegex(theme, r"--bs-[a-z-]+\s*:")
+        # the one --bs-* read: upstream's manage help button sets Bootstrap's --bs-btn-color, CoreUI's .btn reads
+        # --cui-btn-color, so the theme hands the value on
+        self.assertEqual(re.findall(r"[a-z-]+:\s*var\(--bs-[a-z-]+\)", theme), ["--cui-btn-color: var(--bs-btn-color)"])
+        self.assertIn("--bs-btn-color:", (UPSTREAM_CSS / "manage.css").read_text())
+
+    def test_cv_tokens_are_element_scoped(self):
+        # On :root a token would resolve --cui-* once, at the root, and ignore [data-coreui-theme] subtrees.
+        theme = re.sub(r"/\*.*?\*/", "", (STATIC / "crud_views_coreui.css").read_text(), flags=re.S)
+        for selector, body in re.findall(r"([^{}]+)\{([^{}]*)\}", theme):
+            if re.search(r"--cv-(?!coreui-)[a-z-]+\s*:", body):
+                self.assertNotRegex(selector, r"(:root|\bhtml\b)", selector.strip())
 
     def test_adapter_script_uses_coreui_namespace_and_wraps_tooltip_init(self):
         script = (STATIC / "coreui-adapters.js").read_text()
