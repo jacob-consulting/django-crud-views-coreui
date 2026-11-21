@@ -27,27 +27,37 @@ Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Table
 Every entry was re-checked against `../django-crud-views` @ `fa2f0a7b` and `../django-crud-views-extensions` @
 `667f27a9` and in the browser (alex, sam, kim; light, dark and auto; 375px). Nothing is filed or done upstream yet.
 
+2026-11-21: U1 and U2 filed together as django-crud-views #391 (theme-registered data-attribute prefix,
+`register_data_prefix()` / `{% cv_data_prefix %}`, prefix read by `tabs.js` from `#cv-config`). U8 was considered for
+that issue and deliberately left out; revisit when a third theme exists or a registration bug appears.
+2026-11-21: U9 and U10 filed together as django-crud-views #393 (keys `breadcrumb:list` / `:item` / `:item-active`;
+`aria-sort` and the sort icon from `column.is_ordered`, which also fixes the icon on prefixed tables).
+2026-11-21: U5 filed as django-crud-views #394 (six `--cv-*` tokens read as `var(--cv-x, var(--bs-x, fallback))`, never
+declared upstream; gutter via `gx-3`; help-button rule stays). U12 follows with the same token names.
+2026-11-21: U12 filed as django-crud-views-extensions #6 (same chains, plus `--cv-border-color-translucent` and
+`--cv-highlight-bg`; hard fallbacks everywhere); #394 got a comment asking its docs to state the naming rule.
+
 | Entry | Final status | Handled by (theme side) |
 |---|---|---|
-| U1 | confirmed | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
-| U2 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
-| U3 | confirmed | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
-| U4 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
-| U5 | confirmed | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
+| U1 | filed (#391) | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
+| U2 | filed (#391) | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
+| U3 | deferred (superseded by #391) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
+| U4 | deferred (after #391) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
+| U5 | filed (#394) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
 | U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
 | U7 | confirmed (demo) | semantic icon names: `example/config/icons.py` `ACME_ICONS` -> `CRUD_VIEWS_ICONS` and `COREUI_ICON_ALIASES` (`django_coreui/icons.py`) |
 | U8 | anticipated, not hit | nothing to work around; `src/crud_views_coreui/apps.py` is the duplicated `ready()` |
-| U9 | confirmed | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
-| U10 | confirmed | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
+| U9 | filed (#393) | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
+| U10 | filed (#393) | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
 | U11 | confirmed | system check `crud_views_coreui.E002` (`src/crud_views_coreui/checks.py`) |
-| U12 | confirmed | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
+| U12 | filed (extensions #6) | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug; file it only together with U1's prefix setting, as a `register_theme()` helper.
 
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
-- Status: confirmed · Severity: annoyance
+- Status: filed (#391, 2026-11-21, together with U2) · Severity: annoyance
 - Where:
   - `crud_views/templates/crud_views/tags/actions_menu_toggle.html:4-5`: `data-bs-toggle="dropdown"`,
     `data-bs-popper-config` (the `⋯` menu on every list row and toolbar)
@@ -73,7 +83,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U2. Hard-coded `data-bs-toggle` selector in JavaScript
 
-- Status: confirmed · Severity: annoyance
+- Status: filed (#391, 2026-11-21, together with U1) · Severity: annoyance
 - Where: `crud_views_object_detail/static/crud_views_object_detail/js/tabs.js:12`:
   `'[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]'`
 - Effect: if the theme renames the attributes (U1), tabs.js no longer finds the triggers; if it keeps them, CoreUI's
@@ -114,6 +124,10 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 - Theme workaround (2026-11-20): none in JavaScript; the two dropdown templates (`tags/actions_menu_toggle.html`,
   incl. its `data-bs-popper-config`, and `snippets/language_selector.html`) are among the U1 overrides, so CoreUI's
   data API picks them up. With a dropdown adapter and a crud_views-owned trigger attribute both overrides could go.
+- Dependency (2026-11-21): superseded in practice by django-crud-views #391 (U1 + U2). With the prefix registered,
+  the dropdown templates write `data-coreui-toggle` and CoreUI's own data API opens them, so the U1 overrides that
+  served as this workaround go. A dropdown adapter would then only help a library that is neither Bootstrap nor a
+  data-API fork; no such theme exists. Deferred until one does.
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
@@ -129,10 +143,15 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
   remove the theme script; a placement option on `tooltip.init` would.
 - Possible fix: a `cv_config` value (`js_namespace: "coreui"`) that `adapters.js` reads before falling back to
   `bootstrap`.
+- Dependency (2026-11-21): builds on django-crud-views #391 (U1 + U2), which puts the data-attribute prefix into
+  `#cv-config`. With it, `adapters.js` could derive the tooltip placement attribute from the prefix, and a namespace
+  value next to it would remove `coreui-adapters.js` entirely. The namespace stays a second value: prefix and
+  namespace differ for Bootstrap (`bs` / `bootstrap`) and only coincide for CoreUI. Decide after #391 lands, by how
+  much of the theme script is left. Deferred.
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
-- Status: confirmed · Severity: cosmetic
+- Status: filed (#394, 2026-11-21) · Severity: cosmetic
 - Where: `crud_views/static/crud_views/css/manage.css`, `crud_views/static/crud_views/css/formset.css`
   (13 `--bs-` references in total: 6 properties read with `var()`, `--bs-secondary-color`,
   `--bs-secondary-text-emphasis`, `--bs-body-bg`, `--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`; and
@@ -205,7 +224,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U9. The breadcrumb has no class key
 
-- Status: confirmed · Severity: cosmetic
+- Status: filed (#393, 2026-11-21, together with U10) · Severity: cosmetic
 - Where: `crud_views/templates/crud_views/tags/breadcrumb.html`: `<ol class="breadcrumb">` is fixed; there is no
   `breadcrumb:*` key in `crud_views/lib/button_classes.py`.
 - Effect under CoreUI: the theme puts the breadcrumb where CoreUI's layout has it, the header's second row
@@ -220,7 +239,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U10. The stock table header has no `aria-sort`
 
-- Status: confirmed · Severity: annoyance (accessibility)
+- Status: filed (#393, 2026-11-21, together with U9) · Severity: annoyance (accessibility)
 - Where: `crud_views/templates/crud_views/table/bootstrap5.html`, block `table.thead`: an orderable `<th>` shows the
   `table-sort-asc`/`-desc` icon (from `request.GET.sort`), but carries no `aria-sort`, so assistive technology does not
   learn which column is sorted or in which direction. The Tabler theme's table override sets it.
@@ -252,7 +271,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U12. django-crud-views-extensions' typeahead skins read `--bs-*` custom properties
 
-- Status: confirmed · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
+- Status: filed (django-crud-views-extensions #6, 2026-11-21) · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
 - Where (`../django-crud-views-extensions` @ `667f27a9`):
   `src/crud_views_widget_typeahead/static/crud_views_widget_typeahead/typeahead-select.css` (`--bs-body-bg`,
   `--bs-border-color-translucent`, `--bs-border-radius` on the select popup, `--bs-secondary-color`,
