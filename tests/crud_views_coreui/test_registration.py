@@ -221,13 +221,17 @@ class AssetTests(SimpleTestCase):
     def test_assets_registered(self):
         bundles = {bundle.key: bundle for bundle in get_registered()}
         bundle = bundles["crud_views_coreui"]
-        self.assertEqual(
-            [a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js", "crud_views_coreui/coreui-tabs.js"]
-        )
+        self.assertEqual([a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js"])
         self.assertEqual([a.path for a in bundle.css], ["crud_views_coreui/crud_views_coreui.css"])
         self.assertTrue(bundle.emit)
         for asset in (*bundle.js, *bundle.css):
             self.assertTrue((STATIC.parent / asset.path).is_file(), asset.path)
+
+    def test_data_prefix_is_coreui(self):
+        # upstream's templates and tabs.js write data-coreui-* (#391, tracker U1/U2)
+        from crud_views.lib.data_prefix import get_data_prefix
+
+        self.assertEqual(get_data_prefix(), "coreui")
 
     def test_css_maps_every_bs_variable_upstream_reads(self):
         upstream = "\n".join((UPSTREAM_CSS / name).read_text() for name in ("manage.css", "formset.css"))

@@ -26,7 +26,7 @@ django-crud-views has no theme setting. The route its own hints describe is the 
 - anything it does not override falls through to the stock Bootstrap 5 templates, whose markup is CoreUI markup.
 
 So the theme is a few template overrides, a little Python (the icon library, the button class table, system checks) and
-three static files (a stylesheet and two scripts). No crud_views code is patched or subclassed.
+two static files (a stylesheet and a script). No crud_views code is patched or subclassed.
 
 ```python
 INSTALLED_APPS = [
@@ -46,10 +46,10 @@ DJANGO_TABLES2_TEMPLATE = "crud_views/table/bootstrap5.html"
 COREUI = {"edition": "free"}
 ```
 
-`CrudViewsCoreuiConfig.ready()` registers five things through upstream's hooks: the `coreui` icon library, the icon table
+`CrudViewsCoreuiConfig.ready()` registers six things through upstream's hooks: the `coreui` icon library, the icon table
 (`register_icons`), label-mode defaults (`{"form": "both"}`), the button class table (`register_button_classes`; the
-`workflow:*` keys only when `crud_views_workflow` is installed) and the asset bundle (`register_assets`:
-`coreui-adapters.js`, `coreui-tabs.js`, `crud_views_coreui.css`).
+`workflow:*` keys only when `crud_views_workflow` is installed), the data-attribute prefix (`register_data_prefix("coreui")`)
+and the asset bundle (`register_assets`: `coreui-adapters.js`, `crud_views_coreui.css`).
 
 ## The page: CRUD_VIEWS_EXTENDS
 
@@ -104,7 +104,7 @@ its legend names colours and a project's primary may be any colour.
 
 ## Overridden templates
 
-The page and six templates:
+The page and two templates:
 
 ```
 crud_views_coreui/
@@ -113,11 +113,6 @@ crud_views/
   snippets/form_frame.html        layout: the form in a card (bare in a modal); extends upstream's frame
   table/bootstrap5.html           layout: the table on a card, in .table-responsive, pagination in the card footer;
                                   extends upstream's table, three blocks with {{ block.super }}; plus table.thead (below)
-  tags/actions_menu_toggle.html   data-bs- renamed to data-coreui- (U1)
-  snippets/language_selector.html data-bs- renamed to data-coreui- (U1)
-crud_views_object_detail/layouts/
-  tabs-vertical/object_detail.html  data-bs- renamed to data-coreui- (U1)
-  accordion/group.html              data-bs- renamed to data-coreui- (U1)
 ```
 
 CoreUI's layout puts the page on `--cui-tertiary-bg` (gray) and its content on cards. Stock Bootstrap 5 markup is
@@ -125,19 +120,14 @@ CoreUI markup, so a layout override is kept only where stock content would sit b
 the table. The Tabler theme's other layout overrides (modal shell, alert, card, filter, card view) were dropped, because
 the stock markup is right. `card:root` is `card mb-4`, since the stock card grid has no vertical gutter.
 
-### The four `data-bs` overrides (U1, U11)
+### Data attributes (U1, U2)
 
-django-crud-views hard-codes `data-bs-toggle`, `data-bs-target`, `data-bs-parent` and `data-bs-popper-config` in four
-templates: the `⋯` actions menu, the language selector, the vertical-tabs object detail and the accordion group.
-CoreUI's data API ignores `data-bs-*`, so under CoreUI dropdowns, pills and accordion groups would do nothing. The theme
-overrides exactly those four files. Each is the upstream file at `fa2f0a7b` with only `data-bs-` replaced by
-`data-coreui-`, plus a first-line comment naming the upstream path and commit. Because they are copies, a test compares
-each with the installed upstream file (with the rename applied): any upstream edit fails the suite. Another test renders
-every test app page, full and as a modal partial, and finds no `data-bs-` anywhere.
-
-Because these are overrides of `crud_views` and `crud_views_object_detail` templates, the theme's position in
-`INSTALLED_APPS` is load-bearing; a project that lists either app first silently gets upstream's `data-bs-*` markup. The
-system check `crud_views_coreui.E002` reports exactly that.
+CoreUI's data API ignores `data-bs-*`. django-crud-views writes its data-API attributes (the `⋯` actions menu, the
+language selector, the vertical-tabs object detail, the accordion group) with a registered prefix, and its object-detail
+`tabs.js` reads the same prefix from `#cv-config` on every scan, also for content loaded into a modal (upstream #391).
+The theme registers `coreui` in `ready()`, so those templates render `data-coreui-*` and the theme copies none of them.
+A test renders every test app page, full and as a modal partial, and finds no `data-bs-`; another scans upstream's
+templates and scripts and fails on any that hard-codes `data-bs-` instead of using the prefix.
 
 ### The table header override (U10)
 
@@ -167,21 +157,10 @@ crud_views' `cv.adapters.tooltip.init` instead of replacing it: that `init` guar
 
 The namespace is resolved on every call, so CoreUI's bundle may load deferred.
 
-### Object-detail tabs (U2)
-
-django-crud-views' `crud_views_object_detail/js/tabs.js` selects `[data-bs-toggle="tab"]`, `"pill"` and `"list"`. With the
-four overrides above the triggers say `data-coreui-toggle`, so upstream's script finds nothing. `coreui-tabs.js`
-(registered after `coreui-adapters.js`) is upstream's initialisation with the selector
-`[data-coreui-toggle="tab"|"pill"|"list"]`: it handles owned tablists (`data-cv-od-tabs`) only, initialises them through
-`cv.adapters.tab.init` on load and on `cv:modal:loaded`, and disposes them on `cv:modal:unload`. Upstream's `tabs.js`
-stays loaded and finds nothing. It also keeps upstream's public `cv.initObjectDetailTabs(root)` working: that global
-becomes a writable property holding the theme's wrapper (upstream part, then the CoreUI init), so projects can wrap it
-the usual way. A test fails once upstream's selector changes, the signal to drop the theme script.
-
 ### Dropdowns (U3)
 
-There is no dropdown adapter upstream; dropdowns rely on the data API alone. The theme needs no JavaScript for that: the
-two dropdown templates are among the four overrides, so CoreUI's own data API handles them.
+There is no dropdown adapter upstream; dropdowns rely on the data API alone. The theme needs no JavaScript for that: with
+the registered prefix the dropdown toggles say `data-coreui-toggle`, so CoreUI's own data API handles them.
 
 ### The shell
 
