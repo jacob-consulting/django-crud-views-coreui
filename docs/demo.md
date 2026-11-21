@@ -42,7 +42,7 @@ The sidebar shows what the account may open.
 |---|---|---|---|
 | | Dashboard | `/` | plain Django view: stat cards, revenue chart (ApexCharts, following the colour mode), orders to roast, recent cuppings |
 | Sales | Customers | `/customer/` | Guardian per-object permissions, conditional group, object detail `split-card`, action menus, nested addresses, delete protection |
-| | Orders | `/orders/`, `/customer/<id>/order/` | two ViewSets on one model, workflow, line formset, typeahead customer picker, datetimepicker, custom form, context button |
+| | Orders | `/orders/`, `/customer/<id>/order/` | two ViewSets on one model, workflow, line formset, typeahead customer picker, datetimepicker, custom form, context button, bulk actions (table and cards: "Mark roasted", "Cancel orders") |
 | | Subscriptions | `/subscriptions/` | nested and top-level lists, a custom form without an object |
 | Catalog | Products | `/product/` | polymorphic, card view plus a table, per-kind object detail |
 | | Categories | `/category/` | ordered (up/down) |

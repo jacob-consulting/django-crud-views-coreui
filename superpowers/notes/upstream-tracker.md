@@ -298,6 +298,26 @@ The gaps found in the AdminLTE tracker apply here as they are:
   scrolls inside the card. No CSS rule; `test_bulk_table_inside_coreui_card` pins the structure.
 - **C10** (the toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
   gaps, not worked around; no CoreUI-specific effect.
+- Demo and browser pass (Acme Roasters, `/orders/` and `/orders/card/`, Chromium via chrome-devtools, 2026-11-21).
+  Indeterminate select-all already takes the brand colour (CoreUI's `.form-check-input:indeterminate` reads
+  `--cui-primary`), so no `acme.css` rule, unlike the AdminLTE demo. Results (pass unless noted; "clientWidth" because
+  the classic 15px scrollbar makes `scrollWidth` equal `clientWidth`, 360 at a 375px viewport, and no sideways scroll):
+
+  | Check | View | User | Width | Result |
+  | --- | --- | --- | --- | --- |
+  | checkboxes + select-all visible; none white/grey, some indeterminate sienna `rgb(160, 82, 45)`, all sienna | table 20 rows | alex | 1280 | pass |
+  | same, card checkboxes (12) in each card's top-left corner, not over the title, all `form=` the toolbar | cards | alex | 1280 | pass |
+  | same states, select column 16px; table scrolls inside `.table-responsive` (505 in 311) | table | alex, kim | 375 | pass |
+  | same states | cards | alex, kim | 375 | pass |
+  | page scroll: `scrollWidth` 360 = `clientWidth` 360 (innerWidth 375) | table, cards | alex, kim | 375 | pass |
+  | page scroll: 1265 = 1265 | table, cards | alex, kim | 1280 | pass |
+  | "Mark roasted" on 2 confirmed orders: straight through, "2 orders marked roasted.", both Roasted | table | alex | 1280 | pass |
+  | "Cancel orders": review with reason textarea, confirm, "1 order cancelled.", order Cancelled | table | alex | 1280 | pass |
+  | "Cancel orders" POST and GET | `/orders/bulk-cancel/` | kim | 1280 | 403 (C10: the button is still shown) |
+  | "Mark roasted" review | `/orders/bulk-roast/` | kim | 375 | 200 |
+
+  The card's total sits in `card_actions`, which the stock card wraps in a shaded block inside the body (the
+  product card's `card-footer` looked the same), so the order card keeps AdminLTE's rule-and-bold-total markup.
 - **C8** is U10 here (`aria-sort`, solved by the table.thead copy, which also fixes the prefixed table's icon).
 
 ## Theme layout overrides (not upstream gaps)
