@@ -18,7 +18,8 @@ ViewSet Navigation #383 and its navbar class keys #386; re-checked, U1-U6 unchan
 repo prefix are in django-crud-views.
 
 Status: **anticipated** (found by reading the code, not yet hit while building), **confirmed** (the theme needed a
-workaround), **filed** (issue number), **done** (fixed upstream and adopted here).
+workaround), **filed** (issue number), **fixed** (merged upstream, PR number; the theme workaround is still in place),
+**done** (fixed upstream and adopted here).
 
 Severity: **blocker**, **annoyance**, **cosmetic** (same meaning as in the Tabler findings file).
 
@@ -37,27 +38,46 @@ declared upstream; gutter via `gx-3`; help-button rule stays). U12 follows with 
 2026-11-21: U12 filed as django-crud-views-extensions #6 (same chains, plus `--cv-border-color-translucent` and
 `--cv-highlight-bg`; hard fallbacks everywhere); #394 got a comment asking its docs to state the naming rule.
 
+2026-11-21, later the same day: all four issues fixed and closed upstream.
+
+| Issue | Entries | Fixed by | Merge commit | What landed |
+|---|---|---|---|---|
+| django-crud-views #391 | U1, U2 | PR #395 | `95d40ddf` | `register_data_prefix()`, `{% cv_data_prefix %}`; prefix on actions-menu toggle, language selector, vertical tabs, accordion group; `data-data-prefix` in both config tags, read by `tabs.js` on every init/dispose scan. Default output byte-identical apart from `data-data-prefix="bs"`. |
+| django-crud-views #393 | U9, U10 (and C8) | PR #396 | `4ec93cb9` | keys `breadcrumb:list`, `breadcrumb:item`, `breadcrumb:item-active`; header `aria-sort` and sort icon from the bound column's ordering, so default-ordered and prefixed tables show their real sort state. |
+| django-crud-views #394 | U5 | PR #397 | `49d5173a` | six `--cv-*` tokens read with Bootstrap and literal fallbacks (twelve uses); compact formset rows use `gx-3`; the help-button `--bs-btn-color` bridge stays. |
+| extensions #6 | U12 | PR #7 | `c23739cb` | both typeahead skins read five `--cv-*` tokens as `var(--cv-x, var(--bs-x, <hard>))`; released in 0.4.0 (`fd06c91`). |
+
+Not yet adopted: `../django-crud-views` is still at `75a42851` (bulk selection #392), before all three PRs, and nox
+installs `main`. The extensions checkout (`fd06c91`) already has its fix. Adopting means: register the `coreui` prefix
+and drop the four U1 overrides, `coreui-tabs.js` and (probably) check E002 (U11); use the breadcrumb key instead of the
+CSS rule (U9); drop the `table.thead` copy (U10, C8); set the `--cv-*` tokens instead of re-mapping `--bs-*` (U5, U12).
+Expect the drift tests (`test_data_bs_overrides_track_upstream`, `test_upstream_tabs_script_still_selects_data_bs`,
+`test_table_head_is_upstream_plus_aria_sort`) and the strict xfail `test_bulk_prefixed_sort_shows_the_icon` to fail
+once the checkout is updated. That failure is the signal to adopt. U3 and U4 were waiting on #391; the decision is
+due when the adoption shows how much of `coreui-adapters.js` is left. #391 shipped without a `register_theme()`
+helper, so U8 stays as it is.
+
 | Entry | Final status | Handled by (theme side) |
 |---|---|---|
-| U1 | filed (#391) | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
-| U2 | filed (#391) | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
-| U3 | deferred (superseded by #391) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
-| U4 | deferred (after #391) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
-| U5 | filed (#394) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
+| U1 | fixed (#391, PR #395) | four `data-coreui-` template overrides under `src/crud_views_coreui/templates/` (drift-tested) |
+| U2 | fixed (#391, PR #395) | `src/crud_views_coreui/static/crud_views_coreui/coreui-tabs.js` (tabs on load and in modals, `cv.initObjectDetailTabs` wrapper; re-init checked in the browser) |
+| U3 | deferred (superseded by #391, now merged) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
+| U4 | deferred (after #391, now merged; decide at adoption) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
+| U5 | fixed (#394, PR #397) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--bs-*` block (`--bs-secondary-text-emphasis` from `--cui-body-color` since the browser pass) |
 | U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
 | U7 | confirmed (demo) | semantic icon names: `example/config/icons.py` `ACME_ICONS` -> `CRUD_VIEWS_ICONS` and `COREUI_ICON_ALIASES` (`django_coreui/icons.py`) |
 | U8 | anticipated, not hit | nothing to work around; `src/crud_views_coreui/apps.py` is the duplicated `ready()` |
-| U9 | filed (#393) | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
-| U10 | filed (#393) | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
-| U11 | confirmed | system check `crud_views_coreui.E002` (`src/crud_views_coreui/checks.py`) |
-| U12 | filed (extensions #6) | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
+| U9 | fixed (#393, PR #396) | `crud_views_coreui.css`, `.header-breadcrumb .breadcrumb` |
+| U10 | fixed (#393, PR #396) | `src/crud_views_coreui/templates/crud_views/table/bootstrap5.html`, block `table.thead` |
+| U11 | confirmed (goes with the U1 overrides once #395 is adopted) | system check `crud_views_coreui.E002` (`src/crud_views_coreui/checks.py`) |
+| U12 | fixed (extensions #6, PR #7, 0.4.0) | `crud_views_coreui.css`, `.cv-typeahead, .cv-typeahead-select` block |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug; file it only together with U1's prefix setting, as a `register_theme()` helper.
 
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
-- Status: filed (#391, 2026-11-21, together with U2) · Severity: annoyance
+- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U2; not yet adopted) · Severity: annoyance
 - Where:
   - `crud_views/templates/crud_views/tags/actions_menu_toggle.html:4-5`: `data-bs-toggle="dropdown"`,
     `data-bs-popper-config` (the `⋯` menu on every list row and toolbar)
@@ -83,7 +103,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U2. Hard-coded `data-bs-toggle` selector in JavaScript
 
-- Status: filed (#391, 2026-11-21, together with U1) · Severity: annoyance
+- Status: fixed (#391 filed and fixed 2026-11-21 by PR #395 @ `95d40ddf`, together with U1; not yet adopted) · Severity: annoyance
 - Where: `crud_views_object_detail/static/crud_views_object_detail/js/tabs.js:12`:
   `'[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]'`
 - Effect: if the theme renames the attributes (U1), tabs.js no longer finds the triggers; if it keeps them, CoreUI's
@@ -151,7 +171,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
-- Status: filed (#394, 2026-11-21) · Severity: cosmetic
+- Status: fixed (#394 filed and fixed 2026-11-21 by PR #397 @ `49d5173a`; not yet adopted) · Severity: cosmetic
 - Where: `crud_views/static/crud_views/css/manage.css`, `crud_views/static/crud_views/css/formset.css`
   (13 `--bs-` references in total: 6 properties read with `var()`, `--bs-secondary-color`,
   `--bs-secondary-text-emphasis`, `--bs-body-bg`, `--bs-border-color`, `--bs-border-radius`, `--bs-tertiary-bg`; and
@@ -224,7 +244,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U9. The breadcrumb has no class key
 
-- Status: filed (#393, 2026-11-21, together with U10) · Severity: cosmetic
+- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U10; not yet adopted) · Severity: cosmetic
 - Where: `crud_views/templates/crud_views/tags/breadcrumb.html`: `<ol class="breadcrumb">` is fixed; there is no
   `breadcrumb:*` key in `crud_views/lib/button_classes.py`.
 - Effect under CoreUI: the theme puts the breadcrumb where CoreUI's layout has it, the header's second row
@@ -239,7 +259,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U10. The stock table header has no `aria-sort`
 
-- Status: filed (#393, 2026-11-21, together with U9) · Severity: annoyance (accessibility)
+- Status: fixed (#393 filed and fixed 2026-11-21 by PR #396 @ `4ec93cb9`, together with U9; not yet adopted) · Severity: annoyance (accessibility)
 - Where: `crud_views/templates/crud_views/table/bootstrap5.html`, block `table.thead`: an orderable `<th>` shows the
   `table-sort-asc`/`-desc` icon (from `request.GET.sort`), but carries no `aria-sort`, so assistive technology does not
   learn which column is sorted or in which direction. The Tabler theme's table override sets it.
@@ -271,7 +291,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U12. django-crud-views-extensions' typeahead skins read `--bs-*` custom properties
 
-- Status: filed (django-crud-views-extensions #6, 2026-11-21) · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
+- Status: fixed (django-crud-views-extensions #6 filed and fixed 2026-11-21 by PR #7 @ `c23739cb`, released in 0.4.0; not yet adopted) · Severity: annoyance · Upstream: django-crud-views-extensions, not django-crud-views
 - Where (`../django-crud-views-extensions` @ `667f27a9`):
   `src/crud_views_widget_typeahead/static/crud_views_widget_typeahead/typeahead-select.css` (`--bs-body-bg`,
   `--bs-border-color-translucent`, `--bs-border-radius` on the select popup, `--bs-secondary-color`,
@@ -302,7 +322,8 @@ The gaps found in the AdminLTE tracker apply here as they are:
   the `aria-sort` half is U10 here (the table.thead copy reads the ordering from the table, so the prefix works;
   `test_bulk_prefixed_sort_sets_aria_sort`). The icon half is not solved: the copy still tests `request.GET.sort`,
   which a prefixed table never sets, so the prefixed header shows no sort icon until upstream #393 lands
-  (`test_bulk_prefixed_sort_shows_the_icon`, a strict xfail).
+  (`test_bulk_prefixed_sort_shows_the_icon`, a strict xfail). #393 landed the same day (PR #396): adopting it drops
+  the copy and the xfail.
 - **Demo test deviation:** `example/sales/tests/test_bulk.py` is AdminLTE's file with one change, the message selector
   `.adminlte-messages .alert` is `.alert`, since this shell has no host message wrapper.
 - Demo and browser pass (Acme Roasters, `/orders/` and `/orders/card/`, Chromium via chrome-devtools, 2026-11-21).
