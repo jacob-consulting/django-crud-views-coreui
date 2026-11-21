@@ -298,6 +298,13 @@ The gaps found in the AdminLTE tracker apply here as they are:
   scrolls inside the card. No CSS rule; `test_bulk_table_inside_coreui_card` pins the structure.
 - **C10** (the toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
   gaps, not worked around; no CoreUI-specific effect.
+- **C8** (a sorted column of a prefixed table, e.g. `?c-sort=name` on the bulk list, has no `aria-sort` and no sort icon):
+  the `aria-sort` half is U10 here (the table.thead copy reads the ordering from the table, so the prefix works;
+  `test_bulk_prefixed_sort_sets_aria_sort`). The icon half is not solved: the copy still tests `request.GET.sort`,
+  which a prefixed table never sets, so the prefixed header shows no sort icon until upstream #393 lands
+  (`test_bulk_prefixed_sort_shows_the_icon`, a strict xfail).
+- **Demo test deviation:** `example/sales/tests/test_bulk.py` is AdminLTE's file with one change, the message selector
+  `.adminlte-messages .alert` is `.alert`, since this shell has no host message wrapper.
 - Demo and browser pass (Acme Roasters, `/orders/` and `/orders/card/`, Chromium via chrome-devtools, 2026-11-21).
   Indeterminate select-all already takes the brand colour (CoreUI's `.form-check-input:indeterminate` reads
   `--cui-primary`), so no `acme.css` rule, unlike the AdminLTE demo. Results (pass unless noted; "clientWidth" because
@@ -318,7 +325,8 @@ The gaps found in the AdminLTE tracker apply here as they are:
 
   The card's total sits in `card_actions`, which the stock card wraps in a shaded block inside the body (the
   product card's `card-footer` looked the same), so the order card keeps AdminLTE's rule-and-bold-total markup.
-- **C8** is U10 here (`aria-sort`, solved by the table.thead copy, which also fixes the prefixed table's icon).
+  Card-view submits ("Mark roasted", "Cancel orders" from `/orders/card/`) were not run in the browser pass; the
+  checkbox-to-form binding there is covered by `test_bulk_checkboxes_point_at_the_toolbar_form`.
 
 ## Theme layout overrides (not upstream gaps)
 

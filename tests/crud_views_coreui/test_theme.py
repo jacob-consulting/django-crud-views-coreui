@@ -39,8 +39,9 @@ import crud_views_coreui
 from crud_views_coreui.buttons import COREUI_BUTTON_CLASSES
 from crud_views_coreui.icons import COREUI_ICONS, render
 from django_coreui.icons import ICONS, svg
+from tests.crud_views_coreui.testapp import urls as testapp_urls
 from tests.crud_views_coreui.testapp.models import Customer
-from tests.crud_views_coreui.testapp.views import CustomerDeleteView, CustomerListView, cv_customer
+from tests.crud_views_coreui.testapp.views import CustomerDeleteView, CustomerListView
 
 THEME = Path(crud_views_coreui.__file__).resolve().parent
 THEME_CSS = THEME / "static/crud_views_coreui/crud_views_coreui.css"
@@ -669,7 +670,10 @@ class DataCoreuiTests(TestCase):
 
     def test_no_data_bs_on_any_testapp_page(self):
         seen = 0
-        for pattern in cv_customer.urlpatterns:  # the bulk ViewSet has no plain GET pages: test_bulk.py
+        # every testapp page, the bulk ViewSet's list and card included; its two form views redirect without a selection
+        for pattern in testapp_urls.urlpatterns:
+            if pattern.name in ("bulk_customer-clear_country", "bulk_customer-set_country"):
+                continue
             kwargs = {"pk": self.customer.pk} if "pk" in pattern.pattern.regex.groupindex else {}
             url = reverse(pattern.name, kwargs=kwargs)
             for headers in ({}, {"X-CV-Modal": "true"}):
@@ -678,7 +682,9 @@ class DataCoreuiTests(TestCase):
                     self.assertEqual(response.status_code, 200)
                     self.assertNotIn("data-bs-", response.content.decode())
                     seen += 1
-        self.assertGreaterEqual(seen, 2 * 9)  # every customer view, the two object-detail packs included
+        self.assertGreaterEqual(
+            seen, 2 * 11
+        )  # every customer view (the two object-detail packs included), bulk list and card
         # the list's row actions are all inline by default; with an overflow menu the ⋯ toggle renders too
         with mock.patch.object(CustomerListView, "cv_list_actions_inline", ["detail"]):
             html = self.client.get(reverse("customer-list")).content.decode()

@@ -122,6 +122,25 @@ def test_bulk_empty_list(admin_client):
     for name in ("bulk_customer-list", "bulk_customer-card"):
         doc = page(admin_client.get(reverse(name)))
         assert not doc.cssselect("[data-cv-bulk-item]"), name
+        assert doc.cssselect("form[data-cv-bulk]"), name  # upstream renders the toolbar for an empty list too
+
+
+def name_header(client):
+    # the bulk ViewSet's table has the prefix "c": ?c-sort=name sorts by name
+    doc = page(client.get(reverse("bulk_customer-list") + "?c-sort=name"))
+    (th,) = [th for th in doc.cssselect("thead th") if "Name" in th.text_content()]
+    return th
+
+
+def test_bulk_prefixed_sort_sets_aria_sort(admin_client, customers):
+    # tracker U10 (C8): the table.thead copy reads the ordering from the table, so the prefix is honoured
+    assert name_header(admin_client).get("aria-sort") == "ascending"
+
+
+# tracker C8: the copy's sort icon still tests request.GET.sort, which a prefixed table never sets; waiting on #393
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="waiting on django-crud-views #393")
+def test_bulk_prefixed_sort_shows_the_icon(admin_client, customers):
+    assert name_header(admin_client).cssselect("svg")
 
 
 def review(client, action, ids):
