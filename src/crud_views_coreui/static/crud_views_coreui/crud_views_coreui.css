@@ -89,13 +89,6 @@
   background-color: color-mix(in srgb, var(--cv-coreui-badge-color) 20%, #fff);
 }
 
-/* The breadcrumb's row in the CoreUI header (django_coreui/layouts/app.html, block breadcrumb): CoreUI's .breadcrumb
-   keeps a 1rem bottom margin, which the free admin template drops there with my-0. crud_views' breadcrumb has no class
-   key for its <ol> (upstream tracker U9), so the margin goes through CoreUI's own variable. */
-.header-breadcrumb .breadcrumb {
-  --cui-breadcrumb-margin-bottom: 0;
-}
-
 /* ViewSet Navigation (page.html): below the owner's h1 and the tabs, the view's own title is a section heading. */
 .cv-coreui-owner ~ .row .page-title {
   font-size: 1rem;

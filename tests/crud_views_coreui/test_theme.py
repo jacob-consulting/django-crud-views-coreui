@@ -14,7 +14,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-import crud_views
 from crud_views.lib.button_classes import _get_default_button_classes, get_button_classes
 from crud_views.lib.crispy import CrispyDeleteForm
 from crud_views.lib.icons import render_icon as cv_render_icon
@@ -43,12 +42,6 @@ from tests.crud_views_coreui.testapp.views import CustomerDeleteView, CustomerLi
 
 THEME = Path(crud_views_coreui.__file__).resolve().parent
 THEME_CSS = THEME / "static/crud_views_coreui/crud_views_coreui.css"
-
-# What the theme's table.thead adds to upstream's <th> (tracker U10), as Tabler's table header does.
-ARIA_SORT = (
-    '{% if column.orderable %} aria-sort="{% if column.is_ordered %}{% if column.order_by_alias.is_descending %}'
-    'descending{% else %}ascending{% endif %}{% else %}none{% endif %}"{% endif %}'
-)
 
 
 def icon_paths(name):
@@ -167,10 +160,10 @@ class ThemeRenderingTests(TestCase):
             self.assertNotIn('class="breadcrumb', self.page_header(html))
 
     def test_header_breadcrumb_has_no_bottom_margin(self):
-        # CoreUI's .breadcrumb keeps a 1rem bottom margin, which the free template drops in the header (my-0);
-        # upstream's breadcrumb has no class key (tracker U9), so the theme CSS sets CoreUI's variable.
-        css = THEME_CSS.read_text()
-        self.assertRegex(css, r"\.header-breadcrumb \.breadcrumb \{\s*--cui-breadcrumb-margin-bottom: 0;")
+        # CoreUI's .breadcrumb keeps a 1rem bottom margin, which the free template drops in the header (my-0); the
+        # theme sets the breadcrumb:list key (upstream #393, tracker U9), so no CSS rule is needed.
+        self.assertIn('<ol class="breadcrumb my-0">', self.header_row(self.list_html()))
+        self.assertNotIn("--cui-breadcrumb-margin-bottom", THEME_CSS.read_text())
 
     # ViewSet Navigation (PR #383): the owner header at the top of the page header, the view's title row below the tabs
     def test_bar_page_builds_the_owner_header(self):
@@ -245,7 +238,7 @@ class ThemeRenderingTests(TestCase):
         self.assertIn(str(svg("cil-building")), html)  # the ViewSet header icon, coreui:cil-building
 
     def test_table_override_extends_the_stock_table(self):
-        # The theme adds the card, the responsive wrapper and aria-sort; rows, sorting and pagination stay upstream's.
+        # The theme adds the card and the responsive wrapper; header, rows, sorting and pagination stay upstream's.
         source = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
         self.assertIn('{% extends "crud_views/table/bootstrap5.html" %}', source)
         self.assertIn("{{ block.super }}", source)
@@ -294,8 +287,8 @@ class ThemeRenderingTests(TestCase):
         self.assertNotIn("<i class=", button.group(0))
 
     def test_sorted_column_is_marked(self):
-        # The stock header marks the sorted column with the table-sort-* icon; the theme's table.thead adds aria-sort,
-        # which the stock header lacks (tracker U10), so screen readers get the sort state too.
+        # The stock header marks the sorted column with the table-sort-* icon and aria-sort (upstream #393, tracker
+        # U10), so screen readers get the sort state too.
         html = self.list_html(sort="-revenue")
         revenue = re.search(r'<th class="[^"]*\btext-end" scope="col" aria-sort="[a-z]+">.*?</th>', html, re.S)
         self.assertIn('aria-sort="descending"', revenue.group(0))
@@ -313,19 +306,10 @@ class ThemeRenderingTests(TestCase):
         self.assertNotIn('aria-sort="descending"', thead)
         self.assertGreater(thead.count('aria-sort="none"'), 1)
 
-    def test_table_head_is_upstream_plus_aria_sort(self):
-        # The theme's table.thead block is a copy (blocks cannot add an attribute to upstream's <th>); it must equal
-        # the installed upstream block with only the aria-sort attribute added. Fails when upstream changes the header.
-        def head(source):
-            return re.search(r"\{% block table\.thead %\}.*?\{% endblock table\.thead %\}", source, re.S).group(0)
-
-        upstream = (
-            Path(crud_views.__file__).resolve().parent / "templates/crud_views/table/bootstrap5.html"
-        ).read_text()
-        theme = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
-        self.assertEqual(head(theme).replace(ARIA_SORT, ""), head(upstream))
-        self.assertEqual(head(theme).count(ARIA_SORT), 1)
-        self.assertNotIn("aria-sort", upstream)  # the copy exists only while upstream has no aria-sort
+    def test_table_override_keeps_the_stock_header(self):
+        # upstream's header sets aria-sort and the sort icon from the table's ordering (#393, tracker U10)
+        source = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
+        self.assertNotIn("table.thead", source)
 
     def test_scripts_use_the_coreui_adapter_without_jquery(self):
         html = self.list_html()

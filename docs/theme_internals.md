@@ -98,6 +98,11 @@ How Tabler classes translate to CoreUI (the key set is the same):
 | `azure`, `green`, `red`, `yellow` | `info`, `success`, `danger`, `warning` |
 | `blue`, `pink` (manage page legend) | `cv-coreui-badge-blue`, `cv-coreui-badge-pink`: subtle badges built in the theme CSS from `--cui-blue` and `--cui-pink`, which CoreUI defines but gives no utility classes; light in dark mode too, like CoreUI's `bg-*-subtle` |
 
+One key goes beyond the Tabler set: `breadcrumb:list` is `breadcrumb my-0`, as CoreUI's free admin template writes the
+breadcrumb in the header's second row (CoreUI's `.breadcrumb` otherwise keeps a 1rem bottom margin; upstream #393,
+tracker U9). A project that sets `breadcrumb:list` itself should keep `my-0`. The table header is upstream's: it sets
+`aria-sort` and the sort icon from the table's ordering, also for tables with a `prefix` (#393, tracker U10).
+
 The label mode decides the square shape: each action key exists as `location:variant` (labelled) and
 `location:variant:icon` (icon-only, with `cv-coreui-icon-btn`). The manage page's badges never use `primary`, because
 its legend names colours and a project's primary may be any colour.
@@ -112,7 +117,7 @@ crud_views_coreui/
 crud_views/
   snippets/form_frame.html        layout: the form in a card (bare in a modal); extends upstream's frame
   table/bootstrap5.html           layout: the table on a card, in .table-responsive, pagination in the card footer;
-                                  extends upstream's table, three blocks with {{ block.super }}; plus table.thead (below)
+                                  extends upstream's table, three blocks with {{ block.super }}
 ```
 
 CoreUI's layout puts the page on `--cui-tertiary-bg` (gray) and its content on cards. Stock Bootstrap 5 markup is
@@ -128,15 +133,6 @@ language selector, the vertical-tabs object detail, the accordion group) with a 
 The theme registers `coreui` in `ready()`, so those templates render `data-coreui-*` and the theme copies none of them.
 A test renders every test app page, full and as a modal partial, and finds no `data-bs-`; another scans upstream's
 templates and scripts and fails on any that hard-codes `data-bs-` instead of using the prefix.
-
-### The table header override (U10)
-
-The stock table header marks the sorted column with an icon but has no `aria-sort`, so assistive technology does not
-learn which column is sorted. A block cannot add an attribute to upstream's `<th>`, so the theme's table template
-overrides `{% block table.thead %}` with a copy of upstream's block plus one attribute on orderable columns:
-`aria-sort="ascending|descending|none"`, taken from `column.is_ordered` and `column.order_by_alias.is_descending` (which
-also works for tables with a `prefix`). A test requires the block to equal the installed upstream one with only that
-attribute added, so an upstream change fails the suite.
 
 ## JavaScript
 
@@ -181,8 +177,7 @@ block exists for django-crud-views-extensions' typeahead skins (`.cv-typeahead`,
 whose select popup otherwise has no background.
 
 The other rules: the square `cv-coreui-icon-btn`, `cv-coreui-section-legend` (registered for the conditional and formset
-legends), the two subtle badge colours, `--cui-breadcrumb-margin-bottom: 0` for the header's breadcrumb row (U9, upstream
-has no `breadcrumb:*` class key), a smaller view title below the owner tabs, and two rules that drop the inner bottom
+legends), the two subtle badge colours, a smaller view title below the owner tabs, and two rules that drop the inner bottom
 margins of the card table and its pagination.
 
 ## Forms

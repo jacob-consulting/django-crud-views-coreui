@@ -91,6 +91,9 @@ COREUI_BUTTON_CLASSES: dict[str, str] = {
     "navbar:nav": "nav nav-underline-border flex-wrap row-gap-1",
     "navbar:item": "nav-item mw-100",
     "navbar:link": "nav-link d-flex align-items-center mw-100 text-break gap-2",
+    # The breadcrumb sits in the CoreUI header's second row, where the free admin template writes ol.breadcrumb.my-0
+    # (upstream #393, tracker U9): without my-0 CoreUI's 1rem bottom margin pushes the row's content up.
+    "breadcrumb:list": "breadcrumb my-0",
     "formset:control": "btn btn-outline-secondary cv-coreui-icon-btn",
     "formset:control-danger": "btn btn-danger cv-coreui-icon-btn",
     "conditional:legend": "cv-coreui-section-legend",

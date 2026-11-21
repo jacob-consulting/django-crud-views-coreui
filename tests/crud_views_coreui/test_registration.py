@@ -117,7 +117,8 @@ TABLER_ONLY = re.compile(
 
 class ButtonClassTests(SimpleTestCase):
     def test_button_keys_match_tabler(self):
-        self.assertEqual(set(COREUI_BUTTON_CLASSES), TABLER_BUTTON_KEYS)
+        # plus breadcrumb:list, which CoreUI's header row needs (upstream #393, tracker U9) and Tabler does not set
+        self.assertEqual(set(COREUI_BUTTON_CLASSES), TABLER_BUTTON_KEYS | {"breadcrumb:list"})
 
     def test_no_tabler_only_classes(self):
         leaks = {key: value for key, value in COREUI_BUTTON_CLASSES.items() if TABLER_ONLY.search(value)}
