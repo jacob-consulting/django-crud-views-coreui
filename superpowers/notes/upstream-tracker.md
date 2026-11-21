@@ -110,11 +110,10 @@ registrations; revisit when a third theme exists or a registration bug appears.
 
 ## Still open (2026-11-21, after PR #3)
 
-Nothing filed is waiting upstream. Left, none of them blocking:
+Waiting upstream: #398 (U4). Left, none of them blocking:
 
-- **U4**: the only theme script left, `coreui-adapters.js`. Candidate issue: a `js_namespace` value in `#cv-config`
-  next to the data prefix, and `tooltip.init` deriving the placement attribute from the prefix; together they would
-  remove the script. Not filed.
+- **U4**: filed as django-crud-views #398 (2026-11-21): `register_js_namespace()` and
+  `register_tooltip_placements()`, both in `#cv-config`; once released `coreui-adapters.js` goes.
 - **U3**: deferred until a theme exists whose library is neither Bootstrap nor a data-API fork.
 - **U8**: see the verdict above.
 - **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
@@ -203,7 +202,7 @@ Nothing filed is waiting upstream. Left, none of them blocking:
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
-- Status: confirmed, deferred · Severity: cosmetic
+- Status: filed (#398, 2026-11-21) · Severity: cosmetic
 - Where: `crud_views/static/crud_views/js/adapters.js:129`
 - Effect: works (a theme script runs `cv.adapters = cv.bootstrapAdapters(() => window.coreui)`), but every
   Bootstrap-fork theme writes the same few lines and has to load after `adapters.js` and before first use.
@@ -223,6 +222,13 @@ Nothing filed is waiting upstream. Left, none of them blocking:
 - After adoption (2026-11-21, PR #3): `adapters.js` is unchanged at `49d5173a`; all of `coreui-adapters.js` is left
   (the namespace line and the tooltip placement wrapper). Filing would need both values, the namespace and the
   placement attribute from the prefix; not filed yet (see "Still open").
+- Filed (2026-11-21): django-crud-views #398, design approved by the maintainer. Two theme registrations carried in
+  `#cv-config` and read by `adapters.js` at call time: `register_js_namespace(name)` (default `bootstrap`) and
+  `register_tooltip_placements({location: placement})` (default `{}`, so stock Bootstrap is unchanged; an explicit
+  `data-{prefix}-placement` on the trigger wins). Chosen over a global "context → bottom" default (would move stock
+  tooltips) and namespace-only (the script would stay). Once released the theme calls
+  `register_js_namespace("coreui")` and `register_tooltip_placements({"context": "bottom"})` and deletes
+  `coreui-adapters.js` with its asset bundle.
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
