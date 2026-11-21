@@ -16,7 +16,6 @@ REQUIRED = [
     "crud_views_coreui/templates/crud_views_coreui/page.html",
     "crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css",
     "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
-    "crud_views_coreui/static/crud_views_coreui/coreui-tabs.js",
     "crud_views_coreui/templatetags/crud_views_coreui.py",
 ]
 
@@ -31,6 +30,18 @@ def build(tmp_path, wheel_names, sdist_names=("pyproject.toml", "src/x.py")):
             info.size = 1
             tar.addfile(info, io.BytesIO(b"x"))
     return subprocess.run([sys.executable, str(SCRIPT), str(tmp_path)], capture_output=True, text=True)
+
+
+def test_every_required_witness_exists_in_the_source_tree():
+    # check_dist.py runs on a real wheel only in the nox package session; a witness for a deleted file fails there
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("check_dist", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    src = SCRIPT.parents[1] / "src"
+    assert [name for name in module.WHEEL_REQUIRED if not (src / name).is_file()] == []
+    assert module.WHEEL_REQUIRED == REQUIRED
 
 
 def test_complete_wheel_passes(tmp_path):
@@ -58,9 +69,9 @@ def test_sdist_outside_allowlist_fails(tmp_path):
     assert build(tmp_path, REQUIRED, ("pyproject.toml", "superpowers/plan.md")).returncode == 1
 
 
-def test_wheel_without_the_theme_tabs_script_or_tag_library_fails(tmp_path):
+def test_wheel_without_the_theme_script_or_tag_library_fails(tmp_path):
     for name in (
-        "crud_views_coreui/static/crud_views_coreui/coreui-tabs.js",
+        "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
         "crud_views_coreui/templatetags/crud_views_coreui.py",
     ):
         result = build(tmp_path, [n for n in REQUIRED if n != name])
