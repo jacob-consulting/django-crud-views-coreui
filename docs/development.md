@@ -70,12 +70,12 @@ uv run ruff format . && uv run ruff check .
 
 ## Guards against upstream drift
 
-The theme copies a few upstream templates; each copy has a test that fails when upstream changes, so drift is noticed:
+The theme copies no upstream template; it uses upstream's hooks. Tests fail when upstream adds something those hooks
+do not cover:
 
-- the four `data-bs-` overrides must equal the installed upstream file with `data-bs-` renamed to `data-coreui-`;
-- the table header block must equal upstream's with the one `aria-sort` attribute added;
-- `coreui-tabs.js` has a test that fails once upstream's `tabs.js` stops selecting `data-bs-toggle`;
-- the CSS test parses upstream's CSS and fails on a `--bs-*` property the theme does not map.
+- a scan of the installed upstream templates and scripts fails on any that hard-codes `data-bs-` instead of the
+  registered prefix, and every test app page (full and as a modal partial) must render without `data-bs-`;
+- the CSS tests parse upstream's CSS (and the typeahead skins) and fail on a `--cv-*` token the theme does not set.
 
 See [Theme internals](theme_internals.md).
 

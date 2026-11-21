@@ -50,7 +50,7 @@ uv run ruff format . && uv run ruff check .
 ```
 
 System checks: `django_coreui.E001` (unknown `COREUI["edition"]`), `crud_views_coreui.E002` (theme listed after
-`crud_views` or `crud_views_object_detail`), `crud_views_coreui.W001` (a `coreui:` icon without SVG).
+`crud_views`), `crud_views_coreui.W001` (a `coreui:` icon without SVG).
 
 ## Architecture
 
@@ -68,19 +68,19 @@ API reads only `data-coreui-*` (never `data-bs-*`), and the CSS custom propertie
 that looks odd exists because of one of those three.
 
 **How the crud_views theme works** (details in `docs/theme_internals.md`): the theme is an app listed *before*
-`crud_views` and `crud_views_object_detail`, so its templates shadow upstream's. Overrides: `form_frame.html` and
-`table/bootstrap5.html` (layout: a card), four `data-bs-` -> `data-coreui-` copies (`actions_menu_toggle.html`,
-`language_selector.html`, object-detail `tabs-vertical/object_detail.html` and `accordion/group.html`; tracker U1) and
-the `table.thead` block with `aria-sort` (U10). Each copy has a drift test against the installed upstream file. Everything
-else is registered in `CrudViewsCoreuiConfig.ready()`:
-- button classes: `buttons.COREUI_BUTTON_CLASSES` (the Tabler theme's keys with CoreUI values; icon-only buttons get
-  `cv-coreui-icon-btn`),
+`crud_views`, so its templates shadow upstream's. Overrides: only `form_frame.html` and `table/bootstrap5.html` (layout:
+a card; the table override extends upstream's and wraps three blocks). Everything else is registered in
+`CrudViewsCoreuiConfig.ready()`:
+- data-attribute prefix: `register_data_prefix("coreui")` (upstream #391), so upstream's templates and object-detail
+  `tabs.js` write and read `data-coreui-*`,
+- button classes: `buttons.COREUI_BUTTON_CLASSES` (the Tabler theme's keys with CoreUI values, plus `breadcrumb:list`
+  = `breadcrumb my-0`; icon-only buttons get `cv-coreui-icon-btn`),
 - label modes: `{"form": "both"}`,
 - icons: the `coreui` library and `COREUI_ICONS` (semantic name -> `coreui:cil-*`); SVGs live in
   `django_coreui.icons.ICONS` (CoreUI Icons Free 3.1.0, CC BY 4.0; add icons with `scripts/vendor_icons.py`),
-- assets: `coreui-adapters.js` (`cv.adapters` -> `window.coreui`; wrap, never replace, `tooltip.init`),
-  `coreui-tabs.js` (object-detail tabs, selector `data-coreui-toggle`; U2) and `crud_views_coreui.css` (maps upstream's
-  `--bs-*` reads to `--cui-*`, U5, plus the theme's few rules).
+- assets: `coreui-adapters.js` (`cv.adapters` -> `window.coreui`; wrap, never replace, `tooltip.init`; U4) and
+  `crud_views_coreui.css` (sets upstream's and the typeahead's `--cv-*` tokens from `--cui-*`, element-scoped, U5/U12,
+  plus the theme's few rules).
 
 Prefer solving theme problems through upstream hooks (class keys, blocks, settings) rather than new template overrides;
 copied templates drift from upstream silently.
