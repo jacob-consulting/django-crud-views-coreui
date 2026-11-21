@@ -440,7 +440,7 @@ provides-extras = ["examples", "test", "dev"]
 
 [[package]]
 name = "django-crud-views-extensions"
-version = "0.3.3"
+version = "0.4.0"
 source = { editable = "../django-crud-views-extensions" }
 dependencies = [
     { name = "django-crud-views" },
