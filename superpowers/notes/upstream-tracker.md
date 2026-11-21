@@ -118,8 +118,12 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
 - **U8**: see the verdict above.
 - **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
   theme layout, not upstream gaps.
-- **C10** (bulk toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
-  gaps from the AdminLTE tracker, unfiled there too; no CoreUI-specific effect.
+- **C10** (bulk toolbar shows every action to every viewer): filed as django-crud-views #399 (2026-11-21), amending
+  #387 D-03: the toolbar offers an action only when its destination passes `cv_has_access` and `cv_action_enabled`
+  for the viewer (default, no flag, no per-row check); a source with no action left renders no toolbar and no
+  checkboxes. Once released, Kim no longer sees "Cancel orders"; nothing to remove here.
+- **C11** (no danger variant for bulk buttons): upstream gap from the AdminLTE tracker, unfiled there too; no
+  CoreUI-specific effect.
 - Theme-side follow-ups from the PR #3 review (not upstream): the token tests check token names but not that the
   selector list still covers the three formset classes; a `[data-coreui-theme]` element nested inside the manage page
   or a formset card keeps the outer token values; no test pins the icon on a default-ordered list without `?sort=`.
