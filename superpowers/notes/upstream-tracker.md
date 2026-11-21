@@ -48,7 +48,7 @@ declared upstream; gutter via `gx-3`; help-button rule stays). U12 follows with 
 | django-crud-views #394 | U5 | PR #397 | `49d5173a` | six `--cv-*` tokens read with Bootstrap and literal fallbacks (twelve uses); compact formset rows use `gx-3`; the help-button `--bs-btn-color` bridge stays. |
 | extensions #6 | U12 | PR #7 | `c23739cb` | both typeahead skins read five `--cv-*` tokens as `var(--cv-x, var(--bs-x, <hard>))`; released in 0.4.0 (`fd06c91`). |
 
-Adopted (2026-11-21, branch `feature/adopt-upstream-fixes`, design
+Adopted (2026-11-21, PR #3, merged to `main` as `c895d3f`; design
 `superpowers/specs/2026-11-21-adopt-upstream-fixes-design.md`): `../django-crud-views` pulled to `49d5173a`.
 
 - U1, U2: `register_data_prefix("coreui")` in `CrudViewsCoreuiConfig.ready()`; the four `data-coreui-` template copies
@@ -93,7 +93,7 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 |---|---|---|
 | U1 | done (#391, PR #395; adopted 2026-11-21) | `register_data_prefix("coreui")` in `ready()`; no template copies |
 | U2 | done (#391, PR #395; adopted 2026-11-21) | nothing; upstream's `tabs.js` reads the prefix (`coreui-tabs.js` deleted) |
-| U3 | deferred (superseded by #391, adopted) | no JS; the `actions_menu_toggle.html` / `language_selector.html` overrides of U1 (row menus open with the fixed popper strategy) |
+| U3 | deferred (superseded by #391, adopted) | nothing; upstream's dropdown templates write `data-coreui-*` through the prefix and CoreUI's data API opens them (row menus keep the fixed popper strategy) |
 | U4 | deferred (#391 adopted; adapters.js unchanged, script stays) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
 | U5 | done (#394, PR #397; adopted 2026-11-21) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--cv-*` block (`--cv-secondary-text-emphasis` from `--cui-body-color`) |
 | U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
@@ -105,7 +105,25 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 | U12 | done (extensions #6, PR #7, 0.4.0; adopted 2026-11-21) | `crud_views_coreui.css`, `--cv-*` tokens on `.cv-typeahead, .cv-typeahead-select` |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
-bug; file it only together with U1's prefix setting, as a `register_theme()` helper.
+bug. #391 shipped `register_data_prefix()` without a `register_theme()` helper, so the theme's `ready()` now makes six
+registrations; revisit when a third theme exists or a registration bug appears.
+
+## Still open (2026-11-21, after PR #3)
+
+Nothing filed is waiting upstream. Left, none of them blocking:
+
+- **U4**: the only theme script left, `coreui-adapters.js`. Candidate issue: a `js_namespace` value in `#cv-config`
+  next to the data prefix, and `tooltip.init` deriving the placement attribute from the prefix; together they would
+  remove the script. Not filed.
+- **U3**: deferred until a theme exists whose library is neither Bootstrap nor a data-API fork.
+- **U8**: see the verdict above.
+- **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
+  theme layout, not upstream gaps.
+- **C10** (bulk toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
+  gaps from the AdminLTE tracker, unfiled there too; no CoreUI-specific effect.
+- Theme-side follow-ups from the PR #3 review (not upstream): the token tests check token names but not that the
+  selector list still covers the three formset classes; a `[data-coreui-theme]` element nested inside the manage page
+  or a formset card keeps the outer token values; no test pins the icon on a default-ordered list without `?sort=`.
 
 ## U1. Hard-coded `data-bs-*` attributes in templates
 
@@ -166,7 +184,7 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 
 ## U3. No `dropdown` adapter
 
-- Status: confirmed · Severity: annoyance
+- Status: deferred (confirmed; superseded in practice by #391, adopted 2026-11-21) · Severity: annoyance
 - Where: `crud_views/static/crud_views/js/adapters.js:67-127`: `cv.bootstrapAdapters(ns)` builds `modal`,
   `tooltip`, `tab`, `collapse`, `alert`, but no `dropdown`; dropdowns rely on Bootstrap's data API alone.
 - Effect: a theme whose library is not `window.bootstrap` cannot initialise crud_views' dropdowns through the adapter
@@ -180,10 +198,12 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
   the dropdown templates write `data-coreui-toggle` and CoreUI's own data API opens them, so the U1 overrides that
   served as this workaround go. A dropdown adapter would then only help a library that is neither Bootstrap nor a
   data-API fork; no such theme exists. Deferred until one does.
+- Adopted (2026-11-21, PR #3): the U1 overrides are deleted; the `⋯` menu opens through CoreUI's data API (browser
+  pass), the language selector is covered by the no-`data-bs-` page test.
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
-- Status: confirmed · Severity: cosmetic
+- Status: confirmed, deferred · Severity: cosmetic
 - Where: `crud_views/static/crud_views/js/adapters.js:129`
 - Effect: works (a theme script runs `cv.adapters = cv.bootstrapAdapters(() => window.coreui)`), but every
   Bootstrap-fork theme writes the same few lines and has to load after `adapters.js` and before first use.
@@ -200,6 +220,9 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
   value next to it would remove `coreui-adapters.js` entirely. The namespace stays a second value: prefix and
   namespace differ for Bootstrap (`bs` / `bootstrap`) and only coincide for CoreUI. Decide after #391 lands, by how
   much of the theme script is left. Deferred.
+- After adoption (2026-11-21, PR #3): `adapters.js` is unchanged at `49d5173a`; all of `coreui-adapters.js` is left
+  (the namespace line and the tooltip placement wrapper). Filing would need both values, the namespace and the
+  placement attribute from the prefix; not filed yet (see "Still open").
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
@@ -273,6 +296,8 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
 - Final verdict (close-out, 2026-11-20): anticipated, not hit. The browser pass found no defect that a registration
   helper would have prevented; every registration took effect (button classes, icons, assets in order, label modes).
   Do not file alone; bundle with U1.
+- 2026-11-21: #391 shipped without a registration helper; the theme adds one more registration
+  (`register_data_prefix`). Verdict unchanged.
 
 ## U9. The breadcrumb has no class key
 
@@ -319,6 +344,9 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
   `check_app_order`): an Error when `crud_views_coreui` comes after `crud_views` or after `crud_views_object_detail`
   (when installed), with a hint naming the order. Tests:
   `tests/crud_views_coreui/test_registration.py::AppOrderCheckTests`.
+- 2026-11-21 (PR #3): with the prefix adopted the object-detail overrides are gone; E002 checks only `crud_views`, for
+  the two layout overrides, and its hint says "before crud_views". The possible fix below happened for the data-bs
+  half; the layout half is theme design, so E002 stays.
 - Possible fix: with U1's data-attribute prefix (or adapter-driven init), the theme would not need the overrides, and
   the order would stop mattering for them.
 
