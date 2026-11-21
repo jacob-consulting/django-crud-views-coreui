@@ -40,8 +40,7 @@ from crud_views_coreui.buttons import COREUI_BUTTON_CLASSES
 from crud_views_coreui.icons import COREUI_ICONS, render
 from django_coreui.icons import ICONS, svg
 from tests.crud_views_coreui.testapp.models import Customer
-from tests.crud_views_coreui.testapp.urls import urlpatterns as testapp_urlpatterns
-from tests.crud_views_coreui.testapp.views import CustomerDeleteView, CustomerListView
+from tests.crud_views_coreui.testapp.views import CustomerDeleteView, CustomerListView, cv_customer
 
 THEME = Path(crud_views_coreui.__file__).resolve().parent
 THEME_CSS = THEME / "static/crud_views_coreui/crud_views_coreui.css"
@@ -670,7 +669,7 @@ class DataCoreuiTests(TestCase):
 
     def test_no_data_bs_on_any_testapp_page(self):
         seen = 0
-        for pattern in testapp_urlpatterns:
+        for pattern in cv_customer.urlpatterns:  # the bulk ViewSet has no plain GET pages: test_bulk.py
             kwargs = {"pk": self.customer.pk} if "pk" in pattern.pattern.regex.groupindex else {}
             url = reverse(pattern.name, kwargs=kwargs)
             for headers in ({}, {"X-CV-Modal": "true"}):

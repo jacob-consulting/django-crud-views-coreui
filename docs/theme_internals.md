@@ -235,6 +235,19 @@ else in either package, or in the demo, branches on the edition.
 A PRO edition is planned behind this setting as a separate design. CoreUI PRO assets are commercial and are never shipped
 with this package. Anyone who wants PRO needs their own CoreUI licence.
 
+## Bulk actions
+
+Bulk selection (django-crud-views #392) needs nothing from the theme beyond what is there:
+
+- The seven `bulk:*` button-class keys are not set: upstream's defaults (`form-check-input`, `d-flex` flex rows,
+  `position-relative` card cells) are CoreUI classes as well.
+- The toolbar renders above the table card or the card grid, and carries the select-all checkbox. The table's first
+  column, "Select", holds one checkbox per row inside the table card; it scrolls with the table in the card's
+  `.table-responsive`, so a wide list does not widen the page (the same wrapper solves C9 of the AdminLTE tracker).
+  Every checkbox posts through `form="<toolbar form id>"`.
+- The review page renders in the theme's page like any custom form view; result and warning messages go through
+  crud_views' own alerts, once.
+
 ## Not covered yet
 
 - A PRO edition (above), and PRO widgets (date range picker, multi select).

@@ -285,6 +285,21 @@ bug; file it only together with U1's prefix setting, as a `register_theme()` hel
   which parses the installed skins (skipped without the extensions).
 - Possible fix: the same as U5, own `--cv-*` tokens with Bootstrap fallbacks, set once by a theme.
 
+## Bulk selection (2026-11-21, upstream 75a42851)
+
+Bulk selection (django-crud-views #392) needed no new CoreUI entry, no `bulk:*` key and no CSS: the theme uses
+upstream's seven defaults (`form-check-input`, `d-flex ... gap-*`, ...), which are CoreUI classes too. Checked by
+`tests/crud_views_coreui/test_bulk.py` (toolbar, row and card checkboxes bound to the toolbar form, the select column
+inside `.card.cv-coreui-table > .table-container > .table-responsive`, the review page, messages, empty list).
+The gaps found in the AdminLTE tracker apply here as they are:
+
+- **C9** (the bare `div.table-container`, no `.table-responsive`): already solved by the theme's table override, which
+  puts `.table-responsive` around the table inside the card (`{% block table %}`), so a wide list with the select column
+  scrolls inside the card. No CSS rule; `test_bulk_table_inside_coreui_card` pins the structure.
+- **C10** (the toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
+  gaps, not worked around; no CoreUI-specific effect.
+- **C8** is U10 here (`aria-sort`, solved by the table.thead copy, which also fixes the prefixed table's icon).
+
 ## Theme layout overrides (not upstream gaps)
 
 For the record, so they are not mistaken for missing hooks. Started from the Tabler theme's seven layout overrides;
