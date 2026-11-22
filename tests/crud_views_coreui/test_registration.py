@@ -222,17 +222,32 @@ class AssetTests(SimpleTestCase):
     def test_assets_registered(self):
         bundles = {bundle.key: bundle for bundle in get_registered()}
         bundle = bundles["crud_views_coreui"]
-        self.assertEqual([a.path for a in bundle.js], ["crud_views_coreui/coreui-adapters.js"])
+        self.assertEqual([a.path for a in bundle.js], [])  # no theme script: upstream #398, tracker U4
         self.assertEqual([a.path for a in bundle.css], ["crud_views_coreui/crud_views_coreui.css"])
         self.assertTrue(bundle.emit)
         for asset in (*bundle.js, *bundle.css):
             self.assertTrue((STATIC.parent / asset.path).is_file(), asset.path)
+
+    def test_theme_ships_no_script(self):
+        self.assertEqual(sorted(path.name for path in STATIC.iterdir()), ["crud_views_coreui.css"])
 
     def test_data_prefix_is_coreui(self):
         # upstream's templates and tabs.js write data-coreui-* (#391, tracker U1/U2)
         from crud_views.lib.data_prefix import get_data_prefix
 
         self.assertEqual(get_data_prefix(), "coreui")
+
+    def test_js_namespace_is_coreui(self):
+        # upstream's stock adapters resolve window.coreui instead of window.bootstrap (#398, tracker U4)
+        from crud_views.lib.js_config import get_js_namespace
+
+        self.assertEqual(get_js_namespace(), "coreui")
+
+    def test_toolbar_tooltips_open_below(self):
+        # so they do not cover the page header; every other location keeps CoreUI's default (#398, tracker U4)
+        from crud_views.lib.js_config import get_tooltip_placements
+
+        self.assertEqual(get_tooltip_placements(), {"context": "bottom"})
 
     # The CoreUI source of each --cv-* token where it is not --cui-<same name>: CoreUI's --cui-secondary-text-emphasis
     # stays dark (#212233) in dark mode, unlike Bootstrap's (browser pass: dark-on-dark manage headers, help buttons).
@@ -279,14 +294,6 @@ class AssetTests(SimpleTestCase):
         for selector, body in re.findall(r"([^{}]+)\{([^{}]*)\}", theme):
             if re.search(r"--cv-(?!coreui-)[a-z-]+\s*:", body):
                 self.assertNotRegex(selector, r"(:root|\bhtml\b)", selector.strip())
-
-    def test_adapter_script_uses_coreui_namespace_and_wraps_tooltip_init(self):
-        script = (STATIC / "coreui-adapters.js").read_text()
-        self.assertIn("cv.bootstrapAdapters(() => globalThis.coreui)", script)
-        self.assertIn("const init = cv.adapters.tooltip.init", script)
-        self.assertIn("data-coreui-placement", script)
-        self.assertNotIn("data-bs-", script)
-        self.assertNotIn("cv.adapters.tooltip = ", script)  # wrap init, never replace the tooltip object
 
 
 def _app_order_messages(*names):

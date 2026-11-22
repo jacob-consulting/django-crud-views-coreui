@@ -573,7 +573,7 @@ class ShowCodeTests(TestCase):
         for label in (
             "crud_views_coreui/apps.py",
             "crud_views_coreui/buttons.py",
-            "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
+            "crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css",
             "crud_views_coreui/templates/crud_views_coreui/page.html",
             "example/config/settings.py (excerpt)",
         ):

@@ -15,7 +15,6 @@ REQUIRED = [
     "django_coreui/static/django_coreui/layout-switch.js",
     "crud_views_coreui/templates/crud_views_coreui/page.html",
     "crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css",
-    "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
     "crud_views_coreui/templatetags/crud_views_coreui.py",
 ]
 
@@ -69,9 +68,9 @@ def test_sdist_outside_allowlist_fails(tmp_path):
     assert build(tmp_path, REQUIRED, ("pyproject.toml", "superpowers/plan.md")).returncode == 1
 
 
-def test_wheel_without_the_theme_script_or_tag_library_fails(tmp_path):
+def test_wheel_without_the_theme_stylesheet_or_tag_library_fails(tmp_path):
     for name in (
-        "crud_views_coreui/static/crud_views_coreui/coreui-adapters.js",
+        "crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css",
         "crud_views_coreui/templatetags/crud_views_coreui.py",
     ):
         result = build(tmp_path, [n for n in REQUIRED if n != name])

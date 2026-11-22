@@ -17,7 +17,7 @@
     <p class="text-body-secondary fs-5 mb-4" style="max-width: 60rem">
       The theme is one app, <code>crud_views_coreui</code>, listed before <code>crud_views</code> in
       <code>INSTALLED_APPS</code>. Its templates shadow django-crud-views’ stock Bootstrap&nbsp;5 templates of the same
-      name, and whatever it does not override falls through. Button classes, icons and the JavaScript adapters are
+      name, and whatever it does not override falls through. Button classes, icons and the JavaScript namespace are
       registered through upstream hooks in <code>apps.py</code>; no crud_views code is patched or subclassed. The
       <code>sales</code>, <code>catalog</code>, <code>roastery</code> and <code>shipping</code> apps never import it:
       open <span class="text-nowrap">{% icon "cil-code" "me-1" %}Show code</span> on any of their pages to check.

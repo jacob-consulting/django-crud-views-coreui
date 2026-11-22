@@ -46,10 +46,12 @@ DJANGO_TABLES2_TEMPLATE = "crud_views/table/bootstrap5.html"
 COREUI = {"edition": "free"}
 ```
 
-`CrudViewsCoreuiConfig.ready()` registers six things through upstream's hooks: the `coreui` icon library, the icon table
-(`register_icons`), label-mode defaults (`{"form": "both"}`), the button class table (`register_button_classes`; the
-`workflow:*` keys only when `crud_views_workflow` is installed), the data-attribute prefix (`register_data_prefix("coreui")`)
-and the asset bundle (`register_assets`: `coreui-adapters.js`, `crud_views_coreui.css`).
+`CrudViewsCoreuiConfig.ready()` registers eight things through upstream's hooks: the `coreui` icon library, the icon
+table (`register_icons`), label-mode defaults (`{"form": "both"}`), the button class table
+(`register_button_classes`; the `workflow:*` keys only when `crud_views_workflow` is installed), the data-attribute
+prefix (`register_data_prefix("coreui")`), the JavaScript namespace (`register_js_namespace("coreui")`), the tooltip
+placements (`register_tooltip_placements({"context": "bottom"})`) and the asset bundle (`register_assets`:
+`crud_views_coreui.css`).
 
 ## The page: CRUD_VIEWS_EXTENDS
 
@@ -136,22 +138,26 @@ templates and scripts and fails on any that hard-codes `data-bs-` instead of usi
 
 ## JavaScript
 
-### The adapter (U4)
+### The adapters (U4, U13)
 
 Core scripts of django-crud-views call Bootstrap components only through `cv.adapters` (`modal`, `tooltip`, `tab`,
-`collapse`, `alert`). CoreUI's bundle exposes the same components on `window.coreui`, so the theme registers one asset,
-`crud_views_coreui/coreui-adapters.js`:
+`collapse`, `alert`). CoreUI's bundle exposes the same components on `window.coreui`, so the theme registers that name
+in `ready()` and ships no script of its own:
 
-```js
-Object.assign(cv.adapters, cv.bootstrapAdapters(() => globalThis.coreui));
+```python
+register_js_namespace("coreui")
+register_tooltip_placements({"context": "bottom"})
 ```
 
-A second statement places toolbar tooltips below the buttons, so they do not cover the page header. It **wraps**
-crud_views' `cv.adapters.tooltip.init` instead of replacing it: that `init` guards tooltip transitions that outlive
-`dispose()`, and the tooltip object also carries the optional `hide` and `dispose`. The placement travels as
-`data-coreui-placement`; a button that already has one keeps it. Do not reassign `cv.adapters.tooltip` as a whole.
+Both values travel on `#cv-config` (`data-js-namespace`, `data-tooltip-placements`), and upstream's stock adapters read
+them on every call, so CoreUI's bundle may load deferred. The placement puts toolbar tooltips below the buttons, so
+they do not cover the page header. A button with its own `data-coreui-placement` keeps it, and every other location
+keeps CoreUI's default.
 
-The namespace is resolved on every call, so CoreUI's bundle may load deferred.
+The stock modal adapter names the events it waits for after the data prefix (`hide.coreui.modal`,
+`hidden.coreui.modal`); that is how it sees a CoreUI modal close and returns focus to the opener. A project that
+copies `crud_views/tags/cv_config.html` must keep its `data-data-prefix`, `data-js-namespace` and
+`data-tooltip-placements` attributes, or the adapters fall back to `window.bootstrap` and `*.bs.modal`.
 
 ### Dropdowns (U3)
 
