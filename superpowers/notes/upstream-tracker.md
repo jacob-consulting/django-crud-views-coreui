@@ -103,6 +103,7 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 | U10 | done (#393, PR #396; adopted 2026-11-21) | nothing; upstream's header |
 | U11 | reduced (2026-11-21) | system check `crud_views_coreui.E002`, now `crud_views` only (two layout overrides remain) |
 | U12 | done (extensions #6, PR #7, 0.4.0; adopted 2026-11-21) | `crud_views_coreui.css`, `--cv-*` tokens on `.cv-typeahead, .cv-typeahead-select` |
+| U13 | fixed (#403, PR #405 @ `5f5918ad`, 2026-11-22; not adopted, browser check open) | nothing; the fix reads the prefix the theme already registers (`register_data_prefix("coreui")`) |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug. #391 shipped `register_data_prefix()` without a `register_theme()` helper, so the theme's `ready()` now makes six
@@ -127,6 +128,10 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
   `bulk:danger`, selected by the destination's `cv_action_variant` (stock values unchanged). Once released, add the
   four keys (and `:icon` variants) to `COREUI_BUTTON_CLASSES` and set `cv_action_variant = "danger"` on the demo's
   "Cancel orders".
+- **U13** (stock modal adapter waits for `*.bs.modal` events CoreUI never dispatches): filed as django-crud-views
+  #403 and fixed by PR #405 @ `5f5918ad` (2026-11-22). Not adopted yet: pull `../django-crud-views` to `5f5918ad` or
+  later, then run the browser check in the U13 entry and record it on #403, which stays open until then. No theme
+  change is needed.
 - Theme-side follow-ups from the PR #3 review (not upstream): the token tests check token names but not that the
   selector list still covers the three formset classes; a `[data-coreui-theme]` element nested inside the manage page
   or a formset card keeps the outer token values; no test pins the icon on a default-ordered list without `?sort=`.
@@ -378,6 +383,37 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
   `tests/crud_views_coreui/test_registration.py::AssetTests::test_css_maps_every_bs_variable_the_typeahead_reads`,
   which parses the installed skins (skipped without the extensions).
 - Possible fix: the same as U5, own `--cv-*` tokens with Bootstrap fallbacks, set once by a theme.
+
+## U13. Stock modal adapter listens to fixed `*.bs.modal` events
+
+- Status: fixed (django-crud-views #403 filed 2026-11-22, fixed the same day by PR #405 @ `5f5918ad`; not adopted
+  here yet, browser check open) · Severity: annoyance
+- Found by reading the code in a review of upstream phase 06.45 (#398), not in the browser passes above. Not yet
+  reproduced in a browser.
+- Where (`../django-crud-views` @ `ee82aea1`): `crud_views/static/crud_views/js/adapters.js:41,53`. `modalLifecycle()`
+  registers `hide.bs.modal` and `hidden.bs.modal` on the modal shell, whatever namespace
+  `cv.bootstrapAdapters(ns)` was given.
+- Effect under CoreUI, expected from the code: CoreUI 5.9.1 (`django_coreui/assets.py`) dispatches
+  `hide.coreui.modal` / `hidden.coreui.modal` (`DATA_KEY = 'coreui.modal'` in its bundle), so the adapter never sees
+  a modal close. `cv.adapters.modal.onHidden` callbacks do not run: `modal.js` neither releases its modal session nor
+  returns focus to the opener, and a replacement opened while the old modal is still fading out is not queued behind
+  the hide. Opening and showing work, which is why the browser passes did not notice. The example has seven
+  `cv_modal = True` views. Tabler keeps `*.bs.modal` and is not affected.
+- Theme workaround: none. `coreui-adapters.js` repoints the namespace and wraps `tooltip.init`; it never assigned
+  `cv.adapters.modal`.
+- Upstream fix (#403, D-01 to D-06): the stock modal adapter listens to `hide.{prefix}.modal` /
+  `hidden.{prefix}.modal`, with the prefix from `data-data-prefix` on `#cv-config` (#391; `bs` when absent), read
+  once per modal element at its first `onHidden` or `show`. It applies to adapters built by
+  `cv.bootstrapAdapters(...)` too, so the theme's current `Object.assign(cv.adapters, cv.bootstrapAdapters(...))`
+  wiring is covered. A theme that copies `crud_views/tags/cv_config.html` must keep `data-data-prefix`; this theme
+  does not copy it. The same PR makes the missing-component error library-neutral ("UI library JavaScript not
+  loaded").
+- To adopt: pull `../django-crud-views` to `5f5918ad` or later (`uv run` then picks it up through
+  `[tool.uv.sources]`). Nothing to add or remove in the theme.
+- Browser check still owed (upstream #403 D-06), before and after the pull, with a hard reload so the new
+  `adapters.js` is served: (1) open a modal view from a keyboard-focused opener and close it; focus returns to the
+  opener. (2) Trigger a replacement open while the modal is still fading out; the new content is shown. Record the
+  result on #403 with the upstream commit and CoreUI 5.9.1.
 
 ## Bulk selection (2026-11-21, upstream 75a42851)
 
