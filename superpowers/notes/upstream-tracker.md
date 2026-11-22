@@ -115,7 +115,7 @@ registrations; revisit when a third theme exists or a registration bug appears.
 
 - **U4**: done. The theme calls `register_js_namespace("coreui")` and
   `register_tooltip_placements({"context": "bottom"})`; `coreui-adapters.js` and its asset-bundle entry are gone.
-  Not checked in a browser after the adoption: see the U4 entry.
+  The browser check after the adoption passed (2026-11-22): see the U4 entry.
 - **U3**: deferred until a theme exists whose library is neither Bootstrap nor a data-API fork.
 - **U8**: see the verdict above.
 - **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
@@ -252,8 +252,15 @@ registrations; revisit when a third theme exists or a registration bug appears.
   (`test_js_namespace_is_coreui`, `test_toolbar_tooltips_open_below`, `test_theme_ships_no_script`), the rendered
   `#cv-config` (`data-js-namespace="coreui"`, the placements JSON) and a scan of upstream's `adapters.js` for the
   hooks the theme now relies on, the U13 event names included. `scripts/check_dist.py` no longer requires the script
-  in the wheel. Needs `../django-crud-views` at `5f5918ad` or later (U13). Not checked in a browser after the
-  adoption: toolbar tooltips opening below, and one modal open and close.
+  in the wheel. Needs `../django-crud-views` at `5f5918ad` or later (U13).
+- Browser check after the adoption (`/showcase/` as alex, CoreUI 5.9.1, django-crud-views @ `5f5918ad`, 2026-11-22):
+
+  | Check | Result |
+  | --- | --- |
+  | toolbar tooltips (List, Filter, Create, Manage) open below the buttons | pass |
+  | row tooltips (update, delete) keep CoreUI's default, above the icon | pass |
+  | delete modal opens from a keyboard-focused trigger; Escape closes it and focus returns to the trigger | pass |
+  | the Filter button opens and closes the filter panel (collapse adapter) | pass |
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
