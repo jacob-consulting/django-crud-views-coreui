@@ -103,7 +103,7 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 | U10 | done (#393, PR #396; adopted 2026-11-21) | nothing; upstream's header |
 | U11 | reduced (2026-11-21) | system check `crud_views_coreui.E002`, now `crud_views` only (two layout overrides remain) |
 | U12 | done (extensions #6, PR #7, 0.4.0; adopted 2026-11-21) | `crud_views_coreui.css`, `--cv-*` tokens on `.cv-typeahead, .cv-typeahead-select` |
-| U13 | fixed (#403, PR #405 @ `5f5918ad`, 2026-11-22; not adopted, browser check open) | nothing; the fix reads the prefix the theme already registers (`register_data_prefix("coreui")`) |
+| U13 | done (#403, PR #405 @ `5f5918ad`; browser check passed 2026-11-22, #403 closed) | nothing; the fix reads the prefix the theme already registers (`register_data_prefix("coreui")`) |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug. #391 shipped `register_data_prefix()` without a `register_theme()` helper, so the theme's `ready()` now makes six
@@ -128,10 +128,9 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
   `bulk:danger`, selected by the destination's `cv_action_variant` (stock values unchanged). Once released, add the
   four keys (and `:icon` variants) to `COREUI_BUTTON_CLASSES` and set `cv_action_variant = "danger"` on the demo's
   "Cancel orders".
-- **U13** (stock modal adapter waits for `*.bs.modal` events CoreUI never dispatches): filed as django-crud-views
-  #403 and fixed by PR #405 @ `5f5918ad` (2026-11-22). Not adopted yet: pull `../django-crud-views` to `5f5918ad` or
-  later, then run the browser check in the U13 entry and record it on #403, which stays open until then. No theme
-  change is needed.
+- **U13** (stock modal adapter waits for `*.bs.modal` events CoreUI never dispatches): fixed by django-crud-views
+  PR #405 @ `5f5918ad`; the browser check passed and #403 is closed (2026-11-22). Nothing open in the theme. Local
+  development runs the fix once `../django-crud-views` is pulled to `5f5918ad` or later.
 - Theme-side follow-ups from the PR #3 review (not upstream): the token tests check token names but not that the
   selector list still covers the three formset classes; a `[data-coreui-theme]` element nested inside the manage page
   or a formset card keeps the outer token values; no test pins the icon on a default-ordered list without `?sort=`.
@@ -386,10 +385,10 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
 
 ## U13. Stock modal adapter listens to fixed `*.bs.modal` events
 
-- Status: fixed (django-crud-views #403 filed 2026-11-22, fixed the same day by PR #405 @ `5f5918ad`; not adopted
-  here yet, browser check open) · Severity: annoyance
-- Found by reading the code in a review of upstream phase 06.45 (#398), not in the browser passes above. Not yet
-  reproduced in a browser.
+- Status: done (django-crud-views #403 filed 2026-11-22, fixed the same day by PR #405 @ `5f5918ad`; browser check
+  passed and #403 closed 2026-11-22; no theme change) · Severity: annoyance
+- Found by reading the code in a review of upstream phase 06.45 (#398), not in the browser passes above. The defect
+  itself was never reproduced in a browser: only the fixed code was checked.
 - Where (`../django-crud-views` @ `ee82aea1`): `crud_views/static/crud_views/js/adapters.js:41,53`. `modalLifecycle()`
   registers `hide.bs.modal` and `hidden.bs.modal` on the modal shell, whatever namespace
   `cv.bootstrapAdapters(ns)` was given.
@@ -410,10 +409,16 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
   loaded").
 - To adopt: pull `../django-crud-views` to `5f5918ad` or later (`uv run` then picks it up through
   `[tool.uv.sources]`). Nothing to add or remove in the theme.
-- Browser check still owed (upstream #403 D-06), before and after the pull, with a hard reload so the new
-  `adapters.js` is served: (1) open a modal view from a keyboard-focused opener and close it; focus returns to the
-  opener. (2) Trigger a replacement open while the modal is still fading out; the new content is shown. Record the
-  result on #403 with the upstream commit and CoreUI 5.9.1.
+- Browser check (upstream #403 D-06; `/showcase/` as alex, CoreUI 5.9.1, 2026-11-22), with django-crud-views served
+  from the PR branch head `e3faebb7`, merged as `5f5918ad`, and no theme change:
+
+  | Check | Result |
+  | --- | --- |
+  | delete modal opened from a keyboard-focused trigger, closed with Escape: focus returns to the trigger | pass |
+  | replacement opened while the first modal is fading out (`cv.adapters.modal.hide(...)`, then a second trigger's click): the second modal is shown | pass |
+
+  Not run: the same checks on the unfixed code, and the repeat on upstream's stock Bootstrap example. Recorded on
+  #403.
 
 ## Bulk selection (2026-11-21, upstream 75a42851)
 
