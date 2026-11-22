@@ -94,7 +94,7 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 | U1 | done (#391, PR #395; adopted 2026-11-21) | `register_data_prefix("coreui")` in `ready()`; no template copies |
 | U2 | done (#391, PR #395; adopted 2026-11-21) | nothing; upstream's `tabs.js` reads the prefix (`coreui-tabs.js` deleted) |
 | U3 | deferred (superseded by #391, adopted) | nothing; upstream's dropdown templates write `data-coreui-*` through the prefix and CoreUI's data API opens them (row menus keep the fixed popper strategy) |
-| U4 | deferred (#391 adopted; adapters.js unchanged, script stays) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
+| U4 | fixed (#398, PR #401 @ `ee82aea1`, 2026-11-22; not adopted, script stays) | `src/crud_views_coreui/static/crud_views_coreui/coreui-adapters.js` |
 | U5 | done (#394, PR #397; adopted 2026-11-21) | `src/crud_views_coreui/static/crud_views_coreui/crud_views_coreui.css`, `--cv-*` block (`--cv-secondary-text-emphasis` from `--cui-body-color`) |
 | U6 | confirmed | `scripts/vendor_templates.py` / `django_coreui.crispy.vendored.rewrite` (`data-bs-` -> `data-coreui-` in the crispy pack) |
 | U7 | confirmed (demo) | semantic icon names: `example/config/icons.py` `ACME_ICONS` -> `CRUD_VIEWS_ICONS` and `COREUI_ICON_ALIASES` (`django_coreui/icons.py`) |
@@ -111,10 +111,11 @@ registrations; revisit when a third theme exists or a registration bug appears.
 
 ## Still open (2026-11-21, after PR #3)
 
-Waiting upstream: #398 (U4). Left, none of them blocking:
+#398 (U4) is fixed upstream since 2026-11-22 and waits for adoption here. Left, none of them blocking:
 
-- **U4**: filed as django-crud-views #398 (2026-11-21): `register_js_namespace()` and
-  `register_tooltip_placements()`, both in `#cv-config`; once released `coreui-adapters.js` goes.
+- **U4**: fixed by django-crud-views PR #401 @ `ee82aea1` (2026-11-22, #398 closed): `register_js_namespace()` and
+  `register_tooltip_placements()`, both in `#cv-config`. Not adopted yet: `coreui-adapters.js` and its asset-bundle
+  entry are still in place; the adoption steps are in the U4 entry.
 - **U3**: deferred until a theme exists whose library is neither Bootstrap nor a data-API fork.
 - **U8**: see the verdict above.
 - **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
@@ -213,7 +214,8 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
 
 ## U4. Default adapter namespace is fixed to `globalThis.bootstrap`
 
-- Status: filed (#398, 2026-11-21) · Severity: cosmetic
+- Status: fixed (#398 filed 2026-11-21, fixed 2026-11-22 by PR #401 @ `ee82aea1`; not adopted here, the theme
+  script is still in place) · Severity: cosmetic
 - Where: `crud_views/static/crud_views/js/adapters.js:129`
 - Effect: works (a theme script runs `cv.adapters = cv.bootstrapAdapters(() => window.coreui)`), but every
   Bootstrap-fork theme writes the same few lines and has to load after `adapters.js` and before first use.
@@ -240,6 +242,17 @@ Waiting upstream: #398 (U4). Left, none of them blocking:
   tooltips) and namespace-only (the script would stay). Once released the theme calls
   `register_js_namespace("coreui")` and `register_tooltip_placements({"context": "bottom"})` and deletes
   `coreui-adapters.js` with its asset bundle.
+- Fixed upstream (2026-11-22): PR #401, merged as `ee82aea1`, #398 closed. Both functions are exported from
+  `crud_views.lib`; `#cv-config` carries `data-js-namespace` and `data-tooltip-placements`; the stock adapters
+  resolve the namespace on every call and `tooltip.init` passes the registered placement unless the trigger has
+  `data-{prefix}-placement`. Its follow-up #403 (U13) makes the stock modal adapter follow the data prefix.
+- To adopt (not done): in `CrudViewsCoreuiConfig.ready()` add `register_js_namespace("coreui")` and
+  `register_tooltip_placements({"context": "bottom"})`, drop `js=["crud_views_coreui/coreui-adapters.js"]` from
+  `register_assets(...)` and delete the script. The script is pinned by
+  `tests/crud_views_coreui/test_registration.py` (bundle list and
+  `test_adapter_script_uses_coreui_namespace_and_wraps_tooltip_init`) and by the adapter tests in
+  `tests/crud_views_coreui/test_theme.py`, and described in `CLAUDE.md` and `docs/theme_internals.md`; those change
+  with it. Needs `../django-crud-views` at `ee82aea1` or later, and at `5f5918ad` or later for U13.
 
 ## U5. Upstream CSS reads `--bs-*` custom properties
 
