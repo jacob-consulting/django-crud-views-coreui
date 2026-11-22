@@ -78,9 +78,11 @@ a card; the table override extends upstream's and wraps three blocks). Everythin
 - label modes: `{"form": "both"}`,
 - icons: the `coreui` library and `COREUI_ICONS` (semantic name -> `coreui:cil-*`); SVGs live in
   `django_coreui.icons.ICONS` (CoreUI Icons Free 3.1.0, CC BY 4.0; add icons with `scripts/vendor_icons.py`),
-- assets: `coreui-adapters.js` (`cv.adapters` -> `window.coreui`; wrap, never replace, `tooltip.init`; U4) and
-  `crud_views_coreui.css` (sets upstream's and the typeahead's `--cv-*` tokens from `--cui-*`, element-scoped, U5/U12,
-  plus the theme's few rules).
+- JavaScript: `register_js_namespace("coreui")` and `register_tooltip_placements({"context": "bottom"})`
+  (upstream #398, U4), so upstream's stock adapters use `window.coreui` and toolbar tooltips open below the buttons.
+  The theme ships no script; the stock modal adapter follows the data prefix (upstream #403, U13),
+- assets: `crud_views_coreui.css` (sets upstream's and the typeahead's `--cv-*` tokens from `--cui-*`,
+  element-scoped, U5/U12, plus the theme's few rules).
 
 Prefer solving theme problems through upstream hooks (class keys, blocks, settings) rather than new template overrides;
 copied templates drift from upstream silently.

@@ -311,46 +311,39 @@ class ThemeRenderingTests(TestCase):
         source = (THEME / "templates/crud_views/table/bootstrap5.html").read_text()
         self.assertNotIn("table.thead", source)
 
-    def test_scripts_use_the_coreui_adapter_without_jquery(self):
+    def test_scripts_use_upstream_adapters_without_jquery_or_a_theme_script(self):
         html = self.list_html()
         self.assertNotIn("jquery", html.lower())
         self.assertNotIn("bootstrap-shim", html)
-        bundle = html.index("/dist/js/coreui.bundle.min.js")
-        core = html.index("crud_views/js/adapters.js")
-        theme = html.index("crud_views_coreui/coreui-adapters.js")
-        self.assertLess(bundle, core)
-        self.assertLess(core, theme)
+        self.assertNotIn("coreui-adapters.js", html)  # the registrations below replaced it (#398, tracker U4)
+        self.assertLess(html.index("/dist/js/coreui.bundle.min.js"), html.index("crud_views/js/adapters.js"))
         self.assertIn("crud_views/js/modal.js", html)
 
-    def test_tooltip_adapter_places_toolbar_tooltips_below(self):
-        with open(finders.find("crud_views_coreui/coreui-adapters.js"), encoding="utf-8") as f:
-            source = f.read()
-        self.assertIn('location === "context"', source)
-        self.assertIn('setAttribute("data-coreui-placement", "bottom")', source)
+    def test_cv_config_publishes_the_namespace_and_tooltip_placements(self):
+        # upstream's stock adapters read both from #cv-config on every call: window.coreui instead of
+        # window.bootstrap, and toolbar tooltips below the buttons so they do not cover the page header
+        html = self.list_html()
+        self.assertIn('data-js-namespace="coreui"', html)
+        self.assertIn('data-tooltip-placements="{&quot;context&quot;: &quot;bottom&quot;}"', html)
 
-    def test_upstream_adapter_set_includes_tab_and_theme_takes_all_of_it(self):
-        # crud_views/js/adapters.js's bootstrapAdapters returns a `tab:` entry using component(ns, "Tab"), which
-        # the object-detail tab init uses (#328); the theme assigns the whole set, so no tab adapter of its own.
+    def test_upstream_stock_adapters_cover_what_the_theme_script_did(self):
+        # The theme assigns no adapter, so each of these has to come from crud_views/js/adapters.js: the tab entry
+        # for object-detail tabs (#328), the namespace and placements from #cv-config with an explicit
+        # data-coreui-placement winning (#398), tooltip hide/dispose (#205) and modal events named after the data
+        # prefix, which is what lets a CoreUI modal's close be seen (#403, tracker U13).
         with open(finders.find("crud_views/js/adapters.js"), encoding="utf-8") as f:
             core = f.read()
         self.assertRegex(core, r'tab: \{\s*init\(el\) \{ component\(ns, "Tab"\)')
-        with open(finders.find("crud_views_coreui/coreui-adapters.js"), encoding="utf-8") as f:
-            source = f.read()
-        self.assertIn("Object.assign(cv.adapters, cv.bootstrapAdapters(() => globalThis.coreui))", source)
-        self.assertNotRegex(source, r"cv\.adapters\.tab\b")
-
-    def test_tooltip_adapter_keeps_upstream_lifecycle(self):
-        # Only init is replaced, so crud_views' hide(el) / dispose(el) (#205) keep resolving coreui.Tooltip.
-        with open(finders.find("crud_views_coreui/coreui-adapters.js"), encoding="utf-8") as f:
-            source = f.read()
-        self.assertIn("init(el, options);", source)
-        self.assertNotIn("getOrCreateInstance", source)
-        self.assertNotIn("cv.adapters.tooltip.hide", source)
-        self.assertNotIn("cv.adapters.tooltip.dispose", source)
-        with open(finders.find("crud_views/js/adapters.js"), encoding="utf-8") as f:
-            core = f.read()
-        self.assertIn("hide(el)", core)
-        self.assertIn("dispose(el)", core)
+        for needle in (
+            '"data-js-namespace"',
+            '"data-tooltip-placements"',
+            "`data-${prefix}-placement`",
+            "hide(el)",
+            "dispose(el)",
+            "`hide.${prefix}.modal`",
+            "`hidden.${prefix}.modal`",
+        ):
+            self.assertIn(needle, core)
 
     def test_form_page_wraps_form_in_card(self):
         html = self.client.get(reverse("customer-create")).content.decode()

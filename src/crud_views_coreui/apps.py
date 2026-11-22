@@ -13,7 +13,7 @@ class CrudViewsCoreuiConfig(AppConfig):
     verbose_name = "django-crud-views CoreUI theme"
 
     def ready(self):
-        from crud_views.lib import register_data_prefix
+        from crud_views.lib import register_data_prefix, register_js_namespace, register_tooltip_placements
         from crud_views.lib.assets import register_assets
         from crud_views.lib.button_classes import register_button_classes
         from crud_views.lib.icons import register_icon_library, register_icons
@@ -34,12 +34,14 @@ class CrudViewsCoreuiConfig(AppConfig):
             }
         )
         # CoreUI's data API reads only data-coreui-*: upstream's templates and object-detail tabs.js write the
-        # registered prefix (upstream #391, tracker U1/U2).
+        # registered prefix (upstream #391, tracker U1/U2). The stock modal adapter names its events after it too
+        # (hidden.coreui.modal; upstream #403, tracker U13).
         register_data_prefix("coreui")
-        # coreui-adapters.js points cv.adapters at window.coreui (tracker U4); the CSS sets upstream's --cv-* tokens
-        # from CoreUI's --cui-* (tracker U5, U12).
-        register_assets(
-            "crud_views_coreui",
-            js=["crud_views_coreui/coreui-adapters.js"],
-            css=["crud_views_coreui/crud_views_coreui.css"],
-        )
+        # CoreUI's bundle exposes its components on window.coreui, not window.bootstrap; upstream's stock adapters
+        # resolve the registered name on every call (upstream #398, tracker U4).
+        register_js_namespace("coreui")
+        # Toolbar tooltips open below the buttons, so they do not cover the page header; the rest keep CoreUI's
+        # default. A data-coreui-placement on the button wins.
+        register_tooltip_placements({"context": "bottom"})
+        # The CSS sets upstream's --cv-* tokens from CoreUI's --cui-* (tracker U5, U12).
+        register_assets("crud_views_coreui", css=["crud_views_coreui/crud_views_coreui.css"])

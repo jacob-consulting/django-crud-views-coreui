@@ -27,7 +27,7 @@ GROUPS = (
     (
         "static",
         "CSS and JavaScript",
-        "A few CSS fixes and the adapters that hand crud_views CoreUI's Bootstrap components.",
+        "A few CSS fixes. The theme ships no JavaScript: it registers CoreUI's namespace in apps.py.",
     ),
     (
         "settings",

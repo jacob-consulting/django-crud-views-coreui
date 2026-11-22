@@ -7,7 +7,7 @@ A [CoreUI](https://coreui.io) 5.9.1 (free edition) theme for
 Django apps:
 
 - **`crud_views_coreui`**: the theme. Listed before `crud_views` in `INSTALLED_APPS`, it shadows a few templates of
-  django-crud-views' stock Bootstrap 5 theme and registers CoreUI button classes, icons and JavaScript adapters through
+  django-crud-views' stock Bootstrap 5 theme and registers CoreUI button classes, icons and the JS namespace through
   upstream's hooks. Your ViewSets and views need no changes.
 - **`django_coreui`**: a CoreUI page shell that does not depend on django-crud-views: base template and admin layout
   (sidebar and header), sign-in page, `{% load coreui %}` icon tags, an end-user colour-mode and sidebar switch, and
