@@ -1,5 +1,9 @@
 # django-crud-views-coreui
 
+[![Tests](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/tests.yml/badge.svg)](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/tests.yml)
+[![Lint](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/lint.yml/badge.svg)](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/lint.yml)
+[![Coverage](https://codecov.io/gh/jacob-consulting/django-crud-views-coreui/branch/main/graph/badge.svg)](https://codecov.io/gh/jacob-consulting/django-crud-views-coreui)
+
 Current version: 0.1.0
 
 A [CoreUI](https://coreui.io) 5.9.1 (free edition) theme for [django-crud-views](https://github.com/jacob-consulting/django-crud-views).
