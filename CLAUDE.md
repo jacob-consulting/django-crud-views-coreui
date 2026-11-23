@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 The distribution **django-crud-views-coreui** (repo `jacob-consulting/django-crud-views-coreui`): a CoreUI 5 (free
-edition, 5.9.1) sister of django-crud-views-tabler, ported from `../tabler-test`. Two reusable packages under `src/`
-and a demo project under `example/`. Supported: Python 3.12-3.15 x Django 4.2, 5.2, 6.1 (the nox matrix; 4.2 only on
-3.12/3.13); local development runs Python 3.14 / Django 6.1.
+edition, 5.9.1) sister of django-crud-views-tabler, ported from `../django-crud-views-tabler`. Two reusable packages
+under `src/` and a demo project under `example/`. Supported: Python 3.12-3.15 x Django 4.2, 5.2, 6.1 (the nox matrix;
+4.2 only on 3.12/3.13); local development runs Python 3.14 / Django 6.1.
 
 - `src/django_coreui/`: CoreUI page shell (CSS and JS from the jsDelivr CDN, pinned with SRI hashes in `assets.py`),
   admin layout (sidebar, header with breadcrumb row), sign-in page, `{% load coreui %}` tags (`icon`, `initials`,
