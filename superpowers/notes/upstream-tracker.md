@@ -133,6 +133,9 @@ registrations; revisit when a third theme exists or a registration bug appears.
   2026-11-23: `COREUI_BUTTON_CLASSES` sets the four keys and their `:icon` keys to the `context:*` values (the bulk
   toolbar is a page-level button row like the context toolbar), and the demo's "Cancel orders" sets
   `cv_action_variant = "danger"` (`btn btn-outline-danger`; `test_toolbar_buttons_follow_the_destination_variant`).
+  Browser check 2026-11-23 (headless Chromium 159): `/orders/` and `/orders/card/`, alex and kim, light and dark, 1280
+  and 375px: red-outline "Cancel orders", grey-outline "Mark roasted", Kim only "Mark roasted", no sideways scroll. In
+  dark mode the grey outline is dim, as on the context toolbar (CoreUI's own `btn-outline-secondary`).
 - **U13** (stock modal adapter waits for `*.bs.modal` events CoreUI never dispatches): fixed by django-crud-views
   PR #405 @ `5f5918ad`; the browser check passed and #403 is closed (2026-11-22). Nothing open in the theme. Local
   development runs the fix once `../django-crud-views` is pulled to `5f5918ad` or later.
