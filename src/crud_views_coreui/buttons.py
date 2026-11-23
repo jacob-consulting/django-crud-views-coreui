@@ -67,6 +67,16 @@ COREUI_BUTTON_CLASSES: dict[str, str] = {
     "card:secondary:icon": "btn btn-sm btn-outline-secondary cv-coreui-icon-btn",
     "card:tertiary:icon": "btn btn-sm btn-ghost-secondary cv-coreui-icon-btn",
     "card:danger:icon": "btn btn-sm btn-ghost-danger cv-coreui-icon-btn",
+    # Bulk toolbar buttons by the destination's cv_action_variant (upstream #400): a page-level button row like the
+    # context toolbar, so the same values. Labelled by default (bulk label mode "both"); :icon is the icon-only mode.
+    "bulk:primary": "btn btn-primary",
+    "bulk:secondary": "btn btn-outline-secondary",
+    "bulk:tertiary": "btn btn-outline-secondary",
+    "bulk:danger": "btn btn-outline-danger",
+    "bulk:primary:icon": "btn btn-primary cv-coreui-icon-btn",
+    "bulk:secondary:icon": "btn btn-outline-secondary cv-coreui-icon-btn",
+    "bulk:tertiary:icon": "btn btn-outline-secondary cv-coreui-icon-btn",
+    "bulk:danger:icon": "btn btn-outline-danger cv-coreui-icon-btn",
     "context:container": "d-flex flex-wrap gap-2",
     "list:container": "d-flex flex-nowrap justify-content-end gap-1",
     "card:container": "d-flex flex-wrap gap-2",

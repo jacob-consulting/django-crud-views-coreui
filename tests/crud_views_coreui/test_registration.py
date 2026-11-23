@@ -19,12 +19,21 @@ from django_coreui.icons import ICONS, svg
 STATIC = Path(crud_views_coreui.__file__).parent / "static" / "crud_views_coreui"
 UPSTREAM_CSS = Path(crud_views.__file__).parent / "static" / "crud_views" / "css"
 
-# Frozen copy of crud_views_tabler.buttons.TABLER_BUTTON_CLASSES' keys (tabler-test 7165eaf). The CoreUI theme covers
+# Frozen copy of crud_views_tabler.buttons.TABLER_BUTTON_CLASSES' keys (tabler-test 7165eaf, plus the eight bulk
+# variant keys of upstream #400, Tabler branch feature/bulk-variants). The CoreUI theme covers
 # exactly the keys the Tabler theme covers; when Tabler gains a key, add it here and in COREUI_BUTTON_CLASSES.
 TABLER_BUTTON_KEYS = frozenset(
     {
         "alert:close",
         "alert:dismissible",
+        "bulk:danger",
+        "bulk:danger:icon",
+        "bulk:primary",
+        "bulk:primary:icon",
+        "bulk:secondary",
+        "bulk:secondary:icon",
+        "bulk:tertiary",
+        "bulk:tertiary:icon",
         "card-order:container",
         "card-order:toggle",
         "card:container",
