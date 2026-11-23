@@ -111,6 +111,19 @@ U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of re
 bug. #391 shipped `register_data_prefix()` without a `register_theme()` helper, so the theme's `ready()` now makes six
 registrations; revisit when a third theme exists or a registration bug appears.
 
+## 2026-11-23: bulk variants adopted, CI and Read the Docs
+
+- PR #5 (`b1a8fbd`): C11 adopted (`bulk:*` variant keys = `context:*` values, demo "Cancel orders" is `danger`), C10
+  recorded as done; browser check passed (headless Chromium, see C11 under "Still open").
+- PR #6 (`439d799`): GitHub workflows Tests (Python 3.12-3.15 x Django 4.2/5.2/6.1 against django-crud-views `main`,
+  coverage to Codecov), Lint (ruff, `nox -s package`) and Docs (`mkdocs build --strict`), as in the Tabler theme;
+  `CODECOV_TOKEN` secret set. Design and plan: `superpowers/specs|plans/2026-11-23-ci-pr-checks*`.
+- PR #7 (`5607a3b`): `.readthedocs.yaml`; the docs are live at https://django-crud-views-coreui.readthedocs.io/ (Read the
+  Docs project connected through the Read the Docs Community GitHub App; every PR gets a preview build and check).
+  Design and plan: `superpowers/specs|plans/2026-11-23-readthedocs*`.
+- Upstream, no theme change: django-crud-views PR #406 corrects the theme guide's "Authorized data in overridden
+  templates", which still said the bulk toolbar renders destinations without access checks (stale after #399).
+
 ## Still open (2026-11-21, after PR #3)
 
 #398 (U4) is fixed upstream and adopted here (2026-11-22). Left, none of them blocking:
