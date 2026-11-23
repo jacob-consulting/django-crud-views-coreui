@@ -104,6 +104,8 @@ demo has no i18n; covered by `test_no_data_bs_on_any_testapp_page`), the prefixe
 | U11 | reduced (2026-11-21) | system check `crud_views_coreui.E002`, now `crud_views` only (two layout overrides remain) |
 | U12 | done (extensions #6, PR #7, 0.4.0; adopted 2026-11-21) | `crud_views_coreui.css`, `--cv-*` tokens on `.cv-typeahead, .cv-typeahead-select` |
 | U13 | done (#403, PR #405 @ `5f5918ad`; browser check passed 2026-11-22, #403 closed) | nothing; the fix reads the prefix the theme already registers (`register_data_prefix("coreui")`) |
+| C10 | done (#399, PR #404 @ `822f737c`; checked 2026-11-23) | nothing; the stock table and card templates follow `view.cv_bulk_buttons`. `test_roasters_are_not_offered_cancel` pins it in the demo |
+| C11 | done (#400, PR #402 @ `71f59256`; adopted 2026-11-23) | `bulk:primary` … `bulk:danger` and their `:icon` keys in `COREUI_BUTTON_CLASSES`, the `context:*` values; the demo's "Cancel orders" sets `cv_action_variant = "danger"` |
 
 U8 verdict: not worth an issue of its own. Two themes repeat a dozen lines of registration and the duplication hides no
 bug. #391 shipped `register_data_prefix()` without a `register_theme()` helper, so the theme's `ready()` now makes six
@@ -120,15 +122,17 @@ registrations; revisit when a third theme exists or a registration bug appears.
 - **U8**: see the verdict above.
 - **U11**: E002 stays for the two layout overrides (`snippets/form_frame.html`, `table/bootstrap5.html`); they are
   theme layout, not upstream gaps.
-- **C10** (bulk toolbar shows every action to every viewer): filed as django-crud-views #399 (2026-11-21), amending
-  #387 D-03: the toolbar offers an action only when its destination passes `cv_has_access` and `cv_action_enabled`
-  for the viewer (default, no flag, no per-row check); a source with no action left renders no toolbar and no
-  checkboxes. Once released, Kim no longer sees "Cancel orders"; nothing to remove here.
-- **C11** (no danger variant for bulk buttons): filed as django-crud-views #400 (2026-11-21), amending 06.41
-  D-19 / D-29: a dedicated bulk leaf (`crud_views/tags/button/bulk.html`) with four class keys `bulk:primary` to
-  `bulk:danger`, selected by the destination's `cv_action_variant` (stock values unchanged). Once released, add the
-  four keys (and `:icon` variants) to `COREUI_BUTTON_CLASSES` and set `cv_action_variant = "danger"` on the demo's
-  "Cancel orders".
+- **C10** (bulk toolbar shows every action to every viewer): done. Fixed by django-crud-views #399 (PR #404 @
+  `822f737c`): the toolbar offers an action only when its destination passes `cv_has_access` and `cv_action_enabled`
+  for the viewer, and a source with no action left renders no toolbar and no checkboxes. The theme uses the stock
+  table and card templates, so nothing changed here; Kim sees only "Mark roasted" (`test_roasters_are_not_offered_cancel`,
+  2026-11-23).
+- **C11** (no danger variant for bulk buttons): done. Fixed by django-crud-views #400 (PR #402 @ `71f59256`): a
+  dedicated bulk leaf with four class keys `bulk:primary` to `bulk:danger`, selected by the destination's
+  `cv_action_variant` (an unset variant renders `secondary`; every stock value is `btn btn-primary`). Adopted
+  2026-11-23: `COREUI_BUTTON_CLASSES` sets the four keys and their `:icon` keys to the `context:*` values (the bulk
+  toolbar is a page-level button row like the context toolbar), and the demo's "Cancel orders" sets
+  `cv_action_variant = "danger"` (`btn btn-outline-danger`; `test_toolbar_buttons_follow_the_destination_variant`).
 - **U13** (stock modal adapter waits for `*.bs.modal` events CoreUI never dispatches): fixed by django-crud-views
   PR #405 @ `5f5918ad`; the browser check passed and #403 is closed (2026-11-22). Nothing open in the theme. Local
   development runs the fix once `../django-crud-views` is pulled to `5f5918ad` or later.
@@ -453,7 +457,8 @@ The gaps found in the AdminLTE tracker apply here as they are:
   puts `.table-responsive` around the table inside the card (`{% block table %}`), so a wide list with the select column
   scrolls inside the card. No CSS rule; `test_bulk_table_inside_coreui_card` pins the structure.
 - **C10** (the toolbar shows every action to every viewer) and **C11** (no danger variant for bulk buttons): upstream
-  gaps, not worked around; no CoreUI-specific effect.
+  gaps, not worked around; no CoreUI-specific effect. Both fixed upstream and adopted 2026-11-23 (see "Still open");
+  since C11 the theme sets the four `bulk:*` variant keys and their `:icon` keys.
 - **C8** (a sorted column of a prefixed table, e.g. `?c-sort=name` on the bulk list, has no `aria-sort` and no sort icon):
   the `aria-sort` half is U10 here (the table.thead copy reads the ordering from the table, so the prefix works;
   `test_bulk_prefixed_sort_sets_aria_sort`). The icon half is not solved: the copy still tests `request.GET.sort`,
