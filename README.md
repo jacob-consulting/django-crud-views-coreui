@@ -3,6 +3,7 @@
 [![Tests](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/tests.yml/badge.svg)](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/tests.yml)
 [![Lint](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/lint.yml/badge.svg)](https://github.com/jacob-consulting/django-crud-views-coreui/actions/workflows/lint.yml)
 [![Coverage](https://codecov.io/gh/jacob-consulting/django-crud-views-coreui/branch/main/graph/badge.svg)](https://codecov.io/gh/jacob-consulting/django-crud-views-coreui)
+[![Docs](https://readthedocs.org/projects/django-crud-views-coreui/badge/?version=latest)](https://django-crud-views-coreui.readthedocs.io/en/latest/)
 
 Current version: 0.1.0
 
@@ -20,7 +21,7 @@ Python 3.12-3.15, Django 4.2, 5.2 and 6.1. CoreUI loads from the jsDelivr CDN wi
 Work in progress: not released yet, and there is no public demo yet.
 
 - Source and issues: https://github.com/jacob-consulting/django-crud-views-coreui
-- Documentation: https://django-crud-views-coreui.readthedocs.io/ (not published yet; the sources are in `docs/`)
+- Documentation: https://django-crud-views-coreui.readthedocs.io/
 
 ## Free and PRO
 
