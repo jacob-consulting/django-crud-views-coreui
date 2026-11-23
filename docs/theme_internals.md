@@ -218,10 +218,17 @@ with this package. Anyone who wants PRO needs their own CoreUI licence.
 
 ## Bulk actions
 
-Bulk selection (django-crud-views #392) needs nothing from the theme beyond what is there:
+Bulk selection (django-crud-views #392) needs eight button-class keys and no template or CSS:
 
-- The seven `bulk:*` button-class keys are not set: upstream's defaults (`form-check-input`, `d-flex` flex rows,
+- The toolbar buttons take their class from the destination's `cv_action_variant` (django-crud-views #400):
+  `bulk:primary`, `bulk:secondary`, `bulk:tertiary` and `bulk:danger`, plus an `:icon` key each for the icon-only label
+  mode. The theme sets them to the `context:*` values, because the bulk toolbar is a page-level button row like the
+  context toolbar: secondary is `btn btn-outline-secondary`, danger `btn btn-outline-danger`. The demo marks "Cancel
+  orders" as danger. A destination without a variant renders secondary.
+- The other seven `bulk:*` keys are not set: upstream's defaults (`form-check-input`, `d-flex` flex rows,
   `position-relative` card cells) are CoreUI classes as well.
+- The toolbar offers only the actions the viewer may enter (django-crud-views #399); with none left, the page has no
+  toolbar and no checkboxes. The stock templates do this, so the theme needs nothing for it.
 - The toolbar renders above the table card or the card grid, and carries the select-all checkbox. The table's first
   column, "Select", holds one checkbox per row inside the table card; it scrolls with the table in the card's
   `.table-responsive`, so a wide list does not widen the page (the same wrapper solves C9 of the AdminLTE tracker).

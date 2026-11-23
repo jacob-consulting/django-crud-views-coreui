@@ -92,8 +92,19 @@ class ButtonClassTests(SimpleTestCase):
     def test_square_class_only_on_icon_only_buttons(self):
         # cv-coreui-icon-btn squares a button; a labelled button (label or both) must not get it.
         for key, classes in COREUI_BUTTON_CLASSES.items():
-            if key.split(":")[0] in ("context", "list", "card") and key.split(":")[1] in VARIANTS:
+            if key.split(":")[0] in ("context", "list", "card", "bulk") and key.split(":")[1] in VARIANTS:
                 self.assertEqual("cv-coreui-icon-btn" in classes.split(), key.endswith(":icon"), key)
+
+    def test_bulk_variants_follow_the_context_toolbar(self):
+        # Upstream #400: the bulk toolbar is a page-level button row like the context toolbar, so each bulk variant
+        # (and its icon-only key) takes the context value.
+        for variant in VARIANTS:
+            for suffix in ("", ":icon"):
+                self.assertEqual(
+                    COREUI_BUTTON_CLASSES[f"bulk:{variant}{suffix}"],
+                    COREUI_BUTTON_CLASSES[f"context:{variant}{suffix}"],
+                    variant + suffix,
+                )
 
     @override_settings(CRUD_VIEWS_BUTTON_CLASSES={"list:danger": "x-danger"})
     def test_project_setting_wins_over_the_theme_classes(self):
